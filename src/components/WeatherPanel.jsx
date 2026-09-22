@@ -10,12 +10,28 @@ const WeatherPanel = () => {
   const { currentSol, weather } = useMapStore();
   
   const forecast = useMemo(() => {
-    return generateForecast(currentSol, 7);
+    const rawForecast = generateForecast(currentSol, 7);
+    return rawForecast.map(day => ({
+      ...day,
+      maxTemp: day.temperature.max,
+      minTemp: day.temperature.min,
+      avgTemp: day.temperature.avg,
+    }));
   }, [currentSol]);
 
   const marsDate = useMemo(() => marsDateFromEarthDate(new Date()), []);
   
   if (!weather) return null;
+
+  // Extract flat properties from the weather object for current conditions
+  const temp = weather.temperature?.avg ?? 0;
+  const maxTemp = weather.temperature?.max ?? 0;
+  const minTemp = weather.temperature?.min ?? 0;
+  const pressureValue = weather.pressure?.value ?? 600;
+  const windSpd = weather.wind?.speed ?? 0;
+  const windDir = weather.wind?.direction ?? 0;
+  const uvIdx = weather.uvIndex ?? 'Low';
+  const dustOp = weather.dustOpacity ?? 0.5;
 
   return (
     <div className="w-full h-full text-primary flex flex-col gap-4 overflow-y-auto custom-scrollbar p-2">
@@ -30,7 +46,7 @@ const WeatherPanel = () => {
             <Calendar size={14} />
             <span>Sol {currentSol}</span>
             <span className="text-space-600">•</span>
-            <span>{marsDate}</span>
+            <span>{marsDate.formatted}</span>
           </div>
         </div>
         <div className="flex items-center gap-1.5 bg-space-800/80 px-3 py-1.5 rounded-full border border-space-700 text-xs text-secondary">
@@ -53,13 +69,13 @@ const WeatherPanel = () => {
             <div className="flex flex-col">
               <span className="text-secondary text-xs mb-1">Temperature</span>
               <div className="flex items-baseline gap-1">
-                <span className={`text-3xl font-display ${weather.temperature > -20 ? 'text-mars-400' : 'text-blue-400'}`}>
-                  {weather.temperature}°C
+                <span className={`text-3xl font-display ${temp > -20 ? 'text-mars-400' : 'text-blue-400'}`}>
+                  {temp}°C
                 </span>
               </div>
               <div className="text-xs text-secondary mt-2 flex justify-between font-mono">
-                <span className="text-blue-400">L: {weather.minTemp}°</span>
-                <span className="text-mars-400">H: {weather.maxTemp}°</span>
+                <span className="text-blue-400">L: {minTemp}°</span>
+                <span className="text-mars-400">H: {maxTemp}°</span>
               </div>
             </div>
 
@@ -69,7 +85,7 @@ const WeatherPanel = () => {
               <div className="flex items-end gap-2">
                 <Gauge size={28} className="text-space-400 mb-1" />
                 <div>
-                  <div className="text-2xl font-display text-white">{weather.pressure}</div>
+                  <div className="text-2xl font-display text-white">{pressureValue}</div>
                   <div className="text-xs text-secondary font-mono">Pa</div>
                 </div>
               </div>
@@ -82,7 +98,7 @@ const WeatherPanel = () => {
                 <div className="w-10 h-10 rounded-full bg-space-800 border border-space-700 flex items-center justify-center relative">
                   <div className="absolute w-1 h-1 bg-mars-400 rounded-full"></div>
                   <motion.div 
-                    animate={{ rotate: weather.windDirection }}
+                    animate={{ rotate: windDir }}
                     transition={{ type: "spring", stiffness: 50 }}
                     className="absolute w-full h-full flex items-start justify-center pt-1"
                   >
@@ -90,7 +106,7 @@ const WeatherPanel = () => {
                   </motion.div>
                 </div>
                 <div>
-                  <div className="text-2xl font-display text-white">{weather.windSpeed}</div>
+                  <div className="text-2xl font-display text-white">{windSpd}</div>
                   <div className="text-xs text-secondary font-mono">m/s</div>
                 </div>
               </div>
@@ -101,23 +117,23 @@ const WeatherPanel = () => {
               <div>
                 <div className="flex justify-between text-xs mb-1">
                   <span className="text-secondary">Dust (τ)</span>
-                  <span className="text-white font-mono">{weather.dustOpacity.toFixed(1)}</span>
+                  <span className="text-white font-mono">{dustOp.toFixed(1)}</span>
                 </div>
                 <div className="h-1.5 w-full bg-space-800 rounded-full overflow-hidden">
                   <div 
-                    className={`h-full ${weather.dustOpacity > 1.5 ? 'bg-red-500' : weather.dustOpacity > 0.8 ? 'bg-yellow-500' : 'bg-green-500'}`}
-                    style={{ width: `${Math.min(100, (weather.dustOpacity / 3) * 100)}%` }}
+                    className={`h-full ${dustOp > 1.5 ? 'bg-red-500' : dustOp > 0.8 ? 'bg-yellow-500' : 'bg-green-500'}`}
+                    style={{ width: `${Math.min(100, (dustOp / 3) * 100)}%` }}
                   ></div>
                 </div>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-secondary text-xs">UV Index</span>
                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                  weather.uvIndex === 'Extreme' ? 'bg-purple-900/50 text-purple-400 border border-purple-700/50' : 
-                  weather.uvIndex === 'High' ? 'bg-red-900/50 text-red-400 border border-red-700/50' : 
+                  uvIdx === 'Extreme' ? 'bg-purple-900/50 text-purple-400 border border-purple-700/50' : 
+                  uvIdx === 'High' ? 'bg-red-900/50 text-red-400 border border-red-700/50' : 
                   'bg-yellow-900/50 text-yellow-400 border border-yellow-700/50'
                 }`}>
-                  {weather.uvIndex}
+                  {uvIdx}
                 </span>
               </div>
             </div>
@@ -128,9 +144,9 @@ const WeatherPanel = () => {
         <div className="glass-panel p-4 rounded-xl border border-space-700/50 flex flex-col justify-center items-center text-center relative overflow-hidden">
           <Sun size={48} className="text-mars-400/20 absolute -right-4 -bottom-4" />
           <div className="text-secondary text-xs mb-2">Current Season</div>
-          <div className="text-2xl font-display text-white mb-1">{weather.season}</div>
+          <div className="text-2xl font-display text-white mb-1">{weather.seasonName || weather.season}</div>
           <div className="text-sm text-mars-400 font-mono bg-mars-500/10 px-3 py-1 rounded-full border border-mars-500/20">
-            Ls {Math.round(weather.ls)}°
+            Ls {Math.round(weather.ls ?? 0)}°
           </div>
         </div>
       </div>
