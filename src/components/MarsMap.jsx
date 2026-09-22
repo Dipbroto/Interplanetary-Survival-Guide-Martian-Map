@@ -9,7 +9,7 @@ import { marsDistance, calculateSlope } from '../utils/marsUtils';
 import CoordinateDisplay from './CoordinateDisplay';
 import POIMarkers from './POIMarkers';
 import { marsAudio } from '../utils/audioSynthesizer';
-import { Shield, Play, Pause, Square, Ruler, AlertTriangle, Battery, Gauge, Compass } from 'lucide-react';
+import { Shield, Play, Pause, Square, Ruler, AlertTriangle, Battery, Gauge, Compass, Globe, Crosshair } from 'lucide-react';
 
 // Custom Rover Div Icon
 const createRoverIcon = () => {
@@ -61,7 +61,7 @@ const MapViewController = () => {
 
   useEffect(() => {
     if (mapCenter && Array.isArray(mapCenter) && mapCenter.length === 2) {
-      const targetZoom = Math.min(Math.max(mapZoom || 4, 1), 8);
+      const targetZoom = Math.min(Math.max(typeof mapZoom === 'number' ? mapZoom : 2, 0), 8);
       map.flyTo(mapCenter, targetZoom, { duration: 1.2 });
     }
   }, [mapCenter, mapZoom, map]);
@@ -183,6 +183,8 @@ const MarsMap = () => {
   const setRulerActive = useMapStore((s) => s.setRulerActive);
   const rulerPoints = useMapStore((s) => s.rulerPoints);
   const clearRuler = useMapStore((s) => s.clearRuler);
+  const setMapCenter = useMapStore((s) => s.setMapCenter);
+  const setMapZoom = useMapStore((s) => s.setMapZoom);
 
   const activeLayerConfigs = activeLayers
     .map((id) => marsLayers.find((l) => l.id === id))
@@ -217,14 +219,14 @@ const MarsMap = () => {
   return (
     <div className={`w-full h-full relative ${isPlacingWaypoint || isRulerActive ? 'crosshair-cursor' : ''}`}>
       <MapContainer
-        center={[18.4447, 77.4508]}
-        zoom={4}
-        minZoom={1}
+        center={[0, 0]}
+        zoom={2}
+        minZoom={0}
         maxZoom={8}
         crs={L.CRS.EPSG4326}
         style={{ height: '100%', width: '100%', background: '#090b14' }}
         maxBounds={[[-90, -180], [90, 180]]}
-        maxBoundsViscosity={1.0}
+        maxBoundsViscosity={0.6}
         worldCopyJump={false}
       >
         <MapEvents />
@@ -239,6 +241,7 @@ const MarsMap = () => {
             attribution={layer.attribution}
             noWrap={true}
             bounds={[[-90, -180], [90, 180]]}
+            minZoom={0}
             maxNativeZoom={layer.maxZoom}
             maxZoom={8}
           />
@@ -355,6 +358,31 @@ const MarsMap = () => {
 
       {/* FLOATING MAP TOOLBAR (Top Left) */}
       <div className="absolute top-3 left-3 z-[400] flex items-center gap-1.5 bg-space-950/90 backdrop-blur-md p-1.5 rounded-xl border border-space-700/80 shadow-2xl font-mono text-xs">
+        {/* Quick Global Mars / Jezero Views */}
+        <button
+          onClick={() => {
+            setMapCenter([0, 0]);
+            setMapZoom(1);
+          }}
+          className="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all border bg-space-800 text-space-300 hover:text-white hover:bg-space-700 border-space-700"
+          title="Fit whole Mars planet in view (Global Scale)"
+        >
+          <Globe className="w-3.5 h-3.5 text-mars-400" />
+          <span className="hidden sm:inline">GLOBAL MARS</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setMapCenter([18.4447, 77.4508]);
+            setMapZoom(4);
+          }}
+          className="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all border bg-space-800 text-space-300 hover:text-white hover:bg-space-700 border-space-700"
+          title="Zoom to Jezero Crater (Perseverance Landing Site)"
+        >
+          <Crosshair className="w-3.5 h-3.5 text-cyan-400" />
+          <span className="hidden sm:inline">JEZERO</span>
+        </button>
+
         {/* Drive Rover Button */}
         {waypoints && waypoints.length > 1 && (
           <button
@@ -372,7 +400,7 @@ const MarsMap = () => {
             }`}
           >
             {isRoverDriving ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-amber-400" />}
-            <span>{isRoverDriving ? 'PAUSE ROVER' : 'DRIVE ROVER'}</span>
+            <span>{isRoverDriving ? 'PAUSE' : 'DRIVE'}</span>
           </button>
         )}
 

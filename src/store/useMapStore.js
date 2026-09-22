@@ -9,8 +9,8 @@ const useMapStore = create((set, get) => ({
   // ========================
   // MAP STATE
   // ========================
-  mapCenter: [18.4447, 77.4508], // Jezero Crater
-  mapZoom: 4,
+  mapCenter: [0, 0], // Global Mars Equator & Prime Meridian
+  mapZoom: 2,
   cursorPosition: null, // {lat, lon}
   viewMode: '2d', // '2d' | '3d' | 'split'
   
