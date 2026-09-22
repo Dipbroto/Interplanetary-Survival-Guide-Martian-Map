@@ -21,7 +21,8 @@ const POIDetailCard = () => {
     addWaypoint({
       id: Date.now().toString(),
       lat: selectedPOI.lat,
-      lng: selectedPOI.lng,
+      lon: selectedPOI.lon !== undefined ? selectedPOI.lon : selectedPOI.lng,
+      elevation: selectedPOI.elevation || 0,
       name: selectedPOI.name
     });
   };

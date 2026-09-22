@@ -6,9 +6,11 @@ import BottomPanel from './components/BottomPanel';
 import MarsMap from './components/MarsMap';
 import Mars3DViewer from './components/Mars3DViewer';
 import LoadingScreen from './components/LoadingScreen';
+import EVAHelmetHUD from './components/EVAHelmetHUD';
+import ScienceLabModal from './components/ScienceLabModal';
 
 function App() {
-  const { viewMode, showLoadingScreen, sidebarOpen, bottomPanelOpen } = useMapStore();
+  const { viewMode, showLoadingScreen } = useMapStore();
 
   // Update weather data periodically
   useEffect(() => {
@@ -67,9 +69,15 @@ function App() {
         </div>
       </div>
 
+      {/* Astronaut EVA Helmet HUD Simulator Overlay */}
+      <EVAHelmetHUD />
+
+      {/* In-Situ Science Laboratory & SuperCam Spectrometer Modal */}
+      <ScienceLabModal />
+
       {/* Version Badge */}
       <div className="absolute bottom-1 right-1 text-[9px] text-space-600 font-mono pointer-events-none select-none z-10">
-        MarsWalk Explorer v1.0 — NASA Space Apps 2026
+        MarsWalk Explorer v2.0 • NASA Space Apps Challenge 2026
       </div>
     </div>
   );
