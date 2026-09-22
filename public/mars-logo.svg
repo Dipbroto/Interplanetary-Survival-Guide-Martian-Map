@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100">
+  <defs>
+    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f47050"/>
+      <stop offset="100%" stop-color="#ec4c2e"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="35" fill="none" stroke="url(#logoGrad)" stroke-width="2"/>
+  <circle cx="50" cy="50" r="28" fill="#f47050" opacity="0.15"/>
+  <path d="M 30 50 Q 40 35 50 50 Q 60 65 70 50" stroke="#f47050" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <circle cx="35" cy="45" r="3" fill="#f47050"/>
+  <circle cx="50" cy="50" r="2" fill="#ec4c2e"/>
+  <circle cx="65" cy="45" r="3" fill="#f47050"/>
+  <text x="100" y="42" font-family="Orbitron, sans-serif" font-weight="700" font-size="24" fill="#ffffff">MARSWALK</text>
+  <text x="100" y="68" font-family="Orbitron, sans-serif" font-weight="400" font-size="16" fill="#f47050" letter-spacing="8">EXPLORER</text>
+</svg>
