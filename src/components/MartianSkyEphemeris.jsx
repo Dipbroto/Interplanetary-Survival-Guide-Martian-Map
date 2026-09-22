@@ -43,6 +43,7 @@ export default function MartianSkyEphemeris() {
 
   // Escape key to close
   useEffect(() => {
+    if (!isSkyEphemerisOpen) return;
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         setSkyEphemerisOpen(false);
@@ -50,7 +51,7 @@ export default function MartianSkyEphemeris() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setSkyEphemerisOpen]);
+  }, [isSkyEphemerisOpen, setSkyEphemerisOpen]);
 
   if (!isSkyEphemerisOpen) return null;
 

@@ -109,6 +109,18 @@ export default function ScienceLabModal() {
   const [isFiringLaser, setIsFiringLaser] = useState(false);
   const [cachedSuccess, setCachedSuccess] = useState(false);
 
+  // Escape key to close (hook called unconditionally at top level)
+  React.useEffect(() => {
+    if (!isScienceLabOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setScienceLabOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isScienceLabOpen, setScienceLabOpen]);
+
   if (!isScienceLabOpen) return null;
 
   const target = selectedTarget || ROCK_TARGETS[0];
@@ -138,17 +150,6 @@ export default function ScienceLabModal() {
     marsAudio.playQuindarTone(false);
     setTimeout(() => setCachedSuccess(false), 2500);
   };
-
-  // Escape key to close
-  React.useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        setScienceLabOpen(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setScienceLabOpen]);
 
   return (
     <div 

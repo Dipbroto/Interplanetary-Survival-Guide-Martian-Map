@@ -52,6 +52,7 @@ export default function AudioSynthesizerRack() {
 
   // Escape key to close
   useEffect(() => {
+    if (!isAudioRackOpen) return;
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         setAudioRackOpen(false);
@@ -59,7 +60,7 @@ export default function AudioSynthesizerRack() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setAudioRackOpen]);
+  }, [isAudioRackOpen, setAudioRackOpen]);
 
   if (!isAudioRackOpen) return null;
 

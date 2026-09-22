@@ -16,6 +16,18 @@ export default function FlightPlanModal() {
     currentSol
   } = useMapStore();
 
+  // Escape key to close (called unconditionally at top level)
+  React.useEffect(() => {
+    if (!isFlightPlanOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setFlightPlanOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFlightPlanOpen, setFlightPlanOpen]);
+
   if (!isFlightPlanOpen) return null;
 
   const totalDist = routeDistance(waypoints || []);
@@ -78,17 +90,6 @@ export default function FlightPlanModal() {
     a.click();
     URL.revokeObjectURL(url);
   };
-
-  // Escape key to close
-  React.useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        setFlightPlanOpen(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setFlightPlanOpen]);
 
   return (
     <div 
