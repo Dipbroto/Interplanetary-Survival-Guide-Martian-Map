@@ -212,25 +212,43 @@ const useMapStore = create((set, get) => ({
       status: 'Cached in Tube #14'
     }
   ],
-  setScienceLabOpen: (val) => set({ isScienceLabOpen: val, isEVASimulating: false }),
+  setScienceLabOpen: (val) => set((state) => {
+    const next = typeof val === 'boolean' ? val : !state.isScienceLabOpen;
+    return {
+      isScienceLabOpen: next,
+      ...(next ? { isSkyEphemerisOpen: false, isFlightPlanOpen: false, isEVASimulating: false } : {})
+    };
+  }),
   addSample: (sample) => set((state) => ({
-    collectedSamples: [sample, ...state.collectedSamples]
+    collectedSamples: [sample, ...(state.collectedSamples || [])]
   })),
   removeSample: (id) => set((state) => ({
-    collectedSamples: state.collectedSamples.filter(s => s.id !== id)
+    collectedSamples: (state.collectedSamples || []).filter(s => s.id !== id)
   })),
 
   // ========================
   // MARTIAN SKY EPHEMERIS & MOONS
   // ========================
   isSkyEphemerisOpen: false,
-  setSkyEphemerisOpen: (val) => set({ isSkyEphemerisOpen: val, isEVASimulating: false }),
+  setSkyEphemerisOpen: (val) => set((state) => {
+    const next = typeof val === 'boolean' ? val : !state.isSkyEphemerisOpen;
+    return {
+      isSkyEphemerisOpen: next,
+      ...(next ? { isScienceLabOpen: false, isFlightPlanOpen: false, isEVASimulating: false } : {})
+    };
+  }),
 
   // ========================
   // FLIGHT PLAN & CHECKLIST
   // ========================
   isFlightPlanOpen: false,
-  setFlightPlanOpen: (val) => set({ isFlightPlanOpen: val, isEVASimulating: false }),
+  setFlightPlanOpen: (val) => set((state) => {
+    const next = typeof val === 'boolean' ? val : !state.isFlightPlanOpen;
+    return {
+      isFlightPlanOpen: next,
+      ...(next ? { isScienceLabOpen: false, isSkyEphemerisOpen: false, isEVASimulating: false } : {})
+    };
+  }),
 
   // ========================
   // AUDIO SOUNDSCAPE & RACK

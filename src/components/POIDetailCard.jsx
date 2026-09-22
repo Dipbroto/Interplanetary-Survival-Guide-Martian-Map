@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MapPin, Navigation, Rocket, Mountain, Info, Target, Calendar, User } from 'lucide-react';
+import { X, MapPin, Navigation, Rocket, Mountain, Info, Target, Calendar, User, FlaskConical } from 'lucide-react';
 import useMapStore from '../store/useMapStore';
 
 const POIDetailCard = () => {
-  const { selectedPOI, setSelectedPOI, addWaypoint } = useMapStore();
+  const { selectedPOI, setSelectedPOI, addWaypoint, setScienceLabOpen } = useMapStore();
 
   if (!selectedPOI) {
     return (
@@ -66,7 +66,7 @@ const POIDetailCard = () => {
                 <MapPin size={12} className="mr-1" /> Coordinates
               </div>
               <div className="font-mono text-xs text-primary">
-                {selectedPOI.lat.toFixed(4)}°, {selectedPOI.lng.toFixed(4)}°
+                {(selectedPOI.lat || 0).toFixed(4)}°, {(selectedPOI.lon !== undefined ? selectedPOI.lon : (selectedPOI.lng || 0)).toFixed(4)}°
               </div>
             </div>
             <div className="bg-space-900/50 p-3 rounded-xl border border-space-800 flex flex-col justify-center">
@@ -137,13 +137,21 @@ const POIDetailCard = () => {
           )}
         </div>
         
-        <div className="p-4 border-t border-space-800 bg-space-900/50 shrink-0">
+        <div className="p-4 border-t border-space-800 bg-space-900/50 shrink-0 flex flex-col gap-2">
+          <button
+            onClick={() => setScienceLabOpen(true)}
+            className="w-full py-2.5 bg-gradient-to-r from-purple-800 to-indigo-800 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md text-xs cursor-pointer"
+          >
+            <FlaskConical size={16} className="text-purple-300" />
+            <span>Analyze in Science Lab</span>
+          </button>
+
           <button
             onClick={handleNavigate}
-            className="w-full py-3 bg-mars-600 hover:bg-mars-500 text-white rounded-xl font-bold flex items-center justify-center transition-colors shadow-lg shadow-mars-600/20"
+            className="w-full py-2.5 bg-mars-600 hover:bg-mars-500 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-lg shadow-mars-600/20 text-xs cursor-pointer"
           >
-            <Navigation size={18} className="mr-2" />
-            Navigate Here
+            <Navigation size={16} />
+            <span>Navigate Here</span>
           </button>
         </div>
       </motion.div>

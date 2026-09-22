@@ -104,12 +104,15 @@ const ROCK_TARGETS = [
 ];
 
 export default function ScienceLabModal() {
-  const { isScienceLabOpen, setScienceLabOpen, collectedSamples, addSample, currentSol } = useMapStore();
+  const { isScienceLabOpen, setScienceLabOpen, collectedSamples = [], addSample, currentSol } = useMapStore();
   const [selectedTarget, setSelectedTarget] = useState(ROCK_TARGETS[0]);
   const [isFiringLaser, setIsFiringLaser] = useState(false);
   const [cachedSuccess, setCachedSuccess] = useState(false);
 
   if (!isScienceLabOpen) return null;
+
+  const target = selectedTarget || ROCK_TARGETS[0];
+  const safeSamples = Array.isArray(collectedSamples) ? collectedSamples : [];
 
   const handleFireLaser = () => {
     setIsFiringLaser(true);
@@ -122,15 +125,15 @@ export default function ScienceLabModal() {
   const handleCacheSample = () => {
     const newSample = {
       id: `sample-${Date.now()}`,
-      name: selectedTarget.name,
-      location: selectedTarget.location,
-      sol: currentSol,
-      rockType: selectedTarget.formation,
-      keyMinerals: selectedTarget.mineralogy,
-      biosignatureScore: selectedTarget.bpi,
-      status: `Cached in Tube #${collectedSamples.length + 10}`
+      name: target.name,
+      location: target.location,
+      sol: currentSol || 423,
+      rockType: target.formation,
+      keyMinerals: target.mineralogy,
+      biosignatureScore: target.bpi,
+      status: `Cached in Tube #${safeSamples.length + 10}`
     };
-    addSample(newSample);
+    if (addSample) addSample(newSample);
     setCachedSuccess(true);
     marsAudio.playQuindarTone(false);
     setTimeout(() => setCachedSuccess(false), 2500);
@@ -228,11 +231,11 @@ export default function ScienceLabModal() {
               <div className="text-xs font-mono text-space-400 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
                   <Database className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Sample Tubes ({collectedSamples.length}/38)</span>
+                  <span>Sample Tubes ({safeSamples.length}/38)</span>
                 </span>
               </div>
               <div className="space-y-1.5 max-h-36 overflow-y-auto custom-scrollbar">
-                {collectedSamples.map((s) => (
+                {safeSamples.map((s) => (
                   <div key={s.id} className="text-[11px] p-2 bg-space-800/60 rounded border border-space-700/50 flex flex-col">
                     <span className="font-semibold text-space-200">{s.name}</span>
                     <div className="flex justify-between text-[10px] text-space-400 font-mono mt-0.5">
@@ -251,14 +254,14 @@ export default function ScienceLabModal() {
             <div className="p-4 rounded-xl bg-space-900/60 border border-space-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-xl font-bold font-display text-white">{selectedTarget.name}</h3>
+                  <h3 className="text-xl font-bold font-display text-white">{target.name}</h3>
                   <span className="text-xs px-2 py-0.5 rounded-full bg-space-800 text-space-300 font-mono border border-space-700">
-                    {selectedTarget.formation}
+                    {target.formation}
                   </span>
                 </div>
-                <p className="text-xs text-space-300 leading-relaxed max-w-2xl">{selectedTarget.description}</p>
+                <p className="text-xs text-space-300 leading-relaxed max-w-2xl">{target.description}</p>
                 <div className="text-xs text-mars-400 font-mono mt-2">
-                  Key Minerals: <span className="text-space-300">{selectedTarget.mineralogy}</span>
+                  Key Minerals: <span className="text-space-300">{target.mineralogy}</span>
                 </div>
               </div>
 
@@ -267,7 +270,7 @@ export default function ScienceLabModal() {
                 <button
                   onClick={handleFireLaser}
                   disabled={isFiringLaser}
-                  className="px-4 py-2 bg-mars-600 hover:bg-mars-500 disabled:bg-mars-800 text-white rounded-lg text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-mars-600/30 transition-all"
+                  className="px-4 py-2 bg-mars-600 hover:bg-mars-500 disabled:bg-mars-800 text-white rounded-lg text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-mars-600/30 transition-all cursor-pointer"
                 >
                   <Zap className={`w-4 h-4 ${isFiringLaser ? 'animate-bounce text-yellow-300' : ''}`} />
                   {isFiringLaser ? 'Pulsing Laser...' : 'Fire SuperCam Laser'}
@@ -276,7 +279,7 @@ export default function ScienceLabModal() {
                 <button
                   onClick={handleCacheSample}
                   disabled={cachedSuccess}
-                  className="px-4 py-2 bg-space-800 hover:bg-space-700 text-primary border border-space-700 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
+                  className="px-4 py-2 bg-space-800 hover:bg-space-700 text-primary border border-space-700 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
                   {cachedSuccess ? (
                     <>
@@ -295,15 +298,15 @@ export default function ScienceLabModal() {
 
             {/* Biosignature Probability Index (BPI) Banner */}
             <div className={`p-4 rounded-xl border flex items-center justify-between gap-4 ${
-              selectedTarget.bpi > 70 
+              target.bpi > 70 
                 ? 'bg-green-950/20 border-green-500/40' 
-                : selectedTarget.bpi > 30 
+                : target.bpi > 30 
                 ? 'bg-yellow-950/20 border-yellow-500/40'
                 : 'bg-space-900/60 border-space-800'
             }`}>
               <div className="flex items-center gap-3">
                 <div className={`p-2.5 rounded-xl ${
-                  selectedTarget.bpi > 70 ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
+                  target.bpi > 70 ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
                 }`}>
                   <ShieldCheck className="w-6 h-6" />
                 </div>
@@ -312,12 +315,12 @@ export default function ScienceLabModal() {
                     Astrobiology Biosignature Probability Index (BPI)
                   </div>
                   <div className="text-base font-bold text-white mt-0.5">
-                    Rating: <span className={selectedTarget.bpi > 70 ? 'text-green-400' : 'text-yellow-400'}>{selectedTarget.bpiCategory}</span>
+                    Rating: <span className={target.bpi > 70 ? 'text-green-400' : 'text-yellow-400'}>{target.bpiCategory}</span>
                   </div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-display font-bold text-white">{selectedTarget.bpi}%</div>
+                <div className="text-3xl font-display font-bold text-white">{target.bpi}%</div>
                 <div className="text-[10px] text-space-400 font-mono">Organic Carbon Retention</div>
               </div>
             </div>
@@ -333,9 +336,9 @@ export default function ScienceLabModal() {
                   </span>
                   <span className="text-[10px] text-space-500 font-mono">250nm - 750nm UV-VIS</span>
                 </div>
-                <div className="h-44 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={selectedTarget.spectrum}>
+                <div className="w-full h-[170px]">
+                  <ResponsiveContainer width="100%" height={165}>
+                    <AreaChart data={target.spectrum || []}>
                       <defs>
                         <linearGradient id="spectrumGradient" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#f47050" stopOpacity={0.8}/>
@@ -360,14 +363,14 @@ export default function ScienceLabModal() {
                   </span>
                   <span className="text-[10px] text-space-500 font-mono">Calibrated Oxide wt%</span>
                 </div>
-                <div className="h-44 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={selectedTarget.elements} layout="vertical" margin={{ left: 20 }}>
+                <div className="w-full h-[170px]">
+                  <ResponsiveContainer width="100%" height={165}>
+                    <BarChart data={target.elements || []} layout="vertical" margin={{ left: 20 }}>
                       <XAxis type="number" stroke="#606c8b" fontSize={10} unit="%" />
                       <YAxis type="category" dataKey="name" stroke="#cbd5e1" fontSize={10} width={90} tickLine={false} />
                       <Tooltip contentStyle={{ backgroundColor: '#090b14', borderColor: '#2a334a', borderRadius: '8px' }} />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                        {selectedTarget.elements.map((entry, index) => (
+                        {(target.elements || []).map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Bar>

@@ -124,7 +124,8 @@ export default function TopBar() {
           ) : (
             <>
               <Orbit className="w-3.5 h-3.5 text-amber-400" />
-              <span className="hidden sm:inline">Sky & Moons</span>
+              <span className="hidden md:inline">Sky & Moons</span>
+              <span className="inline md:hidden">Sky</span>
             </>
           )}
         </button>
@@ -147,7 +148,8 @@ export default function TopBar() {
           ) : (
             <>
               <FlaskConical className="w-3.5 h-3.5 text-purple-400" />
-              <span className="hidden sm:inline">Science Lab</span>
+              <span className="hidden md:inline">Science Lab</span>
+              <span className="inline md:hidden">Lab</span>
             </>
           )}
         </button>
@@ -165,12 +167,13 @@ export default function TopBar() {
           {isEVASimulating ? (
             <>
               <X className="w-3.5 h-3.5" />
-              <span>← Exit HUD</span>
+              <span>Exit HUD</span>
             </>
           ) : (
             <>
               <Play className="w-3.5 h-3.5 fill-white" />
-              <span>Marswalk HUD</span>
+              <span className="hidden md:inline">Marswalk HUD</span>
+              <span className="inline md:hidden">HUD</span>
             </>
           )}
         </button>

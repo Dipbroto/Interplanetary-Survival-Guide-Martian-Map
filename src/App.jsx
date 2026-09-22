@@ -77,19 +77,29 @@ function App() {
       </div>
 
       {/* Astronaut EVA Helmet HUD Simulator Overlay */}
-      <EVAHelmetHUD />
+      <ErrorBoundary>
+        <EVAHelmetHUD />
+      </ErrorBoundary>
 
       {/* In-Situ Science Laboratory & SuperCam Spectrometer Modal */}
-      <ScienceLabModal />
+      <ErrorBoundary>
+        <ScienceLabModal />
+      </ErrorBoundary>
 
       {/* Official NASA EVA Flight Plan & Checklist Modal */}
-      <FlightPlanModal />
+      <ErrorBoundary>
+        <FlightPlanModal />
+      </ErrorBoundary>
 
       {/* Martian Sky & Moons (Phobos/Deimos) Ephemeris Modal */}
-      <MartianSkyEphemeris />
+      <ErrorBoundary>
+        <MartianSkyEphemeris />
+      </ErrorBoundary>
 
       {/* Procedural Audio Mixer & Synthesizer Console */}
-      <AudioSynthesizerRack />
+      <ErrorBoundary>
+        <AudioSynthesizerRack />
+      </ErrorBoundary>
 
       {/* Version Badge */}
       <div className="absolute bottom-1 right-1 text-[9px] text-space-600 font-mono pointer-events-none select-none z-10">

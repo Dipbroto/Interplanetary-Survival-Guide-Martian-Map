@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, CheckCircle, AlertTriangle, Download, Clipboard, Printer } from 'lucide-react';
+import { FileText, CheckCircle, AlertTriangle, Download, Clipboard, Printer, FlaskConical } from 'lucide-react';
 import useMapStore from '../store/useMapStore';
 
 const Gauge = ({ score }) => {
@@ -43,7 +43,8 @@ const MissionReport = () => {
     missionActivities = [], 
     weather = {}, 
     currentSol,
-    setFlightPlanOpen 
+    setFlightPlanOpen,
+    setScienceLabOpen
   } = useMapStore();
   
   const [copied, setCopied] = useState(false);
@@ -155,10 +156,19 @@ Status: ${score >= 80 ? 'GO FOR EVA' : (score >= 50 ? 'MARGINAL - REVIEW REQUIRE
 
       {/* Action Buttons */}
       <div className="mt-4 pt-3 border-t border-space-800 relative z-10 flex flex-col gap-2">
+        {/* Open In-Situ Science Laboratory Modal */}
+        <button
+          onClick={() => setScienceLabOpen(true)}
+          className="w-full py-2.5 bg-gradient-to-r from-purple-800 to-indigo-800 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-purple-800/25 transition-all text-xs cursor-pointer"
+        >
+          <FlaskConical size={15} className="text-purple-300" />
+          <span>Launch In-Situ Science Laboratory</span>
+        </button>
+
         {/* Open Official NASA Flight Plan Modal */}
         <button
           onClick={() => setFlightPlanOpen(true)}
-          className="w-full py-2.5 bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-700/25 transition-all text-xs"
+          className="w-full py-2.5 bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-700/25 transition-all text-xs cursor-pointer"
         >
           <Printer size={15} />
           <span>Official NASA Flight Plan & Checklist</span>
