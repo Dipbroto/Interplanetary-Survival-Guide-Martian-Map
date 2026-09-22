@@ -8,6 +8,9 @@ import Mars3DViewer from './components/Mars3DViewer';
 import LoadingScreen from './components/LoadingScreen';
 import EVAHelmetHUD from './components/EVAHelmetHUD';
 import ScienceLabModal from './components/ScienceLabModal';
+import FlightPlanModal from './components/FlightPlanModal';
+import MartianSkyEphemeris from './components/MartianSkyEphemeris';
+import AudioSynthesizerRack from './components/AudioSynthesizerRack';
 
 function App() {
   const { viewMode, showLoadingScreen } = useMapStore();
@@ -75,9 +78,18 @@ function App() {
       {/* In-Situ Science Laboratory & SuperCam Spectrometer Modal */}
       <ScienceLabModal />
 
+      {/* Official NASA EVA Flight Plan & Checklist Modal */}
+      <FlightPlanModal />
+
+      {/* Martian Sky & Moons (Phobos/Deimos) Ephemeris Modal */}
+      <MartianSkyEphemeris />
+
+      {/* Procedural Audio Mixer & Synthesizer Console */}
+      <AudioSynthesizerRack />
+
       {/* Version Badge */}
       <div className="absolute bottom-1 right-1 text-[9px] text-space-600 font-mono pointer-events-none select-none z-10">
-        MarsWalk Explorer v2.0 • NASA Space Apps Challenge 2026
+        MarsWalk Explorer v2.5 • NASA Space Apps Challenge 2026
       </div>
     </div>
   );

@@ -7,18 +7,22 @@ class MarsAudioSynthesizer {
     this.isInitialized = false;
     this.isMuted = true;
     this.masterGain = null;
+    this.analyser = null;
     
     // Wind nodes
     this.windNode = null;
     this.windFilter = null;
     this.windGain = null;
+    this.windVol = 0.25;
     
     // Breathing nodes & intervals
     this.breathGain = null;
     this.breathTimer = null;
+    this.breathVol = 0.04;
     
     // Geiger timer
     this.geigerTimer = null;
+    this.geigerVol = 0.06;
   }
 
   init() {
@@ -28,9 +32,14 @@ class MarsAudioSynthesizer {
       if (!AudioContext) return;
       
       this.ctx = new AudioContext();
+      this.analyser = this.ctx.createAnalyser();
+      this.analyser.fftSize = 64;
+
       this.masterGain = this.ctx.createGain();
       this.masterGain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-      this.masterGain.connect(this.ctx.destination);
+      
+      this.masterGain.connect(this.analyser);
+      this.analyser.connect(this.ctx.destination);
       
       this.isInitialized = true;
       this.setupWindGenerator();
@@ -43,7 +52,6 @@ class MarsAudioSynthesizer {
   setupWindGenerator() {
     if (!this.ctx) return;
     
-    // Create 4-second pink noise buffer
     const bufferSize = this.ctx.sampleRate * 4;
     const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
     const output = noiseBuffer.getChannelData(0);
@@ -65,29 +73,26 @@ class MarsAudioSynthesizer {
     this.windNode.buffer = noiseBuffer;
     this.windNode.loop = true;
 
-    // Resonant bandpass filter for atmospheric howling
     this.windFilter = this.ctx.createBiquadFilter();
     this.windFilter.type = 'lowpass';
     this.windFilter.frequency.setValueAtTime(280, this.ctx.currentTime);
     this.windFilter.Q.setValueAtTime(2.5, this.ctx.currentTime);
 
     this.windGain = this.ctx.createGain();
-    this.windGain.gain.setValueAtTime(this.isMuted ? 0 : 0.25, this.ctx.currentTime);
+    this.windGain.gain.setValueAtTime(this.isMuted ? 0 : this.windVol, this.ctx.currentTime);
 
     this.windNode.connect(this.windFilter);
     this.windFilter.connect(this.windGain);
     this.windGain.connect(this.masterGain);
 
     this.windNode.start(0);
-
-    // Gently modulate wind frequency for realistic gusting
     this.modulateWind();
   }
 
   modulateWind() {
     if (!this.ctx || !this.windFilter) return;
     const now = this.ctx.currentTime;
-    const targetFreq = 180 + Math.random() * 220; // 180 to 400 Hz gust
+    const targetFreq = 180 + Math.random() * 220;
     const duration = 2 + Math.random() * 3;
     this.windFilter.frequency.linearRampToValueAtTime(targetFreq, now + duration);
     setTimeout(() => this.modulateWind(), duration * 1000);
@@ -100,14 +105,11 @@ class MarsAudioSynthesizer {
     this.breathGain.gain.setValueAtTime(0, this.ctx.currentTime);
     this.breathGain.connect(this.masterGain);
 
-    // 4.5 second breathing cycle (inhalation + exhalation)
     const runBreathCycle = () => {
       if (!this.isMuted && this.ctx && this.ctx.state === 'running') {
         const now = this.ctx.currentTime;
-        // Inhale (filtered white noise)
-        this.createBreathingPuff(now, 1.8, 0.04, 380);
-        // Exhale
-        this.createBreathingPuff(now + 2.3, 1.4, 0.03, 260);
+        this.createBreathingPuff(now, 1.8, this.breathVol, 380);
+        this.createBreathingPuff(now + 2.3, 1.4, this.breathVol * 0.75, 260);
       }
       this.breathTimer = setTimeout(runBreathCycle, 5200);
     };
@@ -143,7 +145,6 @@ class MarsAudioSynthesizer {
     osc.stop(startTime + duration);
   }
 
-  // NASA Quindar Tone (Iconic Apollo/Mars mission radio beep: 2525 Hz)
   playQuindarTone(isIntro = true) {
     if (this.isMuted || !this.ctx) return;
     try {
@@ -169,7 +170,6 @@ class MarsAudioSynthesizer {
     }
   }
 
-  // Geiger Counter Click (Triggered occasionally or when radiation spikes)
   playGeigerClick() {
     if (this.isMuted || !this.ctx) return;
     try {
@@ -183,7 +183,7 @@ class MarsAudioSynthesizer {
       osc.buffer = buf;
 
       const gain = this.ctx.createGain();
-      gain.gain.setValueAtTime(0.06, now);
+      gain.gain.setValueAtTime(this.geigerVol, now);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.015);
 
       osc.connect(gain);
@@ -219,7 +219,7 @@ class MarsAudioSynthesizer {
     this.isMuted = !this.isMuted;
     if (this.windGain && this.ctx) {
       const now = this.ctx.currentTime;
-      this.windGain.gain.linearRampToValueAtTime(this.isMuted ? 0 : 0.25, now + 0.5);
+      this.windGain.gain.linearRampToValueAtTime(this.isMuted ? 0 : this.windVol, now + 0.5);
     }
 
     if (!this.isMuted) {
@@ -235,6 +235,27 @@ class MarsAudioSynthesizer {
   setVolume(val) {
     if (this.masterGain && this.ctx) {
       this.masterGain.gain.setValueAtTime(Math.max(0, Math.min(1, val)), this.ctx.currentTime);
+    }
+  }
+
+  setWindVolume(val) {
+    this.windVol = val;
+    if (this.windGain && this.ctx && !this.isMuted) {
+      this.windGain.gain.setValueAtTime(val, this.ctx.currentTime);
+    }
+  }
+
+  setBreathVolume(val) {
+    this.breathVol = val;
+  }
+
+  setGeigerVolume(val) {
+    this.geigerVol = val;
+  }
+
+  getFrequencyData(array) {
+    if (this.analyser) {
+      this.analyser.getByteFrequencyData(array);
     }
   }
 }

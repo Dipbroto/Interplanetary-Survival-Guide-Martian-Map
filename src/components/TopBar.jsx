@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Map, Box, Columns, Clock, Globe2, Volume2, VolumeX, Play, FlaskConical, Radio } from 'lucide-react';
+import { Map, Box, Columns, Clock, Globe2, Volume2, VolumeX, Play, FlaskConical, Radio, Orbit, Sliders } from 'lucide-react';
 import useMapStore from '../store/useMapStore';
 import { marsDateFromEarthDate } from '../utils/marsUtils';
 import { getSolarLongitude, getSolFromDate } from '../data/weatherSimulation';
@@ -9,10 +9,11 @@ export default function TopBar() {
     viewMode, 
     setViewMode, 
     isAudioActive, 
-    toggleAudio, 
+    toggleAudio,
+    setAudioRackOpen,
     setEVASimulating, 
     setScienceLabOpen,
-    waypoints
+    setSkyEphemerisOpen,
   } = useMapStore();
   const [time, setTime] = useState(new Date());
 
@@ -38,8 +39,8 @@ export default function TopBar() {
 
   return (
     <header className="h-12 w-full glass-panel-solid border-b border-mars-500/30 flex items-center justify-between px-3 z-50 shrink-0 bg-space-950/95 backdrop-blur-xl">
-      {/* Left: Logo & Audio Button */}
-      <div className="flex items-center gap-3">
+      {/* Left: Logo & Audio Control */}
+      <div className="flex items-center gap-2.5">
         <div className="flex items-center gap-2">
           <Globe2 className="text-mars-400 w-5 h-5 shrink-0" />
           <h1 className="font-display text-mars-400 font-bold text-base tracking-widest leading-none">
@@ -50,23 +51,33 @@ export default function TopBar() {
           </span>
         </div>
 
-        {/* Audio Soundscape Toggle */}
-        <button
-          onClick={toggleAudio}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono transition-all border ${
-            isAudioActive
-              ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-sm shadow-cyan-500/20'
-              : 'bg-space-900/60 text-space-400 hover:text-white border-space-800'
-          }`}
-          title="Toggle Martian Procedural Audio (Wind, Life Support Respirator, Geiger counter)"
-        >
-          {isAudioActive ? <Volume2 className="w-3.5 h-3.5 text-cyan-400 animate-pulse" /> : <VolumeX className="w-3.5 h-3.5" />}
-          <span className="hidden sm:inline">{isAudioActive ? 'EVA AUDIO ON' : 'AUDIO OFF'}</span>
-        </button>
+        {/* Audio Toggle & Rack Trigger */}
+        <div className="flex items-center bg-space-900/60 rounded-md border border-space-800 p-0.5">
+          <button
+            onClick={toggleAudio}
+            className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs font-mono transition-all ${
+              isAudioActive
+                ? 'bg-cyan-500/20 text-cyan-300'
+                : 'text-space-400 hover:text-white'
+            }`}
+            title="Toggle Martian Ambient Audio"
+          >
+            {isAudioActive ? <Volume2 className="w-3.5 h-3.5 text-cyan-400 animate-pulse" /> : <VolumeX className="w-3.5 h-3.5" />}
+            <span className="hidden sm:inline">{isAudioActive ? 'AUDIO ON' : 'AUDIO OFF'}</span>
+          </button>
+          
+          <button
+            onClick={() => setAudioRackOpen(true)}
+            className="p-1 hover:text-cyan-300 text-space-400 border-l border-space-800 transition-colors"
+            title="Open Audio Mixer & Visualizer Console"
+          >
+            <Sliders className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* Center: Mission Clock & Systems Status */}
-      <div className="hidden md:flex items-center gap-3.5 text-xs font-mono bg-space-900/70 px-3.5 py-1.5 rounded-full border border-space-700/70">
+      <div className="hidden md:flex items-center gap-3 text-xs font-mono bg-space-900/70 px-3.5 py-1.5 rounded-full border border-space-700/70">
         <div className="flex items-center gap-1.5 text-mars-400">
           <Clock className="w-3.5 h-3.5" />
           <span className="font-semibold">{md.formatted}</span>
@@ -80,7 +91,7 @@ export default function TopBar() {
         <div className="text-space-400 border-l border-space-700 pl-2.5 text-[11px]">
           Ls {ls.toFixed(1)}°
         </div>
-        <div className="hidden lg:flex items-center gap-1 text-[11px] text-space-400 border-l border-space-700 pl-2.5" title="One-way light time speed from Mars to NASA Houston DSN">
+        <div className="hidden xl:flex items-center gap-1 text-[11px] text-space-400 border-l border-space-700 pl-2.5" title="One-way light time speed from Mars to NASA Houston DSN">
           <Radio className="w-3 h-3 text-amber-400" />
           <span>DSN: {commsMinutes}m {commsSeconds}s</span>
         </div>
@@ -90,8 +101,18 @@ export default function TopBar() {
         </div>
       </div>
 
-      {/* Right: Science Lab, Marswalk Sim & View Modes */}
+      {/* Right: Sky Ephemeris, Science Lab, Marswalk Sim & View Modes */}
       <div className="flex items-center gap-2">
+        {/* Martian Sky & Moons Ephemeris Trigger */}
+        <button
+          onClick={() => setSkyEphemerisOpen(true)}
+          className="px-2.5 py-1.5 bg-gradient-to-r from-amber-950/60 to-amber-900/60 hover:from-amber-900 hover:to-amber-800 border border-amber-500/40 text-amber-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+          title="Open Martian Sky & Moons (Phobos/Deimos) Ephemeris"
+        >
+          <Orbit className="w-3.5 h-3.5 text-amber-400" />
+          <span className="hidden sm:inline">Sky & Moons</span>
+        </button>
+
         {/* Science Lab Modal Trigger */}
         <button
           onClick={() => setScienceLabOpen(true)}

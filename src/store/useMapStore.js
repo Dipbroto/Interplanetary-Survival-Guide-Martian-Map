@@ -56,10 +56,46 @@ const useMapStore = create((set, get) => ({
   updateWaypoint: (id, updates) => set((state) => ({
     waypoints: state.waypoints.map(w => w.id === id ? { ...w, ...updates } : w)
   })),
-  clearWaypoints: () => set({ waypoints: [], selectedWaypointId: null, evaCurrentWaypointIndex: 0 }),
-  setPlacingWaypoint: (val) => set({ isPlacingWaypoint: val }),
+  clearWaypoints: () => set({ waypoints: [], selectedWaypointId: null, evaCurrentWaypointIndex: 0, isRoverDriving: false, roverProgress: 0 }),
+  setPlacingWaypoint: (val) => set({ isPlacingWaypoint: val, isRulerActive: false }),
   setSelectedWaypoint: (id) => set({ selectedWaypointId: id }),
   reorderWaypoints: (newOrder) => set({ waypoints: newOrder }),
+
+  // ========================
+  // ROVER DRIVE SIMULATOR
+  // ========================
+  isRoverDriving: false,
+  roverProgress: 0, // 0.0 to 1.0 along route
+  roverCurrentPosition: null, // {lat, lon, bearing, elevation}
+  roverSpeedKmh: 7.2,
+  roverBatterySoC: 96, // %
+  roverOdometerKm: 0,
+  
+  setRoverDriving: (val) => {
+    set({ isRoverDriving: val });
+    if (val) {
+      marsAudio.playQuindarTone(true);
+    }
+  },
+  setRoverProgress: (prog) => set({ roverProgress: prog }),
+  setRoverCurrentPosition: (pos) => set({ roverCurrentPosition: pos }),
+  setRoverBatterySoC: (soc) => set({ roverBatterySoC: Math.max(0, Math.min(100, soc)) }),
+  setRoverOdometerKm: (km) => set({ roverOdometerKm: km }),
+
+  // ========================
+  // MAP TOOLS (WALKBACK & RULER)
+  // ========================
+  showWalkbackLimits: true,
+  toggleWalkbackLimits: () => set((state) => ({ showWalkbackLimits: !state.showWalkbackLimits })),
+  
+  isRulerActive: false,
+  rulerPoints: [], // max 2 points [{lat, lon, elevation}]
+  setRulerActive: (val) => set({ isRulerActive: val, isPlacingWaypoint: false }),
+  addRulerPoint: (pt) => set((state) => {
+    if (state.rulerPoints.length >= 2) return { rulerPoints: [pt] };
+    return { rulerPoints: [...state.rulerPoints, pt] };
+  }),
+  clearRuler: () => set({ rulerPoints: [] }),
 
   // ========================
   // EXPEDITION PRESETS
@@ -74,6 +110,8 @@ const useMapStore = create((set, get) => ({
       selectedWaypointId: preset.waypoints[0]?.id || null,
       sidebarTab: 'route',
       sidebarOpen: true,
+      isRoverDriving: false,
+      roverProgress: 0,
       missionActivities: preset.timeline.map((item, idx) => ({
         id: `act-preset-${idx}`,
         title: item.title,
@@ -180,13 +218,27 @@ const useMapStore = create((set, get) => ({
   })),
 
   // ========================
-  // AUDIO SOUNDSCAPE
+  // MARTIAN SKY EPHEMERIS & MOONS
+  // ========================
+  isSkyEphemerisOpen: false,
+  setSkyEphemerisOpen: (val) => set({ isSkyEphemerisOpen: val }),
+
+  // ========================
+  // FLIGHT PLAN & CHECKLIST
+  // ========================
+  isFlightPlanOpen: false,
+  setFlightPlanOpen: (val) => set({ isFlightPlanOpen: val }),
+
+  // ========================
+  // AUDIO SOUNDSCAPE & RACK
   // ========================
   isAudioActive: false,
+  isAudioRackOpen: false,
   toggleAudio: () => {
     const active = marsAudio.toggleMute();
     set({ isAudioActive: active });
   },
+  setAudioRackOpen: (val) => set({ isAudioRackOpen: val }),
 
   // ========================
   // UI STATE
