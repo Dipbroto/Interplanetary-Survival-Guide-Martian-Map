@@ -126,15 +126,20 @@ export function getProfileStats(profile) {
     else elevLoss += Math.abs(diff);
   }
 
+  const totDist = profile[profile.length - 1]?.distance || 0;
+
   return {
     minElevation: Math.min(...elevations),
     maxElevation: Math.max(...elevations),
-    avgElevation: Math.round(elevations.reduce((a, b) => a + b, 0) / elevations.length),
+    avgElevation: Math.round(elevations.reduce((a, b) => a + b, 0) / (elevations.length || 1)),
     elevationGain: Math.round(elevGain),
     elevationLoss: Math.round(elevLoss),
+    gain: Math.round(elevGain),
+    loss: Math.round(elevLoss),
+    distance: totDist,
+    totalDistance: totDist,
     maxSlope: Math.round(Math.max(...slopes) * 10) / 10,
-    avgSlope: Math.round((slopes.reduce((a, b) => a + b, 0) / slopes.length) * 10) / 10,
-    totalDistance: profile[profile.length - 1].distance,
+    avgSlope: Math.round((slopes.reduce((a, b) => a + b, 0) / (slopes.length || 1)) * 10) / 10,
   };
 }
 

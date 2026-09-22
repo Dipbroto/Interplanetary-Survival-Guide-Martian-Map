@@ -115,23 +115,23 @@ export default function ElevationProfile() {
         <div className="grid grid-cols-5 gap-2 mt-4 px-4 py-2.5 bg-space-800/50 rounded-lg border border-space-700/50 text-center">
           <div className="border-r border-space-700/50 pr-2">
             <div className="text-[10px] text-space-400 uppercase tracking-wider mb-0.5">Total Dist</div>
-            <div className="font-mono text-sm text-primary">{stats.distance.toFixed(2)} <span className="text-[10px] text-space-500 font-sans">km</span></div>
+            <div className="font-mono text-sm text-primary">{(stats.distance ?? stats.totalDistance ?? 0).toFixed(2)} <span className="text-[10px] text-space-500 font-sans">km</span></div>
           </div>
           <div className="border-r border-space-700/50 pr-2">
             <div className="text-[10px] text-space-400 uppercase tracking-wider mb-0.5">Elev Gain</div>
-            <div className="font-mono text-sm text-green-400">+{stats.gain.toFixed(0)} <span className="text-[10px] text-green-700 font-sans">m</span></div>
+            <div className="font-mono text-sm text-green-400">+{(stats.gain ?? stats.elevationGain ?? 0).toFixed(0)} <span className="text-[10px] text-green-700 font-sans">m</span></div>
           </div>
           <div className="border-r border-space-700/50 pr-2">
             <div className="text-[10px] text-space-400 uppercase tracking-wider mb-0.5">Elev Loss</div>
-            <div className="font-mono text-sm text-red-400">-{stats.loss.toFixed(0)} <span className="text-[10px] text-red-700 font-sans">m</span></div>
+            <div className="font-mono text-sm text-red-400">-{(stats.loss ?? stats.elevationLoss ?? 0).toFixed(0)} <span className="text-[10px] text-red-700 font-sans">m</span></div>
           </div>
           <div className="border-r border-space-700/50 pr-2">
             <div className="text-[10px] text-space-400 uppercase tracking-wider mb-0.5">Max Slope</div>
-            <div className="font-mono text-sm text-mars-400">{stats.maxSlope.toFixed(1)}°</div>
+            <div className="font-mono text-sm text-mars-400">{(stats.maxSlope ?? 0).toFixed(1)}°</div>
           </div>
           <div>
             <div className="text-[10px] text-space-400 uppercase tracking-wider mb-0.5">Avg Slope</div>
-            <div className="font-mono text-sm text-primary">{stats.avgSlope.toFixed(1)}°</div>
+            <div className="font-mono text-sm text-primary">{(stats.avgSlope ?? 0).toFixed(1)}°</div>
           </div>
         </div>
       )}

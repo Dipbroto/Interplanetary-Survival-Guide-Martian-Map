@@ -11,6 +11,7 @@ import ScienceLabModal from './components/ScienceLabModal';
 import FlightPlanModal from './components/FlightPlanModal';
 import MartianSkyEphemeris from './components/MartianSkyEphemeris';
 import AudioSynthesizerRack from './components/AudioSynthesizerRack';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   const { viewMode, showLoadingScreen } = useMapStore();
@@ -34,38 +35,44 @@ function App() {
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden relative">
         {/* Sidebar */}
-        <Sidebar />
+        <ErrorBoundary>
+          <Sidebar />
+        </ErrorBoundary>
 
         {/* Map / 3D Viewport */}
         <div className="flex-1 flex flex-col relative overflow-hidden">
           {/* Map Container */}
           <div className="flex-1 relative">
-            {viewMode === '2d' && (
-              <div className="absolute inset-0">
-                <MarsMap />
-              </div>
-            )}
-
-            {viewMode === '3d' && (
-              <div className="absolute inset-0">
-                <Mars3DViewer />
-              </div>
-            )}
-
-            {viewMode === 'split' && (
-              <div className="absolute inset-0 flex">
-                <div className="w-1/2 h-full border-r border-space-700 relative">
+            <ErrorBoundary>
+              {viewMode === '2d' && (
+                <div className="absolute inset-0">
                   <MarsMap />
                 </div>
-                <div className="w-1/2 h-full relative">
+              )}
+
+              {viewMode === '3d' && (
+                <div className="absolute inset-0">
                   <Mars3DViewer />
                 </div>
-              </div>
-            )}
+              )}
+
+              {viewMode === 'split' && (
+                <div className="absolute inset-0 flex">
+                  <div className="w-1/2 h-full border-r border-space-700 relative">
+                    <MarsMap />
+                  </div>
+                  <div className="w-1/2 h-full relative">
+                    <Mars3DViewer />
+                  </div>
+                </div>
+              )}
+            </ErrorBoundary>
           </div>
 
           {/* Bottom Panel */}
-          <BottomPanel />
+          <ErrorBoundary>
+            <BottomPanel />
+          </ErrorBoundary>
         </div>
       </div>
 

@@ -12,7 +12,7 @@ export const expeditionPresets = [
     estHours: 4.8,
     targetRegion: 'Jezero Crater (18.44°N, 77.45°E)',
     center: [18.4447, 77.4508],
-    zoom: 12,
+    zoom: 6,
     sciencePriority: 'Astrobiology & Lacustrine Biosignatures',
     waypoints: [
       { id: 'wp-jez-1', name: 'Octavia E. Butler Landing', lat: 18.4447, lon: 77.4508, elevation: -2570 },
@@ -41,7 +41,7 @@ export const expeditionPresets = [
     estHours: 7.5,
     targetRegion: 'Tharsis Montes (18.65°N, -133.8°E)',
     center: [18.65, -133.8],
-    zoom: 9,
+    zoom: 5,
     sciencePriority: 'Volcanology & Subsurface Lava Tube Shelters',
     waypoints: [
       { id: 'wp-oly-1', name: 'Camp Schiaparelli (Rim Base)', lat: 18.6500, lon: -133.8000, elevation: 21100 },
@@ -67,7 +67,7 @@ export const expeditionPresets = [
     estHours: 6.2,
     targetRegion: 'Gale Crater (-4.59°S, 137.44°E)',
     center: [-4.5895, 137.4417],
-    zoom: 11,
+    zoom: 6,
     sciencePriority: 'Paleo-Climatic Transition & Habitability',
     waypoints: [
       { id: 'wp-gal-1', name: 'Bradbury Landing Site', lat: -4.5895, lon: 137.4417, elevation: -4500 },
@@ -94,7 +94,7 @@ export const expeditionPresets = [
     estHours: 8.0,
     targetRegion: 'Melas Chasma (-9.8°S, -76.5°E)',
     center: [-9.8, -76.5],
-    zoom: 9,
+    zoom: 5,
     sciencePriority: 'Deep Crustal Stratigraphy & Water Ice Seeps',
     waypoints: [
       { id: 'wp-val-1', name: 'Melas North Terrace Landing', lat: -9.5000, lon: -76.2000, elevation: -2800 },

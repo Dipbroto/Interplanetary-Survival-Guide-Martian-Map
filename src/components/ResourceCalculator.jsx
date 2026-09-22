@@ -33,12 +33,27 @@ const ProgressBar = ({ value, max, color }) => {
 const ResourceCalculator = () => {
   const { missionActivities = [] } = useMapStore();
   
-  const totalDuration = missionActivities.reduce((acc, curr) => acc + curr.duration, 0) || 0;
+  const totalDuration = missionActivities.reduce((acc, curr) => acc + (Number(curr.duration) || 1), 0) || 0;
   
-  // Base calculations (fallback if utils not found)
-  const getO2 = () => { try { return estimateO2Consumption(totalDuration); } catch(e) { return totalDuration * 0.04; } };
-  const getWater = () => { try { return estimateWaterConsumption(totalDuration); } catch(e) { return totalDuration * 0.15; } };
-  const getPower = () => { try { return estimatePowerConsumption(totalDuration); } catch(e) { return totalDuration * 150; } };
+  // Base calculations (extract numeric scalar from helper object)
+  const getO2 = () => { 
+    try { 
+      const res = estimateO2Consumption(totalDuration); 
+      return typeof res === 'object' ? (res.totalKg || 0) : (Number(res) || 0);
+    } catch(e) { return totalDuration * 0.04; } 
+  };
+  const getWater = () => { 
+    try { 
+      const res = estimateWaterConsumption(totalDuration); 
+      return typeof res === 'object' ? (res.totalLiters || 0) : (Number(res) || 0);
+    } catch(e) { return totalDuration * 0.15; } 
+  };
+  const getPower = () => { 
+    try { 
+      const res = estimatePowerConsumption(totalDuration); 
+      return typeof res === 'object' ? (res.energyWh || 0) : (Number(res) || 0);
+    } catch(e) { return totalDuration * 150; } 
+  };
 
   const o2Kg = getO2();
   const waterLiters = getWater();

@@ -22,7 +22,7 @@ const MissionTimeline = () => {
     sol: 1
   });
 
-  const totalDuration = missionActivities.reduce((acc, curr) => acc + curr.duration, 0);
+  const totalDuration = missionActivities.reduce((acc, curr) => acc + (Number(curr.duration) || 1), 0);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -41,7 +41,7 @@ const MissionTimeline = () => {
           <div>
             <h3 className="font-display font-bold text-lg text-primary">EVA Planner</h3>
             <div className="text-xs text-secondary flex items-center mt-1">
-              <Clock size={12} className="mr-1" /> Est. Duration: <span className="text-primary font-mono ml-1">{totalDuration}h</span>
+              <Clock size={12} className="mr-1" /> Est. Duration: <span className="text-primary font-mono ml-1">{totalDuration.toFixed(1)}h</span>
             </div>
           </div>
           <button 
@@ -83,23 +83,28 @@ const MissionTimeline = () => {
           />
           <button 
             type="submit"
-            className="w-full bg-space-800 hover:bg-space-700 text-primary rounded-lg p-2.5 text-sm font-bold flex items-center justify-center transition-colors border border-space-600"
+            className="w-full bg-mars-500 hover:bg-mars-600 text-white font-bold py-2 rounded-lg text-sm transition-colors flex items-center justify-center shadow-lg shadow-mars-500/20"
           >
-            <Plus size={16} className="mr-2" /> Add Activity
+            <Plus size={16} className="mr-1.5" /> Add Task to EVA
           </button>
         </form>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
-        <div className="relative border-l-2 border-space-700 ml-4 pl-6 pb-4 space-y-5">
+      <div className="p-5 flex-1 overflow-y-auto">
+        <div className="relative pl-6 space-y-6 before:absolute before:left-2 before:top-3 before:bottom-3 before:w-0.5 before:bg-space-800">
           <AnimatePresence>
             {missionActivities.length === 0 ? (
-              <motion.div initial={{opacity:0}} animate={{opacity:1}} className="text-space-500 text-sm italic ml-2 py-4">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-xs text-space-500 py-4 text-center font-mono"
+              >
                 No activities planned yet. Add one above.
               </motion.div>
             ) : (
               missionActivities.map((activity, index) => {
-                const config = ACTIVITY_TYPES[activity.type] || ACTIVITY_TYPES.traverse;
+                const actType = activity.type || 'traverse';
+                const config = ACTIVITY_TYPES[actType] || ACTIVITY_TYPES.traverse;
                 const Icon = config.icon;
                 
                 return (
@@ -111,18 +116,18 @@ const MissionTimeline = () => {
                     transition={{ duration: 0.2 }}
                     className={`relative p-3.5 rounded-xl border ${config.bg} ${config.border} backdrop-blur-md group shadow-sm`}
                   >
-                    <div className={`absolute -left-[31px] top-4 w-4 h-4 rounded-full border-[3px] border-space-900 ${config.bg.replace('/10', ' bg-opacity-100').replace('bg-', 'bg-').split(' ')[0]}`} style={{ backgroundColor: 'currentColor', color: config.color.replace('text-', '') }} />
+                    <div className="absolute -left-[31px] top-4 w-4 h-4 rounded-full border-[3px] border-space-900 bg-current" style={{ color: config.color.replace('text-', '') }} />
                     
                     <div className="flex justify-between items-start mb-1">
                       <div className="flex items-center">
                         <Icon size={14} className={`${config.color} mr-2`} />
                         <span className={`text-[10px] font-bold uppercase tracking-wider ${config.color}`}>
-                          {activity.type}
+                          {actType}
                         </span>
                       </div>
                       <div className="flex items-center">
                         <span className="text-[10px] font-mono text-space-400 bg-space-950/50 px-2 py-0.5 rounded border border-space-800 mr-2">
-                          Sol {activity.sol} • {activity.duration}h
+                          Sol {activity.sol || 1} • {activity.duration || 1}h
                         </span>
                         <button 
                           onClick={() => removeActivity(activity.id)}

@@ -15,6 +15,7 @@ export default function RoutePlanner() {
     updateWaypoint, 
     clearWaypoints,
     loadExpeditionPreset,
+    activePresetId,
     setEVASimulating
   } = useMapStore();
 
@@ -25,13 +26,13 @@ export default function RoutePlanner() {
   useEffect(() => {
     if (waypoints && waypoints.length > 1) {
       const dist = routeDistance(waypoints);
-      setDistance(dist);
+      setDistance(dist || 0);
       const profile = getElevationProfile(waypoints, 100);
       const calculatedStats = getProfileStats(profile);
       setStats(calculatedStats);
       
-      const est = estimateEVATime(dist, calculatedStats ? calculatedStats.avgSlope : 0);
-      setEvaTime(typeof est === 'object' ? est.totalHours : est);
+      const est = estimateEVATime(dist || 0, calculatedStats ? calculatedStats.avgSlope : 0);
+      setEvaTime(typeof est === 'object' ? (est.totalHours || 0) : (est || 0));
     } else {
       setDistance(0);
       setEvaTime(0);
@@ -70,7 +71,7 @@ export default function RoutePlanner() {
             const found = expeditionPresets.find(p => p.id === e.target.value);
             if (found) loadExpeditionPreset(found);
           }}
-          defaultValue=""
+          value={activePresetId || ''}
           className="w-full bg-space-800 border border-space-700 text-xs text-primary rounded px-2.5 py-1.5 focus:outline-none focus:border-mars-500 transition-colors"
         >
           <option value="" disabled>Select a NASA Expedition Route...</option>
@@ -104,14 +105,18 @@ export default function RoutePlanner() {
               <ArrowUpDown className="w-4 h-4 text-green-400" />
               <div>
                 <div className="text-space-400 text-[10px] uppercase tracking-wide">Elev Gain</div>
-                <div className="font-mono text-xs text-green-400">+{stats.gain.toFixed(0)} m</div>
+                <div className="font-mono text-xs text-green-400">
+                  +{(stats.gain ?? stats.elevationGain ?? 0).toFixed(0)} m
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <ArrowUpDown className="w-4 h-4 text-red-400" />
               <div>
                 <div className="text-space-400 text-[10px] uppercase tracking-wide">Elev Loss</div>
-                <div className="font-mono text-xs text-red-400">-{stats.loss.toFixed(0)} m</div>
+                <div className="font-mono text-xs text-red-400">
+                  -{(stats.loss ?? stats.elevationLoss ?? 0).toFixed(0)} m
+                </div>
               </div>
             </div>
           </>

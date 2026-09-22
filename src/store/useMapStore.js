@@ -112,11 +112,14 @@ const useMapStore = create((set, get) => ({
       sidebarOpen: true,
       isRoverDriving: false,
       roverProgress: 0,
-      missionActivities: preset.timeline.map((item, idx) => ({
+      missionActivities: (preset.timeline || []).map((item, idx) => ({
         id: `act-preset-${idx}`,
         title: item.title,
         description: item.description,
         time: item.time,
+        type: idx % 3 === 0 ? 'traverse' : (idx % 3 === 1 ? 'sample' : 'experiment'),
+        duration: 1.0,
+        sol: 1,
         category: 'Science',
         completed: false
       }))

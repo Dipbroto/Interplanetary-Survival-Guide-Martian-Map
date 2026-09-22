@@ -53,6 +53,22 @@ const MapEvents = () => {
   return null;
 };
 
+// Controls camera view smoothly when mapCenter or mapZoom changes in store
+const MapViewController = () => {
+  const map = useMap();
+  const mapCenter = useMapStore((s) => s.mapCenter);
+  const mapZoom = useMapStore((s) => s.mapZoom);
+
+  useEffect(() => {
+    if (mapCenter && Array.isArray(mapCenter) && mapCenter.length === 2) {
+      const targetZoom = Math.min(Math.max(mapZoom || 4, 1), 8);
+      map.flyTo(mapCenter, targetZoom, { duration: 1.2 });
+    }
+  }, [mapCenter, mapZoom, map]);
+
+  return null;
+};
+
 // Rover Driver Component running inside MapContainer
 const RoverSimulator = ({ waypoints }) => {
   const map = useMap();
@@ -212,6 +228,7 @@ const MarsMap = () => {
         worldCopyJump={false}
       >
         <MapEvents />
+        <MapViewController />
 
         {/* NASA Trek WMTS Tile Layers */}
         {activeLayerConfigs.map((layer) => (

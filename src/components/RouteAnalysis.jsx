@@ -10,37 +10,38 @@ export default function RouteAnalysis() {
   const analysis = useMemo(() => {
     if (!waypoints || waypoints.length < 2) return null;
     
-    const dist = routeDistance(waypoints);
+    const dist = routeDistance(waypoints) || 0;
     // calculate average slope for ETA
     const profile = getElevationProfile(waypoints, 100);
     const stats = getProfileStats(profile);
     
-    const evaEstimate = estimateEVATime(dist, stats.avgSlope);
-    const evaHours = evaEstimate.totalHours;
+    const evaEstimate = estimateEVATime(dist, stats ? stats.avgSlope : 0);
+    const evaHours = typeof evaEstimate === 'object' ? (evaEstimate.totalHours || 0) : (evaEstimate || 0);
     
     // Safely call util functions
-    const radEstimate = estimateRadiation(evaHours, stats.avgElevation);
-    const radiation = radEstimate.totalDose; 
+    const radEstimate = estimateRadiation(evaHours, stats ? stats.avgElevation : 0);
+    const radiation = radEstimate ? (radEstimate.totalDose || 0) : 0; 
     
     const o2Estimate = estimateO2Consumption(evaHours);
     const waterEstimate = estimateWaterConsumption(evaHours);
     const powerEstimate = estimatePowerConsumption(evaHours, -60);
     
     const consumables = { 
-        o2: o2Estimate.totalKg, 
-        water: waterEstimate.totalLiters, 
-        power: powerEstimate.energyWh 
+        o2: o2Estimate ? (o2Estimate.totalKg || 0) : 0, 
+        water: waterEstimate ? (waterEstimate.totalLiters || 0) : 0, 
+        power: powerEstimate ? (powerEstimate.energyWh || 0) : 0 
     };
     
+    const maxSlope = stats ? (stats.maxSlope || 0) : 0;
     const hazards = { 
         dustRisk: 'Medium', 
-        slopeWarning: stats.maxSlope > 15 
+        slopeWarning: maxSlope > 15 
     };
 
     return {
       distance: dist,
       evaTime: evaHours,
-      stats,
+      stats: stats || { gain: 0, loss: 0, elevationGain: 0, elevationLoss: 0, maxSlope: 0, avgSlope: 0, distance: dist, totalDistance: dist },
       radiation,
       consumables,
       hazards
@@ -59,13 +60,16 @@ export default function RouteAnalysis() {
 
   const { stats, evaTime, radiation, consumables, hazards } = analysis;
 
-  const getSlopeDifficulty = (slope) => {
+  const getSlopeDifficulty = (slope = 0) => {
     if (slope < 5) return { label: 'Easy', color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' };
     if (slope < 15) return { label: 'Moderate', color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' };
     return { label: 'Steep', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' };
   };
 
-  const slopeDiff = getSlopeDifficulty(stats.maxSlope);
+  const slopeVal = stats?.maxSlope ?? 0;
+  const slopeDiff = getSlopeDifficulty(slopeVal);
+  const gainVal = stats?.gain ?? stats?.elevationGain ?? 0;
+  const lossVal = stats?.loss ?? stats?.elevationLoss ?? 0;
 
   return (
     <div className="flex flex-col space-y-5 p-4 glass-panel rounded-xl text-primary mt-4 w-full">
@@ -81,7 +85,7 @@ export default function RouteAnalysis() {
             <Mountain className="w-4 h-4 text-space-400" />
             <span className="text-xs text-secondary font-medium tracking-wide">Total Distance</span>
           </div>
-          <div className="text-xl font-mono font-bold mt-1">{analysis.distance.toFixed(2)} <span className="text-xs text-space-500 font-sans font-normal">km</span></div>
+          <div className="text-xl font-mono font-bold mt-1">{(analysis.distance || 0).toFixed(2)} <span className="text-xs text-space-500 font-sans font-normal">km</span></div>
         </div>
 
         <div className="bg-space-800/40 p-3.5 rounded-xl border border-space-700/50 flex flex-col justify-center">
@@ -89,7 +93,7 @@ export default function RouteAnalysis() {
             <Clock className="w-4 h-4 text-mars-400" />
             <span className="text-xs text-secondary font-medium tracking-wide">Est. Duration</span>
           </div>
-          <div className="text-xl font-mono font-bold text-mars-400 mt-1">{evaTime.toFixed(1)} <span className="text-xs text-space-500 font-sans font-normal">hrs</span></div>
+          <div className="text-xl font-mono font-bold text-mars-400 mt-1">{(evaTime || 0).toFixed(1)} <span className="text-xs text-space-500 font-sans font-normal">hrs</span></div>
         </div>
 
         {/* Elevation Stats */}
@@ -98,7 +102,7 @@ export default function RouteAnalysis() {
             <TrendingUp className="w-4 h-4 text-green-400" />
             <span className="text-xs text-secondary font-medium">Elev Gain</span>
           </div>
-          <div className="text-lg font-mono text-green-400 mt-1 font-semibold">+{stats.gain.toFixed(0)} m</div>
+          <div className="text-lg font-mono text-green-400 mt-1 font-semibold">+{gainVal.toFixed(0)} m</div>
         </div>
 
         <div className="bg-space-800/40 p-3.5 rounded-xl border border-space-700/50">
@@ -106,7 +110,7 @@ export default function RouteAnalysis() {
             <TrendingDown className="w-4 h-4 text-red-400" />
             <span className="text-xs text-secondary font-medium">Elev Loss</span>
           </div>
-          <div className="text-lg font-mono text-red-400 mt-1 font-semibold">-{stats.loss.toFixed(0)} m</div>
+          <div className="text-lg font-mono text-red-400 mt-1 font-semibold">-{lossVal.toFixed(0)} m</div>
         </div>
 
         {/* Max Slope */}
@@ -117,7 +121,7 @@ export default function RouteAnalysis() {
             </div>
             <div>
               <div className="text-xs text-secondary font-medium mb-0.5">Maximum Slope</div>
-              <div className="text-xl font-mono font-bold">{stats.maxSlope.toFixed(1)}°</div>
+              <div className="text-xl font-mono font-bold">{slopeVal.toFixed(1)}°</div>
             </div>
           </div>
           <span className={`px-2.5 py-1.5 rounded text-xs font-bold uppercase tracking-wider border ${slopeDiff.bg} ${slopeDiff.color}`}>
