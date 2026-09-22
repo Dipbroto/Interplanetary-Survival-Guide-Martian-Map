@@ -116,12 +116,24 @@ export default function EVAHelmetHUD() {
     return () => cancelAnimationFrame(animationFrameId);
   }, [currentBPM]);
 
+  // Escape key to exit HUD
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setEVASimulating(false);
+        marsAudio.playQuindarTone(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setEVASimulating]);
+
   if (!isEVASimulating) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden pointer-events-none select-none flex flex-col justify-between font-mono">
       {/* Helmet Visor Curved Edge & Tint Overlay */}
-      <div className="absolute inset-0 border-[36px] border-black/85 rounded-[60px] pointer-events-none shadow-[inset_0_0_120px_rgba(0,0,0,0.9)] z-10" />
+      <div className="absolute inset-0 border-[12px] md:border-[20px] border-black/70 rounded-[28px] md:rounded-[44px] pointer-events-none shadow-[inset_0_0_100px_rgba(0,0,0,0.85)] z-10" />
       
       {/* Visor Glass Flare & Reflection */}
       <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-cyan-500/5 to-amber-500/10 pointer-events-none z-10" />
@@ -131,16 +143,16 @@ export default function EVAHelmetHUD() {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(34,197,94,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(34,197,94,0.06)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none z-10 animate-pulse" />
       )}
 
-      {/* TOP HUD: Compass & Horizon */}
-      <div className="relative z-20 pt-10 px-16 flex items-center justify-between pointer-events-auto">
+      {/* TOP HUD: Compass, Horizon & Prominent Back Button */}
+      <div className="relative z-30 pt-4 px-6 md:px-12 flex items-center justify-between pointer-events-auto">
         {/* Left: EVA Mission Clock */}
-        <div className="bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-cyan-500/40 text-cyan-400 text-xs">
+        <div className="bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-cyan-500/40 text-cyan-400 text-xs shadow-lg">
           <div className="text-[10px] text-space-400 uppercase">SOL {currentSol} • EVA TIME</div>
           <div className="font-bold text-sm tracking-wider">03:42:19 MTC</div>
         </div>
 
         {/* Center: 360° Compass Tape */}
-        <div className="w-80 bg-black/70 backdrop-blur-md p-2 rounded-xl border border-cyan-500/50 flex flex-col items-center shadow-lg">
+        <div className="w-72 md:w-80 bg-black/80 backdrop-blur-md p-2 rounded-xl border border-cyan-500/50 flex flex-col items-center shadow-xl">
           <div className="flex items-center gap-2 text-cyan-400 text-xs font-bold mb-1">
             <Compass className="w-4 h-4 text-cyan-300 animate-spin-slow" />
             <span>BEARING: {headingDeg}° {headingDeg > 315 || headingDeg <= 45 ? 'NORTH' : headingDeg > 45 && headingDeg <= 135 ? 'EAST' : headingDeg > 135 && headingDeg <= 225 ? 'SOUTH' : 'WEST'}</span>
@@ -152,16 +164,17 @@ export default function EVAHelmetHUD() {
           </div>
         </div>
 
-        {/* Right: Exit HUD Button */}
+        {/* Right: PROMINENT BACK TO MAP BUTTON */}
         <button
           onClick={() => {
             setEVASimulating(false);
             marsAudio.playQuindarTone(false);
           }}
-          className="bg-red-600/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors border border-red-400 shadow-lg pointer-events-auto"
+          className="bg-red-600 hover:bg-red-500 active:scale-95 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-2xl border-2 border-white/60 transition-all pointer-events-auto cursor-pointer"
+          title="Exit Marswalk Simulator and return to Map view"
         >
           <X className="w-4 h-4" />
-          <span>EXIT EVA HUD</span>
+          <span>← BACK TO MAP (ESC)</span>
         </button>
       </div>
 

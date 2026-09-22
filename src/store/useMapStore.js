@@ -17,7 +17,7 @@ const useMapStore = create((set, get) => ({
   setMapCenter: (center) => set({ mapCenter: center }),
   setMapZoom: (zoom) => set({ mapZoom: zoom }),
   setCursorPosition: (pos) => set({ cursorPosition: pos }),
-  setViewMode: (mode) => set({ viewMode: mode }),
+  setViewMode: (mode) => set({ viewMode: mode, isEVASimulating: false }),
 
   // ========================
   // LAYERS
@@ -209,7 +209,7 @@ const useMapStore = create((set, get) => ({
       status: 'Cached in Tube #14'
     }
   ],
-  setScienceLabOpen: (val) => set({ isScienceLabOpen: val }),
+  setScienceLabOpen: (val) => set({ isScienceLabOpen: val, isEVASimulating: false }),
   addSample: (sample) => set((state) => ({
     collectedSamples: [sample, ...state.collectedSamples]
   })),
@@ -221,13 +221,13 @@ const useMapStore = create((set, get) => ({
   // MARTIAN SKY EPHEMERIS & MOONS
   // ========================
   isSkyEphemerisOpen: false,
-  setSkyEphemerisOpen: (val) => set({ isSkyEphemerisOpen: val }),
+  setSkyEphemerisOpen: (val) => set({ isSkyEphemerisOpen: val, isEVASimulating: false }),
 
   // ========================
   // FLIGHT PLAN & CHECKLIST
   // ========================
   isFlightPlanOpen: false,
-  setFlightPlanOpen: (val) => set({ isFlightPlanOpen: val }),
+  setFlightPlanOpen: (val) => set({ isFlightPlanOpen: val, isEVASimulating: false }),
 
   // ========================
   // AUDIO SOUNDSCAPE & RACK
@@ -241,7 +241,7 @@ const useMapStore = create((set, get) => ({
   setAudioRackOpen: (val) => set({ isAudioRackOpen: val }),
 
   // ========================
-  // UI STATE
+  // UI STATE & OVERLAY CONTROLS
   // ========================
   sidebarOpen: true,
   sidebarTab: 'layers', // 'layers' | 'route' | 'poi' | 'mission'
@@ -250,10 +250,22 @@ const useMapStore = create((set, get) => ({
   showLoadingScreen: true,
   
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
-  setSidebarTab: (tab) => set({ sidebarTab: tab, sidebarOpen: true }),
+  setSidebarTab: (tab) => set({ sidebarTab: tab, sidebarOpen: true, isEVASimulating: false }),
   setBottomPanelOpen: (open) => set({ bottomPanelOpen: open }),
   setBottomPanelTab: (tab) => set({ bottomPanelTab: tab, bottomPanelOpen: true }),
   setShowLoadingScreen: (show) => set({ showLoadingScreen: show }),
+  
+  // Universal Back / Exit All Overlays action
+  exitAllOverlays: () => set({
+    isEVASimulating: false,
+    isScienceLabOpen: false,
+    isSkyEphemerisOpen: false,
+    isFlightPlanOpen: false,
+    isAudioRackOpen: false,
+    isRoverDriving: false,
+    isRulerActive: false,
+    rulerPoints: []
+  }),
 }));
 
 export default useMapStore;

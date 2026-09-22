@@ -11,6 +11,7 @@ export default function TopBar() {
     isAudioActive, 
     toggleAudio,
     setAudioRackOpen,
+    isEVASimulating,
     setEVASimulating, 
     setScienceLabOpen,
     setSkyEphemerisOpen,
@@ -123,14 +124,27 @@ export default function TopBar() {
           <span className="hidden sm:inline">Science Lab</span>
         </button>
 
-        {/* Marswalk Simulator Button */}
+        {/* Marswalk Simulator Button / Exit HUD */}
         <button
-          onClick={() => setEVASimulating(true)}
-          className="px-2.5 py-1.5 bg-gradient-to-r from-mars-600 to-amber-600 hover:from-mars-500 hover:to-amber-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-md shadow-mars-600/25"
-          title="Launch First-Person Astronaut Helmet EVA HUD"
+          onClick={() => setEVASimulating(!isEVASimulating)}
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-md ${
+            isEVASimulating
+              ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/30 ring-2 ring-red-400 animate-pulse'
+              : 'bg-gradient-to-r from-mars-600 to-amber-600 hover:from-mars-500 hover:to-amber-500 text-white shadow-mars-600/25'
+          }`}
+          title={isEVASimulating ? "Exit Marswalk Helmet HUD" : "Launch First-Person Astronaut Helmet EVA HUD"}
         >
-          <Play className="w-3.5 h-3.5 fill-white" />
-          <span>Marswalk HUD</span>
+          {isEVASimulating ? (
+            <>
+              <X className="w-3.5 h-3.5" />
+              <span>← Exit HUD</span>
+            </>
+          ) : (
+            <>
+              <Play className="w-3.5 h-3.5 fill-white" />
+              <span>Marswalk HUD</span>
+            </>
+          )}
         </button>
 
         {/* 2D / 3D / Split Switcher */}

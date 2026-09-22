@@ -62,9 +62,6 @@ function App() {
                 </div>
               </div>
             )}
-
-            {/* Scan line effect overlay */}
-            <div className="absolute inset-0 pointer-events-none scanline opacity-30" />
           </div>
 
           {/* Bottom Panel */}

@@ -402,7 +402,13 @@ const MarsMap = () => {
             <span className="flex items-center gap-1.5">
               <span>🚜</span> ROVER TELEMETRY
             </span>
-            <span className="text-[10px] text-green-400">AUTONOMOUS</span>
+            <button 
+              onClick={() => setRoverDriving(false)}
+              className="text-space-400 hover:text-white p-1 rounded hover:bg-space-800 transition-colors"
+              title="Stop Rover & Close Telemetry"
+            >
+              ✕
+            </button>
           </div>
 
           <div className="grid grid-cols-2 gap-2 text-[10px]">
@@ -426,7 +432,16 @@ const MarsMap = () => {
               <Ruler className="w-3.5 h-3.5" />
               <span>TERRAIN RULER</span>
             </span>
-            <button onClick={clearRuler} className="text-[10px] text-space-400 hover:text-white">Clear</button>
+            <button 
+              onClick={() => {
+                setRulerActive(false);
+                clearRuler();
+              }} 
+              className="text-space-400 hover:text-white p-1 rounded hover:bg-space-800 transition-colors"
+              title="Close Ruler"
+            >
+              ✕
+            </button>
           </div>
           {rulerPoints.length === 1 ? (
             <p className="text-[11px] text-space-300">Click a second point on the map to measure.</p>
