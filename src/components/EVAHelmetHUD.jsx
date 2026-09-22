@@ -131,7 +131,7 @@ export default function EVAHelmetHUD() {
   if (!isEVASimulating) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden pointer-events-none select-none flex flex-col justify-between font-mono">
+    <div className="fixed inset-0 z-[9999] overflow-hidden pointer-events-none select-none flex flex-col justify-between font-mono">
       {/* Helmet Visor Curved Edge & Tint Overlay */}
       <div className="absolute inset-0 border-[12px] md:border-[20px] border-black/70 rounded-[28px] md:rounded-[44px] pointer-events-none shadow-[inset_0_0_100px_rgba(0,0,0,0.85)] z-10" />
       

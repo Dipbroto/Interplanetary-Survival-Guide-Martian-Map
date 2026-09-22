@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Map, Box, Columns, Clock, Globe2, Volume2, VolumeX, Play, FlaskConical, Radio, Orbit, Sliders } from 'lucide-react';
+import { Map, Box, Columns, Clock, Globe2, Volume2, VolumeX, Play, FlaskConical, Radio, Orbit, Sliders, X } from 'lucide-react';
 import useMapStore from '../store/useMapStore';
 import { marsDateFromEarthDate } from '../utils/marsUtils';
 import { getSolarLongitude, getSolFromDate } from '../data/weatherSimulation';
@@ -13,7 +13,9 @@ export default function TopBar() {
     setAudioRackOpen,
     isEVASimulating,
     setEVASimulating, 
+    isScienceLabOpen,
     setScienceLabOpen,
+    isSkyEphemerisOpen,
     setSkyEphemerisOpen,
   } = useMapStore();
   const [time, setTime] = useState(new Date());
@@ -106,22 +108,48 @@ export default function TopBar() {
       <div className="flex items-center gap-2">
         {/* Martian Sky & Moons Ephemeris Trigger */}
         <button
-          onClick={() => setSkyEphemerisOpen(true)}
-          className="px-2.5 py-1.5 bg-gradient-to-r from-amber-950/60 to-amber-900/60 hover:from-amber-900 hover:to-amber-800 border border-amber-500/40 text-amber-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
-          title="Open Martian Sky & Moons (Phobos/Deimos) Ephemeris"
+          onClick={() => setSkyEphemerisOpen(!isSkyEphemerisOpen)}
+          className={`px-2.5 py-1.5 border rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm ${
+            isSkyEphemerisOpen
+              ? 'bg-amber-600 hover:bg-amber-500 text-white border-amber-400 ring-2 ring-amber-400/50'
+              : 'bg-gradient-to-r from-amber-950/60 to-amber-900/60 hover:from-amber-900 hover:to-amber-800 border-amber-500/40 text-amber-200'
+          }`}
+          title="Toggle Martian Sky & Moons (Phobos/Deimos) Ephemeris"
         >
-          <Orbit className="w-3.5 h-3.5 text-amber-400" />
-          <span className="hidden sm:inline">Sky & Moons</span>
+          {isSkyEphemerisOpen ? (
+            <>
+              <X className="w-3.5 h-3.5" />
+              <span>Close Sky</span>
+            </>
+          ) : (
+            <>
+              <Orbit className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">Sky & Moons</span>
+            </>
+          )}
         </button>
 
         {/* Science Lab Modal Trigger */}
         <button
-          onClick={() => setScienceLabOpen(true)}
-          className="px-2.5 py-1.5 bg-gradient-to-r from-purple-900/60 to-indigo-900/60 hover:from-purple-800/80 hover:to-indigo-800/80 border border-purple-500/40 text-purple-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
-          title="Open In-Situ Science Laboratory & SuperCam Spectrometer"
+          onClick={() => setScienceLabOpen(!isScienceLabOpen)}
+          className={`px-2.5 py-1.5 border rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm ${
+            isScienceLabOpen
+              ? 'bg-purple-600 hover:bg-purple-500 text-white border-purple-400 ring-2 ring-purple-400/50'
+              : 'bg-gradient-to-r from-purple-900/60 to-indigo-900/60 hover:from-purple-800/80 hover:to-indigo-800/80 border-purple-500/40 text-purple-200'
+          }`}
+          title="Toggle In-Situ Science Laboratory & SuperCam Spectrometer"
         >
-          <FlaskConical className="w-3.5 h-3.5 text-purple-400" />
-          <span className="hidden sm:inline">Science Lab</span>
+          {isScienceLabOpen ? (
+            <>
+              <X className="w-3.5 h-3.5" />
+              <span>Close Lab</span>
+            </>
+          ) : (
+            <>
+              <FlaskConical className="w-3.5 h-3.5 text-purple-400" />
+              <span className="hidden sm:inline">Science Lab</span>
+            </>
+          )}
         </button>
 
         {/* Marswalk Simulator Button / Exit HUD */}

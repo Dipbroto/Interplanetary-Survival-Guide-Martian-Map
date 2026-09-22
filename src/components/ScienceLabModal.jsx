@@ -136,13 +136,29 @@ export default function ScienceLabModal() {
     setTimeout(() => setCachedSuccess(false), 2500);
   };
 
+  // Escape key to close
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setScienceLabOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setScienceLabOpen]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-space-950/80 backdrop-blur-md">
+    <div 
+      onClick={(e) => {
+        if (e.target === e.currentTarget) setScienceLabOpen(false);
+      }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+    >
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="glass-panel-solid w-full max-w-5xl h-[90vh] rounded-2xl flex flex-col overflow-hidden border border-mars-500/40 shadow-2xl bg-space-950/95"
+        className="glass-panel-solid w-full max-w-5xl h-[90vh] rounded-2xl flex flex-col overflow-hidden border-2 border-mars-500/60 shadow-2xl bg-space-950 relative z-10"
       >
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-space-800 bg-space-900/60 shrink-0">
@@ -162,11 +178,14 @@ export default function ScienceLabModal() {
               </p>
             </div>
           </div>
+          
           <button 
             onClick={() => setScienceLabOpen(false)}
-            className="p-2 text-space-400 hover:text-white rounded-lg hover:bg-space-800 transition-colors"
+            className="px-3.5 py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl flex items-center gap-1.5 shadow-lg transition-all hover:scale-105 active:scale-95 border border-white/40 cursor-pointer font-mono text-xs"
+            title="Close Science Lab (ESC)"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
+            <span>← BACK TO MAP (ESC)</span>
           </button>
         </div>
 

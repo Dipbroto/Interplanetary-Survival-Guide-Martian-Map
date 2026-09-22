@@ -41,6 +41,17 @@ export default function MartianSkyEphemeris() {
     return () => clearInterval(timer);
   }, [isEclipseSimulating]);
 
+  // Escape key to close
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setSkyEphemerisOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setSkyEphemerisOpen]);
+
   if (!isSkyEphemerisOpen) return null;
 
   // Orbital positions on celestial dome
@@ -66,14 +77,19 @@ export default function MartianSkyEphemeris() {
   const transitX = 60 + (eclipseProgress / 100) * 160;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-space-950/80 backdrop-blur-md font-mono text-xs">
+    <div 
+      onClick={(e) => {
+        if (e.target === e.currentTarget) setSkyEphemerisOpen(false);
+      }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md font-mono text-xs"
+    >
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="glass-panel-solid w-full max-w-4xl rounded-2xl border border-amber-500/40 p-6 bg-space-950/95 shadow-2xl flex flex-col gap-5 text-primary"
+        className="glass-panel-solid w-full max-w-4xl rounded-2xl border-2 border-amber-500/60 p-6 bg-space-950 shadow-2xl flex flex-col gap-5 text-primary relative z-10"
       >
-        {/* Header */}
+        {/* Header with prominent Back button */}
         <div className="flex items-center justify-between pb-3 border-b border-space-800">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30">
@@ -91,11 +107,14 @@ export default function MartianSkyEphemeris() {
               </p>
             </div>
           </div>
+          
           <button
             onClick={() => setSkyEphemerisOpen(false)}
-            className="p-1.5 text-space-400 hover:text-white rounded-lg hover:bg-space-800 transition-colors"
+            className="px-3.5 py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl flex items-center gap-1.5 shadow-lg transition-all hover:scale-105 active:scale-95 border border-white/40 cursor-pointer"
+            title="Close Ephemeris (ESC)"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
+            <span>← BACK TO MAP (ESC)</span>
           </button>
         </div>
 

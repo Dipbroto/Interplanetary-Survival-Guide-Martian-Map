@@ -50,15 +50,31 @@ export default function AudioSynthesizerRack() {
     return () => cancelAnimationFrame(animId);
   }, [isAudioActive, isAudioRackOpen]);
 
+  // Escape key to close
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setAudioRackOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setAudioRackOpen]);
+
   if (!isAudioRackOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-space-950/70 backdrop-blur-sm">
+    <div 
+      onClick={(e) => {
+        if (e.target === e.currentTarget) setAudioRackOpen(false);
+      }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm"
+    >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="glass-panel-solid w-full max-w-lg rounded-2xl border border-cyan-500/40 p-5 bg-space-950/95 shadow-2xl flex flex-col gap-4 font-mono text-xs"
+        className="glass-panel-solid w-full max-w-lg rounded-2xl border-2 border-cyan-500/60 p-5 bg-space-950 shadow-2xl flex flex-col gap-4 font-mono text-xs relative z-10"
       >
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-space-800">
@@ -78,9 +94,11 @@ export default function AudioSynthesizerRack() {
           </div>
           <button
             onClick={() => setAudioRackOpen(false)}
-            className="p-1.5 text-space-400 hover:text-white rounded-lg hover:bg-space-800 transition-colors"
+            className="px-3 py-1 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg flex items-center gap-1 shadow transition-all border border-white/40 cursor-pointer"
+            title="Close Audio Mixer (ESC)"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
+            <span>← BACK (ESC)</span>
           </button>
         </div>
 
