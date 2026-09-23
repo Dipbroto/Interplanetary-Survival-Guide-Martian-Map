@@ -4,6 +4,7 @@ import L from 'leaflet';
 import useMapStore from '../store/useMapStore';
 import { landingSites } from '../data/landingSites';
 import { geologicalFeatures } from '../data/geologicalFeatures';
+import { marsAudio } from '../utils/audioSynthesizer';
 
 const createCustomIcon = (emoji, color) => {
   return L.divIcon({
@@ -55,7 +56,10 @@ const POIMarkers = () => {
                 <p><strong>Elevation:</strong> {site.elevation?.toLocaleString()} m</p>
               </div>
               <button
-                onClick={() => addWaypoint({ lat: site.lat, lon: site.lon, name: site.name, elevation: site.elevation })}
+                onClick={() => {
+                  addWaypoint({ lat: site.lat, lon: site.lon, name: site.name, elevation: site.elevation });
+                  marsAudio.playQuindarTone(true);
+                }}
                 className="w-full bg-mars-600 hover:bg-mars-500 text-white font-medium py-1 px-2 rounded text-xs transition-colors flex items-center justify-center gap-1 shadow-sm"
               >
                 <span>➕ Add to Marswalk Route</span>
@@ -93,7 +97,10 @@ const POIMarkers = () => {
                 <p className="font-mono text-[10px] text-space-500">Lat: {feature.lat.toFixed(2)}°, Lon: {feature.lon.toFixed(2)}°</p>
               </div>
               <button
-                onClick={() => addWaypoint({ lat: feature.lat, lon: feature.lon, name: feature.name, elevation: feature.elevation })}
+                onClick={() => {
+                  addWaypoint({ lat: feature.lat, lon: feature.lon, name: feature.name, elevation: feature.elevation });
+                  marsAudio.playQuindarTone(true);
+                }}
                 className="w-full bg-mars-600 hover:bg-mars-500 text-white font-medium py-1 px-2 rounded text-xs transition-colors flex items-center justify-center gap-1 shadow-sm"
               >
                 <span>➕ Add to Marswalk Route</span>

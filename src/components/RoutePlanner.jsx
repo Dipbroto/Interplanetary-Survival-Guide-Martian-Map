@@ -3,8 +3,15 @@ import useMapStore from '../store/useMapStore';
 import { routeDistance, estimateEVATime } from '../utils/marsUtils';
 import { getElevationProfile, getProfileStats } from '../utils/elevationService';
 import { expeditionPresets } from '../data/expeditionPresets';
-import { MapPin, Plus, Trash2, Navigation, Clock, ArrowUpDown, Route, Compass, Play } from 'lucide-react';
+import { 
+  MapPin, Plus, Trash2, Navigation, Clock, ArrowUpDown, Route, 
+  Compass, Play, Cpu, ShieldCheck, Sparkles, Zap, ChevronRight, 
+  FileText, ShieldAlert, CheckCircle2, Info, RotateCcw 
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AUTONOMOUS_TARGET_PAIRS, generateAutonomousTraverse } from '../utils/autonomousRouter';
+import ProvenanceBadge from './ProvenanceBadge';
+import { marsAudio } from '../utils/audioSynthesizer';
 
 export default function RoutePlanner() {
   const { 
@@ -12,16 +19,31 @@ export default function RoutePlanner() {
     isPlacingWaypoint, 
     setPlacingWaypoint, 
     removeWaypoint, 
+    removeLastWaypoint,
+    undoLastPoint,
+    setWaypoints,
     updateWaypoint, 
     clearWaypoints,
     loadExpeditionPreset,
     activePresetId,
-    setEVASimulating
+    setEVASimulating,
+    setFlightPlanOpen,
+    setContingencyModalOpen,
+    activeContingency,
+    setMapCenter,
+    setMapZoom,
+    addWaypoint,
   } = useMapStore();
 
+  const [activeTab, setActiveTab] = useState('manual'); // 'manual' | 'auto'
   const [distance, setDistance] = useState(0);
   const [evaTime, setEvaTime] = useState(0);
   const [stats, setStats] = useState(null);
+
+  // Autonomous Router State
+  const [selectedPairId, setSelectedPairId] = useState('jezero-delta');
+  const [routingMode, setRoutingMode] = useState('safety'); // 'safety' | 'science' | 'fastest'
+  const [generatedRouteResult, setGeneratedRouteResult] = useState(null);
 
   useEffect(() => {
     if (waypoints && waypoints.length > 1) {
@@ -44,14 +66,73 @@ export default function RoutePlanner() {
     updateWaypoint(id, { name: newName });
   };
 
+  const handleRunAutoRouter = (pairId = selectedPairId, mode = routingMode, autoApply = true) => {
+    let origin, destination;
+    let targetCenter = null;
+    let targetZoom = 7;
+
+    if (pairId === 'custom-current') {
+      if (!waypoints || waypoints.length < 2) return;
+      origin = waypoints[0];
+      destination = waypoints[waypoints.length - 1];
+      const origLat = origin.lat;
+      const origLon = origin.lon !== undefined ? origin.lon : origin.lng;
+      const destLat = destination.lat;
+      const destLon = destination.lon !== undefined ? destination.lon : destination.lng;
+      targetCenter = [(origLat + destLat) / 2, (origLon + destLon) / 2];
+      targetZoom = 6;
+    } else {
+      const pair = AUTONOMOUS_TARGET_PAIRS.find(p => p.id === pairId) || AUTONOMOUS_TARGET_PAIRS[0];
+      origin = pair.origin;
+      destination = pair.destination;
+      targetCenter = pair.center || [origin.lat, origin.lon];
+      targetZoom = pair.zoom || 7;
+    }
+
+    const result = generateAutonomousTraverse(origin, destination, { mode });
+    if (!result) return;
+    setGeneratedRouteResult(result);
+
+    if (autoApply && result.waypoints) {
+      setWaypoints(result.waypoints);
+      if (targetCenter) {
+        setMapCenter(targetCenter);
+        setMapZoom(targetZoom);
+      }
+      marsAudio.playQuindarTone(true);
+    }
+  };
+
+  const handleApplyAutoRoute = () => {
+    if (!generatedRouteResult || !generatedRouteResult.waypoints) return;
+    setWaypoints(generatedRouteResult.waypoints);
+    const pair = AUTONOMOUS_TARGET_PAIRS.find(p => p.id === selectedPairId);
+    if (pair && pair.center) {
+      setMapCenter(pair.center);
+      setMapZoom(pair.zoom || 7);
+    } else if (generatedRouteResult.waypoints[0]) {
+      const firstWp = generatedRouteResult.waypoints[0];
+      setMapCenter([firstWp.lat, firstWp.lon]);
+      setMapZoom(7);
+    }
+    marsAudio.playQuindarTone(true);
+  };
+
   return (
-    <div className="flex flex-col space-y-3 p-4 glass-panel rounded-xl text-primary w-full h-full max-h-[100%]">
+    <div className="flex flex-col space-y-3 p-4 glass-panel rounded-xl text-primary w-full h-full max-h-[100%] overflow-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-display text-mars-400 flex items-center gap-2">
-          <Route className="w-5 h-5" />
-          Route Planner
-        </h2>
+      <div className="flex justify-between items-center shrink-0">
+        <div>
+          <h2 className="text-lg font-display text-mars-400 flex items-center gap-2">
+            <Route className="w-5 h-5" />
+            <span>Marswalk Route Planner</span>
+          </h2>
+          <div className="flex items-center gap-2 mt-0.5">
+            <ProvenanceBadge type="DERIVED" size="xs" detail="IAU Geodesy" />
+            <span className="text-[10px] text-space-400 font-mono">0.38g Human Bioenergetics</span>
+          </div>
+        </div>
+
         {isPlacingWaypoint && (
           <span className="flex items-center text-xs text-mars-400 bg-mars-500/20 px-2 py-1 rounded-full animate-pulse font-bold">
             <Navigation className="w-3 h-3 mr-1" />
@@ -60,136 +141,340 @@ export default function RoutePlanner() {
         )}
       </div>
 
-      {/* NASA Presets Quick Selector */}
-      <div className="bg-space-900/80 p-2.5 rounded-lg border border-space-700/60">
-        <div className="text-[10px] uppercase font-mono tracking-wider text-space-400 mb-1.5 flex items-center gap-1.5">
-          <Compass className="w-3.5 h-3.5 text-mars-400" />
-          <span>NASA Expedition Presets</span>
-        </div>
-        <select
-          onChange={(e) => {
-            const found = expeditionPresets.find(p => p.id === e.target.value);
-            if (found) loadExpeditionPreset(found);
-          }}
-          value={activePresetId || ''}
-          className="w-full bg-space-800 border border-space-700 text-xs text-primary rounded px-2.5 py-1.5 focus:outline-none focus:border-mars-500 transition-colors"
+      {/* Mode Tabs: Manual vs Autonomous */}
+      <div className="flex bg-space-900/80 p-0.5 rounded-lg border border-space-800 shrink-0">
+        <button
+          onClick={() => setActiveTab('manual')}
+          className={`flex-1 py-1.5 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+            activeTab === 'manual'
+              ? 'bg-space-800 text-white shadow-sm'
+              : 'text-space-400 hover:text-white'
+          }`}
         >
-          <option value="" disabled>Select a NASA Expedition Route...</option>
-          {expeditionPresets.map((preset) => (
-            <option key={preset.id} value={preset.id}>
-              {preset.name} ({preset.distanceKm} km)
-            </option>
-          ))}
-        </select>
+          <MapPin className="w-3.5 h-3.5 text-mars-400" />
+          <span>Manual Waypoints</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setActiveTab('auto');
+            if (!generatedRouteResult) handleRunAutoRouter();
+          }}
+          className={`flex-1 py-1.5 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+            activeTab === 'auto'
+              ? 'bg-mars-600 text-white shadow-sm shadow-mars-600/30'
+              : 'text-space-400 hover:text-mars-300'
+          }`}
+        >
+          <Cpu className="w-3.5 h-3.5 text-amber-400" />
+          <span>Autonomous Router</span>
+          <span className="text-[9px] bg-amber-400/20 text-amber-300 px-1 py-0.2 rounded font-mono">AI</span>
+        </button>
       </div>
 
-      {/* Metrics Summary Card */}
-      <div className="grid grid-cols-2 gap-2 bg-space-800/50 p-2.5 rounded-lg border border-space-700 text-sm">
-        <div className="flex items-center gap-2">
-          <Route className="w-4 h-4 text-mars-400" />
-          <div>
-            <div className="text-space-400 text-[10px] uppercase tracking-wide">Distance</div>
-            <div className="font-mono text-sm font-semibold">{distance.toFixed(2)} km</div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-mars-400" />
-          <div>
-            <div className="text-space-400 text-[10px] uppercase tracking-wide">Est. Time</div>
-            <div className="font-mono text-sm font-semibold text-mars-400">{evaTime.toFixed(1)} hrs</div>
-          </div>
-        </div>
-        {stats && (
-          <>
-            <div className="flex items-center gap-2">
-              <ArrowUpDown className="w-4 h-4 text-green-400" />
-              <div>
-                <div className="text-space-400 text-[10px] uppercase tracking-wide">Elev Gain</div>
-                <div className="font-mono text-xs text-green-400">
-                  +{(stats.gain ?? stats.elevationGain ?? 0).toFixed(0)} m
-                </div>
-              </div>
+      {/* MANUAL MODE VIEW */}
+      {activeTab === 'manual' && (
+        <>
+          {/* NASA Presets Quick Selector */}
+          <div className="bg-space-900/80 p-2.5 rounded-lg border border-space-700/60 shrink-0">
+            <div className="text-[10px] uppercase font-mono tracking-wider text-space-400 mb-1.5 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <Compass className="w-3.5 h-3.5 text-mars-400" />
+                <span>NASA Expedition Presets</span>
+              </span>
+              <ProvenanceBadge type="OBSERVED" size="xs" detail="Rover Tracks" />
             </div>
-            <div className="flex items-center gap-2">
-              <ArrowUpDown className="w-4 h-4 text-red-400" />
-              <div>
-                <div className="text-space-400 text-[10px] uppercase tracking-wide">Elev Loss</div>
-                <div className="font-mono text-xs text-red-400">
-                  -{(stats.loss ?? stats.elevationLoss ?? 0).toFixed(0)} m
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Waypoints List */}
-      <div className="flex-1 overflow-y-auto min-h-0 space-y-2 pr-1 custom-scrollbar">
-        <AnimatePresence>
-          {(!waypoints || waypoints.length === 0) ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="text-center py-6 text-space-400 text-sm flex flex-col items-center justify-center h-full"
+            <select
+              onChange={(e) => {
+                const found = expeditionPresets.find(p => p.id === e.target.value);
+                if (found) loadExpeditionPreset(found);
+              }}
+              value={activePresetId || ''}
+              className="w-full bg-space-800 border border-space-700 text-xs text-primary rounded px-2.5 py-1.5 focus:outline-none focus:border-mars-500 transition-colors"
             >
-              <MapPin className="w-8 h-8 text-space-600 mb-2" />
-              <p className="font-medium text-space-300">No waypoints added</p>
-              <p className="text-xs mt-1 text-space-500">Click "Add Waypoint" or pick a NASA preset above.</p>
-            </motion.div>
-          ) : (
-            waypoints.map((wp, index) => {
-              const colorRatio = waypoints.length > 1 ? index / (waypoints.length - 1) : 0;
-              const r = Math.round(16 + colorRatio * (239 - 16));
-              const g = Math.round(185 + colorRatio * (68 - 185));
-              const b = Math.round(129 + colorRatio * (68 - 129));
-              const wpColor = `rgb(${r}, ${g}, ${b})`;
-              const displayLon = wp.lon !== undefined ? wp.lon : (wp.lng !== undefined ? wp.lng : 0);
+              <option value="" disabled>Select a NASA Expedition Route...</option>
+              {expeditionPresets.map((preset) => (
+                <option key={preset.id} value={preset.id}>
+                  {preset.name} ({preset.distanceKm} km)
+                </option>
+              ))}
+            </select>
+          </div>
 
-              return (
-                <motion.div
-                  key={wp.id || `wp-${index}`}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="flex items-center gap-2 p-2 bg-space-800/60 hover:bg-space-800 border border-space-700/60 hover:border-space-600 rounded-lg group transition-all"
-                >
-                  <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs font-bold text-space-950 shrink-0 shadow-sm"
-                    style={{ backgroundColor: wpColor }}
-                  >
-                    {index + 1}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <input
-                      type="text"
-                      value={wp.name || `Waypoint ${index + 1}`}
-                      onChange={(e) => handleNameChange(wp.id, e.target.value)}
-                      className="bg-transparent border-none text-xs font-semibold focus:ring-0 w-full p-0 text-primary placeholder-space-500 focus:outline-none transition-colors hover:text-white"
-                      placeholder={`Waypoint ${index + 1}`}
-                    />
-                    <div className="text-[10px] text-space-400 font-mono truncate mt-0.5">
-                      {wp.lat.toFixed(4)}°, {displayLon.toFixed(4)}° | Elev: {wp.elevation ? wp.elevation.toFixed(0) : 0} m
+          {/* Metrics Summary Card */}
+          <div className="grid grid-cols-2 gap-2 bg-space-800/50 p-2.5 rounded-lg border border-space-700 text-sm shrink-0">
+            <div className="flex items-center gap-2">
+              <Route className="w-4 h-4 text-mars-400" />
+              <div>
+                <div className="text-space-400 text-[10px] uppercase tracking-wide">Distance</div>
+                <div className="font-mono text-sm font-semibold">{distance.toFixed(2)} km</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-mars-400" />
+              <div>
+                <div className="text-space-400 text-[10px] uppercase tracking-wide">Est. Duration</div>
+                <div className="font-mono text-sm font-semibold text-mars-400">{evaTime.toFixed(1)} hrs</div>
+              </div>
+            </div>
+            {stats && (
+              <>
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown className="w-4 h-4 text-green-400" />
+                  <div>
+                    <div className="text-space-400 text-[10px] uppercase tracking-wide">Elev Gain</div>
+                    <div className="font-mono text-xs text-green-400">
+                      +{(stats.gain ?? stats.elevationGain ?? 0).toFixed(0)} m
                     </div>
                   </div>
-                  
-                  <button
-                    onClick={() => removeWaypoint(wp.id)}
-                    className="p-1.5 text-space-500 hover:text-red-400 opacity-60 group-hover:opacity-100 transition-all rounded-md hover:bg-space-700/80 shrink-0"
-                    title="Remove Waypoint"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </motion.div>
-              );
-            })
-          )}
-        </AnimatePresence>
-      </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown className="w-4 h-4 text-red-400" />
+                  <div>
+                    <div className="text-space-400 text-[10px] uppercase tracking-wide">Elev Loss</div>
+                    <div className="font-mono text-xs text-red-400">
+                      -{(stats.loss ?? stats.elevationLoss ?? 0).toFixed(0)} m
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-col gap-2 pt-2 border-t border-space-700/80 mt-auto">
+          {/* Waypoints List */}
+          <div className="flex-1 overflow-y-auto min-h-0 space-y-2 pr-1 custom-scrollbar">
+            <AnimatePresence>
+              {(!waypoints || waypoints.length === 0) ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-center py-6 text-space-400 text-sm flex flex-col items-center justify-center h-full"
+                >
+                  <MapPin className="w-8 h-8 text-space-600 mb-2" />
+                  <p className="font-medium text-space-300">No waypoints added</p>
+                  <p className="text-xs mt-1 text-space-500">Drop points on the map or use the Autonomous Router.</p>
+                </motion.div>
+              ) : (
+                waypoints.map((wp, index) => {
+                  const colorRatio = waypoints.length > 1 ? index / (waypoints.length - 1) : 0;
+                  const r = Math.round(16 + colorRatio * (239 - 16));
+                  const g = Math.round(185 + colorRatio * (68 - 185));
+                  const b = Math.round(129 + colorRatio * (68 - 129));
+                  const wpColor = `rgb(${r}, ${g}, ${b})`;
+                  const displayLon = wp.lon !== undefined ? wp.lon : (wp.lng !== undefined ? wp.lng : 0);
+
+                  return (
+                    <motion.div
+                      key={wp.id || `wp-${index}`}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="flex items-center gap-2 p-2 bg-space-800/60 hover:bg-space-800 border border-space-700/60 hover:border-space-600 rounded-lg group transition-all"
+                    >
+                      <div
+                        className="w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs font-bold text-space-950 shrink-0 shadow-sm"
+                        style={{ backgroundColor: wpColor }}
+                      >
+                        {index + 1}
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <input
+                          type="text"
+                          value={wp.name || `Waypoint ${index + 1}`}
+                          onChange={(e) => handleNameChange(wp.id, e.target.value)}
+                          className="bg-transparent border-none text-xs font-semibold focus:ring-0 w-full p-0 text-primary placeholder-space-500 focus:outline-none transition-colors hover:text-white"
+                          placeholder={`Waypoint ${index + 1}`}
+                        />
+                        <div className="text-[10px] text-space-400 font-mono truncate mt-0.5">
+                          {wp.lat.toFixed(4)}°, {displayLon.toFixed(4)}° | Elev: {wp.elevation ? wp.elevation.toFixed(0) : 0} m
+                        </div>
+                      </div>
+                      
+                      <button
+                        onClick={() => removeWaypoint(wp.id)}
+                        className="p-1.5 text-space-500 hover:text-red-400 opacity-60 group-hover:opacity-100 transition-all rounded-md hover:bg-space-700/80 shrink-0"
+                        title="Remove Waypoint"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </motion.div>
+                  );
+                })
+              )}
+            </AnimatePresence>
+          </div>
+        </>
+      )}
+
+      {/* AUTONOMOUS ROUTER VIEW */}
+      {activeTab === 'auto' && (
+        <div className="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
+          {/* Target Corridor Picker */}
+          <div className="bg-space-900/80 p-3 rounded-xl border border-space-700/60 space-y-2">
+            <span className="text-[10px] uppercase font-mono tracking-wider text-space-400 block">
+              1. Exploration Sector Target
+            </span>
+            <select
+              value={selectedPairId}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSelectedPairId(val);
+                handleRunAutoRouter(val, routingMode, true);
+              }}
+              className="w-full bg-space-800 border border-space-700 text-xs text-primary rounded-lg p-2 focus:outline-none focus:border-mars-500"
+            >
+              {waypoints && waypoints.length >= 2 && (
+                <option value="custom-current">
+                  📍 Use My Current Placed Points ({waypoints[0].name} → {waypoints[waypoints.length - 1].name})
+                </option>
+              )}
+              {AUTONOMOUS_TARGET_PAIRS.map(pair => (
+                <option key={pair.id} value={pair.id}>
+                  {pair.name} ({pair.location})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Multi-Objective Optimization Mode */}
+          <div className="bg-space-900/80 p-3 rounded-xl border border-space-700/60 space-y-2">
+            <span className="text-[10px] uppercase font-mono tracking-wider text-space-400 block">
+              2. Multi-Objective Optimization Criterion
+            </span>
+            <div className="grid grid-cols-3 gap-1.5">
+              <button
+                onClick={() => {
+                  setRoutingMode('safety');
+                  handleRunAutoRouter(selectedPairId, 'safety', true);
+                }}
+                className={`p-2 rounded-lg border text-center transition-all ${
+                  routingMode === 'safety'
+                    ? 'bg-emerald-950/80 border-emerald-400 text-emerald-300 ring-1 ring-emerald-400/50'
+                    : 'bg-space-800 border-space-700 text-space-400 hover:text-white'
+                }`}
+              >
+                <ShieldCheck className="w-4 h-4 mx-auto mb-1 text-emerald-400" />
+                <span className="text-[10px] font-bold block">Safety First</span>
+                <span className="text-[8px] text-space-400 block font-mono">Slope &lt; 10°</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setRoutingMode('science');
+                  handleRunAutoRouter(selectedPairId, 'science', true);
+                }}
+                className={`p-2 rounded-lg border text-center transition-all ${
+                  routingMode === 'science'
+                    ? 'bg-purple-950/80 border-purple-400 text-purple-300 ring-1 ring-purple-400/50'
+                    : 'bg-space-800 border-space-700 text-space-400 hover:text-white'
+                }`}
+              >
+                <Sparkles className="w-4 h-4 mx-auto mb-1 text-purple-400" />
+                <span className="text-[10px] font-bold block">Max Science</span>
+                <span className="text-[8px] text-space-400 block font-mono">Outcrops Buffer</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setRoutingMode('fastest');
+                  handleRunAutoRouter(selectedPairId, 'fastest', true);
+                }}
+                className={`p-2 rounded-lg border text-center transition-all ${
+                  routingMode === 'fastest'
+                    ? 'bg-blue-950/80 border-blue-400 text-blue-300 ring-1 ring-blue-400/50'
+                    : 'bg-space-800 border-space-700 text-space-400 hover:text-white'
+                }`}
+              >
+                <Zap className="w-4 h-4 mx-auto mb-1 text-blue-400" />
+                <span className="text-[10px] font-bold block">Energy/Direct</span>
+                <span className="text-[8px] text-space-400 block font-mono">Min Distance</span>
+              </button>
+            </div>
+
+            <button
+              onClick={() => handleRunAutoRouter(selectedPairId, routingMode, true)}
+              className="w-full mt-2 py-2 px-3 rounded-lg bg-gradient-to-r from-mars-600 to-amber-600 hover:from-mars-500 hover:to-amber-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-mars-600/30 transition-all hover:scale-[1.01]"
+            >
+              <Cpu className="w-3.5 h-3.5" />
+              <span>Re-Compute & Center Route</span>
+            </button>
+          </div>
+
+          {/* Explainability & Decision Support Card */}
+          {generatedRouteResult && (
+            <div className="bg-space-900/90 p-3 rounded-xl border border-mars-500/40 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs text-white uppercase flex items-center gap-1.5">
+                  <Info className="w-3.5 h-3.5 text-mars-400" />
+                  <span>"Why This Route?" Decision Support</span>
+                </span>
+                <ProvenanceBadge type="DERIVED" size="xs" detail="IDW Optimization" />
+              </div>
+
+              <p className="text-[11px] text-space-200 leading-relaxed font-sans">
+                {generatedRouteResult.explainability.summary}
+              </p>
+
+              {/* Rationale Bullet Points */}
+              <ul className="space-y-1 text-[10px] text-space-300 font-mono">
+                {generatedRouteResult.explainability.rationale.map((r, i) => (
+                  <li key={i} className="flex items-start gap-1.5">
+                    <span className="text-mars-400">▸</span>
+                    <span>{r}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Tradeoff Scores */}
+              <div className="grid grid-cols-3 gap-1.5 pt-2 border-t border-space-800 text-center font-mono">
+                <div className="bg-space-800/80 p-1.5 rounded">
+                  <span className="text-[8px] text-space-400 block uppercase">Safety Index</span>
+                  <span className="text-xs font-bold text-emerald-400">
+                    {generatedRouteResult.explainability.safetyScore}%
+                  </span>
+                </div>
+                <div className="bg-space-800/80 p-1.5 rounded">
+                  <span className="text-[8px] text-space-400 block uppercase">Science Yield</span>
+                  <span className="text-xs font-bold text-purple-400">
+                    {generatedRouteResult.explainability.scienceScore}%
+                  </span>
+                </div>
+                <div className="bg-space-800/80 p-1.5 rounded">
+                  <span className="text-[8px] text-space-400 block uppercase">Max Slope</span>
+                  <span className="text-xs font-bold text-amber-400">
+                    {generatedRouteResult.metrics.maxSlopeDeg}°
+                  </span>
+                </div>
+              </div>
+
+              {/* Dual Action: Refocus & Edit in Manual Mode */}
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={handleApplyAutoRoute}
+                  className="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/30 transition-all hover:scale-[1.01]"
+                  title="Refocus map camera and ensure traverse is synced"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Traverse Synced ({generatedRouteResult.metrics.traverseDistanceKm} km)</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('manual')}
+                  className="py-2 px-3 rounded-lg bg-space-800 hover:bg-space-700 text-space-200 border border-space-700 font-bold text-xs flex items-center gap-1 transition-all shrink-0"
+                  title="Switch to manual list to edit waypoints"
+                >
+                  <span>Edit Points</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Action Buttons Footer */}
+      <div className="flex flex-col gap-2 pt-2 border-t border-space-700/80 mt-auto shrink-0">
         <div className="flex gap-2">
           <button
             onClick={() => setPlacingWaypoint(!isPlacingWaypoint)}
@@ -202,6 +487,20 @@ export default function RoutePlanner() {
             <Plus className={`w-3.5 h-3.5 transition-transform ${isPlacingWaypoint ? 'rotate-45' : ''}`} />
             {isPlacingWaypoint ? 'Cancel Placing' : 'Drop Waypoint on Map'}
           </button>
+
+          {waypoints && waypoints.length > 0 && (
+            <button
+              onClick={() => {
+                undoLastPoint();
+                marsAudio.playQuindarTone(false);
+              }}
+              className="py-2 px-2.5 rounded-lg bg-space-800 hover:bg-amber-500/20 text-space-300 hover:text-amber-400 border border-space-700 transition-colors flex items-center gap-1.5 text-xs font-mono shrink-0"
+              title="Undo last placed point (Ctrl+Z)"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Undo</span>
+            </button>
+          )}
           
           {waypoints && waypoints.length > 0 && (
             <button
@@ -210,12 +509,37 @@ export default function RoutePlanner() {
                   clearWaypoints();
                 }
               }}
-              className="p-2 rounded-lg bg-space-800 hover:bg-red-500/20 text-space-400 hover:text-red-400 border border-space-700 transition-colors"
-              title="Clear Route"
+              className="p-2 rounded-lg bg-space-800 hover:bg-red-500/20 text-space-400 hover:text-red-400 border border-space-700 transition-colors shrink-0"
+              title="Clear entire route"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
           )}
+        </div>
+
+        {/* Quick Modal Triggers: Flight Brief & Contingency */}
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => setFlightPlanOpen(true)}
+            className="py-1.5 px-2 bg-space-800 hover:bg-space-700 border border-space-700 rounded-lg text-[11px] font-mono flex items-center justify-center gap-1.5 text-space-200 transition-colors"
+            title="Export Official NASA Flight Brief"
+          >
+            <FileText className="w-3.5 h-3.5 text-blue-400" />
+            <span>Flight Brief (PDF/MD)</span>
+          </button>
+
+          <button
+            onClick={() => setContingencyModalOpen(true)}
+            className={`py-1.5 px-2 border rounded-lg text-[11px] font-mono flex items-center justify-center gap-1.5 transition-colors ${
+              activeContingency
+                ? 'bg-red-950 text-red-200 border-red-500 animate-pulse'
+                : 'bg-space-800 hover:bg-space-700 border-space-700 text-space-200'
+            }`}
+            title="Simulate Mars Contingency / Hazard Anomaly"
+          >
+            <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+            <span>{activeContingency ? 'CONTINGENCY!' : 'What-If Sim'}</span>
+          </button>
         </div>
 
         {/* Marswalk Simulator Launch Button */}
@@ -225,7 +549,7 @@ export default function RoutePlanner() {
             className="w-full py-2.5 px-3 rounded-lg bg-gradient-to-r from-mars-600 to-amber-600 hover:from-mars-500 hover:to-amber-500 text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-mars-600/30 transition-all hover:scale-[1.01]"
           >
             <Play className="w-4 h-4 fill-white" />
-            Launch Marswalk Simulator (EVA HUD)
+            <span>Launch Marswalk Simulator (EVA HUD)</span>
           </button>
         )}
       </div>

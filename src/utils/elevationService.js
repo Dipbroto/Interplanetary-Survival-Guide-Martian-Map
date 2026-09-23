@@ -96,6 +96,7 @@ export function getElevationProfile(waypoints, numSamples = 100) {
       elevation,
       lat: Math.round(sampleLat * 10000) / 10000,
       lon: Math.round(sampleLon * 10000) / 10000,
+      lng: Math.round(sampleLon * 10000) / 10000,
       segmentIndex: segIndex,
     });
   }

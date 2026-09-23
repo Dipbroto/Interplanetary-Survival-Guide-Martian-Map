@@ -11,6 +11,7 @@ import ScienceLabModal from './components/ScienceLabModal';
 import FlightPlanModal from './components/FlightPlanModal';
 import MartianSkyEphemeris from './components/MartianSkyEphemeris';
 import AudioSynthesizerRack from './components/AudioSynthesizerRack';
+import ContingencySimulator from './components/ContingencySimulator';
 import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
@@ -99,6 +100,11 @@ function App() {
       {/* Procedural Audio Mixer & Synthesizer Console */}
       <ErrorBoundary>
         <AudioSynthesizerRack />
+      </ErrorBoundary>
+
+      {/* NASA What-If Contingency Simulator & Emergency Alert System */}
+      <ErrorBoundary>
+        <ContingencySimulator />
       </ErrorBoundary>
 
       {/* Version Badge */}

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, Navigation, Rocket, Mountain, Info, Target, Calendar, User, FlaskConical } from 'lucide-react';
 import useMapStore from '../store/useMapStore';
+import { marsAudio } from '../utils/audioSynthesizer';
 
 const POIDetailCard = () => {
   const { selectedPOI, setSelectedPOI, addWaypoint, setScienceLabOpen } = useMapStore();
@@ -25,6 +26,7 @@ const POIDetailCard = () => {
       elevation: selectedPOI.elevation || 0,
       name: selectedPOI.name
     });
+    marsAudio.playQuindarTone(true);
   };
 
   return (

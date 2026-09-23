@@ -4,30 +4,38 @@ import { estimateRadiation, routeDistance } from '../utils/marsUtils';
 import { RadioTower, Shield, AlertTriangle, Activity, Heart } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { motion } from 'framer-motion';
+import ProvenanceBadge from './ProvenanceBadge';
 
 const RadiationPanel = () => {
-  const { currentSol, waypoints } = useMapStore();
+  const { currentSol, waypoints, activeContingency } = useMapStore();
   
   // Simulated elevation based on map center (for demo purposes)
   const elevation = -2500; 
 
+  const isSPEActive = activeContingency === 'spe';
+
   const radiation = useMemo(() => {
     // 24 hours to get daily dose
     const dailyDoseInfo = estimateRadiation(24, elevation);
-    const hourlyDoseRate = dailyDoseInfo.doseRate || dailyDoseInfo.totalDose / 24; 
+    let hourlyDoseRate = dailyDoseInfo.doseRate || dailyDoseInfo.totalDose / 24; 
     
     // Fallback if doseRate isn't returned directly by estimateRadiation
-    const hourly = typeof hourlyDoseRate === 'number' ? hourlyDoseRate : (0.67 / 24);
+    let hourly = typeof hourlyDoseRate === 'number' ? hourlyDoseRate : (0.67 / 24);
+
+    // If Solar Particle Event is active, dose spikes to ~14.5 mSv/hr
+    if (isSPEActive) {
+      hourly = 14.52;
+    }
     
     const daily = hourly * 24;
     const annual = daily * 365.25; // Earth days for standardized mSv/year
     
     // SPE Risk based on a pseudo-random cycle (11-year solar cycle simulated via sol)
-    const speRisk = (Math.sin(currentSol / 200) + 1) / 2; // 0 to 1
+    const speRisk = isSPEActive ? 0.99 : (Math.sin(currentSol / 200) + 1) / 2; // 0 to 1
     
     // Career limit calculation
-    const careerLimit = 600; // mSv
-    const daysToLimit = Math.floor(careerLimit / daily);
+    const careerLimit = 600; // mSv (NASA career limit)
+    const daysToLimit = Math.max(1, Math.floor(careerLimit / daily));
     
     return {
       hourly,
@@ -37,7 +45,7 @@ const RadiationPanel = () => {
       daysToLimit,
       careerLimit
     };
-  }, [currentSol, elevation]);
+  }, [currentSol, elevation, isSPEActive]);
 
   const evaExposure = useMemo(() => {
     if (waypoints.length < 2) return null;
@@ -56,7 +64,7 @@ const RadiationPanel = () => {
   const comparisonData = [
     { name: 'Earth', dose: 3.0, color: '#3b82f6' },
     { name: 'ISS', dose: 144, color: '#eab308' },
-    { name: 'Mars', dose: Math.round(radiation.annual), color: '#f47050' },
+    { name: 'Mars (GCR)', dose: isSPEActive ? 5300 : Math.round(radiation.annual), color: '#f47050' },
   ];
 
   // Gauge calculation
@@ -69,23 +77,30 @@ const RadiationPanel = () => {
     <div className="w-full h-full text-primary flex flex-col gap-4 overflow-y-auto custom-scrollbar p-2">
       <div className="flex justify-between items-center mb-2">
         <div>
-          <h2 className="text-xl font-display text-white flex items-center gap-2">
-            <RadioTower className="text-yellow-400" size={24} />
-            Radiation Environment
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-display text-white flex items-center gap-2">
+              <RadioTower className={isSPEActive ? "text-red-400 animate-pulse" : "text-yellow-400"} size={24} />
+              Radiation Environment
+            </h2>
+            <ProvenanceBadge type="OBSERVED" size="xs" detail="MSL RAD" />
+          </div>
           <div className="text-sm text-secondary flex items-center gap-2 mt-1 font-mono">
             <Activity size={14} />
-            <span>Active Monitoring</span>
+            <span>Galactic Cosmic Rays (GCR) & Solar Protons</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {radiation.speRisk > 0.7 ? (
-            <div className="flex items-center gap-1.5 bg-red-900/50 px-3 py-1.5 rounded-full border border-red-700/50 text-xs text-red-400 font-bold animate-pulse">
-              <AlertTriangle size={14} /> SPE WARNING
+          {isSPEActive ? (
+            <div className="flex items-center gap-1.5 bg-red-900/80 px-3 py-1.5 rounded-full border border-red-500 text-xs text-red-200 font-bold animate-pulse shadow-lg shadow-red-900/50">
+              <AlertTriangle size={14} className="text-red-400" /> PROMPT SPE EVENT IN PROGRESS
+            </div>
+          ) : radiation.speRisk > 0.7 ? (
+            <div className="flex items-center gap-1.5 bg-amber-900/50 px-3 py-1.5 rounded-full border border-amber-700/50 text-xs text-amber-400 font-bold">
+              <AlertTriangle size={14} /> ELEVATED SOLAR RISK
             </div>
           ) : (
             <div className="flex items-center gap-1.5 bg-green-900/50 px-3 py-1.5 rounded-full border border-green-700/50 text-xs text-green-400">
-              <Shield size={14} /> NORMAL GCR
+              <Shield size={14} /> NOMINAL BACKGROUND GCR
             </div>
           )}
         </div>
@@ -96,10 +111,17 @@ const RadiationPanel = () => {
         <div className="md:col-span-2 glass-panel p-4 rounded-xl border border-space-700/50 relative overflow-hidden">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-yellow-500/10 rounded-full blur-3xl pointer-events-none"></div>
           
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs uppercase font-mono tracking-wider text-space-400">
+              In-Situ Dosimetry Metrics
+            </span>
+            <ProvenanceBadge type="OBSERVED" size="xs" detail="Curiosity RAD Calibrated" />
+          </div>
+
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="flex flex-col justify-center">
-              <span className="text-secondary text-xs mb-1">GCR Dose Rate</span>
-              <div className="text-3xl font-display text-yellow-400 mb-1">
+              <span className="text-secondary text-xs mb-1">Ambient Dose Rate</span>
+              <div className={`text-3xl font-display mb-1 ${isSPEActive ? 'text-red-400 animate-pulse font-bold' : 'text-yellow-400'}`}>
                 {radiation.hourly.toFixed(3)}
               </div>
               <div className="text-xs text-secondary font-mono">mSv/hr</div>
@@ -114,7 +136,7 @@ const RadiationPanel = () => {
             </div>
 
             <div className="flex flex-col justify-center">
-              <span className="text-secondary text-xs mb-1">Annual Dose</span>
+              <span className="text-secondary text-xs mb-1">Annual Projected</span>
               <div className="text-2xl font-display text-mars-400 mb-1">
                 {radiation.annual.toFixed(1)}
               </div>
@@ -122,9 +144,12 @@ const RadiationPanel = () => {
             </div>
 
             <div className="flex flex-col justify-center items-center bg-space-800/40 rounded-lg p-3 border border-space-700/50">
-              <Heart size={20} className="text-red-400 mb-2" />
+              <div className="flex items-center gap-1 mb-1">
+                <Heart size={16} className="text-red-400" />
+                <ProvenanceBadge type="NASA_SPEC" size="xs" detail="600 mSv" />
+              </div>
               <div className="text-xl font-display text-white">{radiation.daysToLimit}</div>
-              <div className="text-[10px] text-secondary font-mono text-center uppercase mt-1">Days to NASA<br/>Career Limit</div>
+              <div className="text-[10px] text-secondary font-mono text-center uppercase mt-0.5">Days to NASA<br/>Career Ceiling</div>
             </div>
           </div>
         </div>
@@ -136,18 +161,20 @@ const RadiationPanel = () => {
               <circle cx="56" cy="56" r="40" fill="none" stroke="#131825" strokeWidth="8" />
               <motion.circle 
                 cx="56" cy="56" r="40" fill="none" 
-                stroke={gaugePercent > 80 ? '#ef4444' : gaugePercent > 50 ? '#eab308' : '#22c55e'} 
+                stroke={isSPEActive || gaugePercent > 80 ? '#ef4444' : gaugePercent > 50 ? '#eab308' : '#22c55e'} 
                 strokeWidth="8"
-                strokeDasharray={gaugeDashArray}
-                initial={{ strokeDashoffset: gaugeDashArray }}
-                animate={{ strokeDashoffset: gaugeDashOffset }}
+                strokeDasharray={gaugeCircumference}
+                initial={{ strokeDashoffset: gaugeCircumference }}
+                animate={{ strokeDashoffset: isSPEActive ? 0 : gaugeDashOffset }}
                 transition={{ duration: 1.5, ease: "easeOut" }}
                 strokeLinecap="round"
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-xl font-display text-white">{Math.round(gaugePercent)}%</span>
-              <span className="text-[9px] text-secondary">Annual Limit</span>
+              <span className={`text-xl font-display ${isSPEActive ? 'text-red-400 font-bold animate-pulse' : 'text-white'}`}>
+                {isSPEActive ? 'OVER LIMIT' : `${Math.round(gaugePercent)}%`}
+              </span>
+              <span className="text-[9px] text-secondary">Annual Safety Limit</span>
             </div>
           </div>
         </div>
@@ -156,20 +183,23 @@ const RadiationPanel = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-2">
         {/* Comparison Chart */}
         <div className="lg:col-span-2 glass-panel p-4 rounded-xl border border-space-700/50">
-          <h3 className="text-sm text-secondary font-medium uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Activity size={16} /> Annual Exposure Comparison (mSv)
-          </h3>
-          <div className="h-40 w-full pr-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm text-secondary font-medium uppercase tracking-wider flex items-center gap-2">
+              <Activity size={16} /> Annual Radiation Exposure Comparison (mSv)
+            </h3>
+            <ProvenanceBadge type="DERIVED" size="xs" detail="Comparative Dosimetry" />
+          </div>
+          <div className="h-44 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={comparisonData} layout="vertical" margin={{ top: 0, right: 20, left: 10, bottom: 0 }}>
+              <BarChart data={comparisonData} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
                 <XAxis type="number" stroke="#606c8b" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis type="category" dataKey="name" stroke="#f0f2f7" fontSize={12} tickLine={false} axisLine={false} width={50} />
+                <YAxis dataKey="name" type="category" stroke="#606c8b" fontSize={12} tickLine={false} axisLine={false} />
                 <Tooltip 
-                  cursor={{ fill: '#2a334a' }}
-                  contentStyle={{ backgroundColor: '#131825', borderColor: '#2a334a', borderRadius: '8px' }}
+                  contentStyle={{ backgroundColor: '#131825', borderColor: '#2a334a', borderRadius: '8px', fontSize: '12px' }}
                   itemStyle={{ color: '#f0f2f7' }}
+                  formatter={(val) => [`${val} mSv/yr`, 'Annual Exposure']}
                 />
-                <Bar dataKey="dose" radius={[0, 4, 4, 0]} label={{ position: 'right', fill: '#97a3c5', fontSize: 10 }}>
+                <Bar dataKey="dose" radius={[0, 4, 4, 0]}>
                   {comparisonData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
@@ -179,37 +209,33 @@ const RadiationPanel = () => {
           </div>
         </div>
 
-        {/* EVA Exposure / Tips */}
-        <div className="glass-panel p-4 rounded-xl border border-space-700/50 flex flex-col gap-4">
+        {/* Traverse Dose Estimate */}
+        <div className="glass-panel p-4 rounded-xl border border-space-700/50 flex flex-col justify-between">
           <div>
-            <h3 className="text-sm text-secondary font-medium uppercase tracking-wider mb-3 flex items-center gap-2">
-              <Shield size={16} /> EVA Exposure
+            <h3 className="text-sm text-secondary font-medium uppercase tracking-wider mb-2 flex items-center gap-2">
+              <Shield size={16} /> Planned Marswalk Dose
             </h3>
             {evaExposure ? (
-              <div className="bg-space-800/60 p-3 rounded-lg border border-space-700">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm text-secondary">Est. Duration</span>
-                  <span className="text-white font-mono">{evaExposure.hours} hrs</span>
+              <div className="space-y-3 mt-4">
+                <div>
+                  <span className="text-secondary text-xs">Accumulated Traverse Dose</span>
+                  <div className={`text-2xl font-display font-mono ${isSPEActive ? 'text-red-400 font-bold' : 'text-white'}`}>
+                    {evaExposure.dose} mSv
+                  </div>
+                  <span className="text-xs text-secondary font-mono">Over {evaExposure.hours} hours EVA</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-secondary">Est. Dose</span>
-                  <span className="text-mars-400 font-mono font-bold">{evaExposure.dose} mSv</span>
+                <div className="text-[11px] text-space-400 border-t border-space-700/50 pt-2 font-mono">
+                  {isSPEActive 
+                    ? '⚠️ CRITICAL: Radiation threshold exceeded. Abort immediately.' 
+                    : 'Within nominal single-EVA safety allowance (0.50 mSv).'}
                 </div>
               </div>
             ) : (
-              <div className="text-xs text-secondary italic text-center p-4 bg-space-800/30 rounded-lg">
-                Plan a route to estimate EVA radiation exposure.
+              <div className="text-secondary text-xs mt-6 flex flex-col items-center justify-center text-center">
+                <AlertTriangle size={24} className="text-space-500 mb-2" />
+                <span>Create a traverse in Route Planner to calculate astronaut mission exposure.</span>
               </div>
             )}
-          </div>
-          
-          <div className="flex-1 bg-space-900/50 p-3 rounded-lg border border-space-800">
-            <h4 className="text-xs text-white font-medium mb-2 flex items-center gap-1">
-              <AlertTriangle size={12} className="text-yellow-500" /> SPE Shielding
-            </h4>
-            <p className="text-[11px] text-secondary leading-relaxed">
-              In the event of a Solar Particle Event, seek shelter in lava tubes or under 3+ meters of regolith. Current SPE probability is <span className={radiation.speRisk > 0.5 ? 'text-red-400 font-bold' : 'text-green-400'}>{(radiation.speRisk * 100).toFixed(1)}%</span>.
-            </p>
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Map, Box, Columns, Clock, Globe2, Volume2, VolumeX, Play, FlaskConical, Radio, Orbit, Sliders, X } from 'lucide-react';
+import { Map, Box, Columns, Clock, Globe2, Volume2, VolumeX, Play, FlaskConical, Radio, Orbit, Sliders, X, ShieldAlert, FileText } from 'lucide-react';
 import useMapStore from '../store/useMapStore';
 import { marsDateFromEarthDate } from '../utils/marsUtils';
 import { getSolarLongitude, getSolFromDate } from '../data/weatherSimulation';
@@ -17,6 +17,10 @@ export default function TopBar() {
     setScienceLabOpen,
     isSkyEphemerisOpen,
     setSkyEphemerisOpen,
+    isFlightPlanOpen,
+    setFlightPlanOpen,
+    activeContingency,
+    setContingencyModalOpen,
   } = useMapStore();
   const [time, setTime] = useState(new Date());
 
@@ -152,6 +156,36 @@ export default function TopBar() {
               <span className="inline md:hidden">Lab</span>
             </>
           )}
+        </button>
+
+        {/* What-If Contingency Simulator Trigger */}
+        <button
+          onClick={() => setContingencyModalOpen(true)}
+          className={`px-2.5 py-1.5 border rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm ${
+            activeContingency
+              ? 'bg-red-600 hover:bg-red-500 text-white border-red-400 ring-2 ring-red-400/60 animate-pulse'
+              : 'bg-gradient-to-r from-red-950/60 to-rose-900/60 hover:from-red-900 hover:to-rose-800 border-red-500/40 text-red-200'
+          }`}
+          title="Open NASA What-If Contingency & Anomaly Simulator"
+        >
+          <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
+          <span className="hidden lg:inline">{activeContingency ? 'CONTINGENCY!' : 'What-If Sim'}</span>
+          <span className="inline lg:hidden">{activeContingency ? 'ALERT' : 'What-If'}</span>
+        </button>
+
+        {/* Flight Plan Brief Modal Trigger */}
+        <button
+          onClick={() => setFlightPlanOpen(!isFlightPlanOpen)}
+          className={`px-2.5 py-1.5 border rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm ${
+            isFlightPlanOpen
+              ? 'bg-blue-600 hover:bg-blue-500 text-white border-blue-400 ring-2 ring-blue-400/50'
+              : 'bg-gradient-to-r from-blue-950/60 to-cyan-900/60 hover:from-blue-900 hover:to-cyan-800 border-blue-500/40 text-blue-200'
+          }`}
+          title="View & Export Official NASA EVA Flight Briefing"
+        >
+          <FileText className="w-3.5 h-3.5 text-blue-400" />
+          <span className="hidden lg:inline">Flight Brief</span>
+          <span className="inline lg:hidden">Brief</span>
         </button>
 
         {/* Marswalk Simulator Button / Exit HUD */}

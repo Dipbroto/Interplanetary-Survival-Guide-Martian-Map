@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import useMapStore from '../store/useMapStore';
 import { Layers, Eye, EyeOff, Info, ChevronDown, ChevronRight, Mountain, Thermometer, FlaskConical, Map as MapIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ProvenanceBadge from './ProvenanceBadge';
 
 const categoryIcons = {
   'topography': Mountain,
@@ -15,15 +16,20 @@ const LayerItem = ({ layer, isActive, opacity, onToggle, onOpacityChange }) => {
 
   return (
     <div className="mb-4">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-2 gap-2">
         <button 
-          className={`flex items-center gap-2 flex-1 text-left ${isActive ? 'text-mars-400' : 'text-primary'}`}
+          className={`flex items-center gap-2 flex-1 text-left min-w-0 ${isActive ? 'text-mars-400' : 'text-primary'}`}
           onClick={() => onToggle(layer.id)}
         >
-          {isActive ? <Eye size={16} /> : <EyeOff size={16} className="text-space-600" />}
-          <span className="font-inter text-sm">{layer.name}</span>
+          {isActive ? <Eye size={16} className="shrink-0" /> : <EyeOff size={16} className="text-space-600 shrink-0" />}
+          <span className="font-inter text-sm truncate">{layer.name}</span>
         </button>
-        <button onClick={() => setShowInfo(!showInfo)} className="text-space-500 hover:text-mars-400 transition-colors">
+        <ProvenanceBadge 
+          type={layer.category === 'Derived' ? 'DERIVED' : 'OBSERVED'} 
+          size="xs" 
+          detail={layer.instrument} 
+        />
+        <button onClick={() => setShowInfo(!showInfo)} className="text-space-500 hover:text-mars-400 transition-colors shrink-0">
           <Info size={16} />
         </button>
       </div>

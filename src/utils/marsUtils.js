@@ -40,12 +40,14 @@ export function routeDistance(waypoints) {
   return total;
 }
 
-// Slope calculation between two points
+// Slope calculation between two points (NaN-safe)
 export function calculateSlope(elev1, elev2, distanceM) {
-  if (distanceM === 0) return 0;
-  const rise = elev2 - elev1;
+  if (!distanceM || distanceM <= 0) return 0;
+  const e1 = typeof elev1 === 'number' && !isNaN(elev1) ? elev1 : 0;
+  const e2 = typeof elev2 === 'number' && !isNaN(elev2) ? elev2 : 0;
+  const rise = e2 - e1;
   const slopeDeg = Math.atan2(rise, distanceM) * (180 / Math.PI);
-  return slopeDeg;
+  return isNaN(slopeDeg) ? 0 : slopeDeg;
 }
 
 // Slope difficulty rating

@@ -4,6 +4,7 @@ import { dustStormSeasons, getSolarLongitude } from '../data/weatherSimulation';
 import { CloudFog, AlertTriangle, Wind, Eye, ShieldAlert, Clock } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { motion } from 'framer-motion';
+import ProvenanceBadge from './ProvenanceBadge';
 
 const DustStormTracker = () => {
   const { currentSol } = useMapStore();
@@ -63,19 +64,22 @@ const DustStormTracker = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-2">
         <div>
-          <h2 className="text-xl font-display text-white flex items-center gap-2">
-            <Wind className="text-mars-400" size={24} />
-            Dust Storm Tracker
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-display text-white flex items-center gap-2">
+              <Wind className="text-mars-400" size={24} />
+              Dust Storm Tracker
+            </h2>
+            <ProvenanceBadge type="OBSERVED" size="xs" detail="THEMIS Dust Tau" />
+          </div>
           <div className="text-sm text-secondary flex items-center gap-2 mt-1 font-mono">
             <Eye size={14} />
-            <span>Global Monitoring Network</span>
+            <span>Global Climatology & Thermal Inertia Network</span>
           </div>
         </div>
         <div className="flex items-center gap-1.5 bg-space-800/80 px-3 py-1.5 rounded-full border border-space-700 text-xs text-secondary font-mono">
           <span>Ls: {Math.round(ls)}°</span>
           <span className="text-space-600">•</span>
-          <span>{currentSeason.label}</span>
+          <span>{currentSeason?.label || 'Mid-Year'}</span>
         </div>
       </div>
 
