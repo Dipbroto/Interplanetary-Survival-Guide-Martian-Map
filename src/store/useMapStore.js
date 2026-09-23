@@ -42,8 +42,12 @@ const useMapStore = create((set, get) => ({
   selectedWaypointId: null,
   
   setWaypoints: (waypoints) => set({
-    waypoints: Array.isArray(waypoints) ? waypoints : [],
+    waypoints: Array.isArray(waypoints) ? waypoints.map(w => ({
+      ...w,
+      lon: w.lon !== undefined ? w.lon : (w.lng !== undefined ? w.lng : 0)
+    })) : [],
     selectedWaypointId: waypoints && waypoints.length > 0 ? waypoints[0]?.id : null,
+    driveTargetWaypointId: null,
     isRoverDriving: false,
     roverProgress: 0
   }),
@@ -87,7 +91,7 @@ const useMapStore = create((set, get) => ({
   updateWaypoint: (id, updates) => set((state) => ({
     waypoints: state.waypoints.map(w => w.id === id ? { ...w, ...updates } : w)
   })),
-  clearWaypoints: () => set({ waypoints: [], selectedWaypointId: null, evaCurrentWaypointIndex: 0, isRoverDriving: false, roverProgress: 0 }),
+  clearWaypoints: () => set({ waypoints: [], selectedWaypointId: null, driveTargetWaypointId: null, evaCurrentWaypointIndex: 0, isRoverDriving: false, roverProgress: 0 }),
   clearSelection: () => set({ selectedWaypointId: null, selectedPOI: null }),
   setPlacingWaypoint: (val) => set({ isPlacingWaypoint: val, isRulerActive: false }),
   setSelectedWaypoint: (id) => set({ selectedWaypointId: id }),
@@ -98,10 +102,12 @@ const useMapStore = create((set, get) => ({
   // ========================
   isRoverDriving: false,
   roverProgress: 0, // 0.0 to 1.0 along route
+  driveTargetWaypointId: null, // specific waypoint ID for station-targeted simulation or null for full route
   roverCurrentPosition: null, // {lat, lon, bearing, elevation}
   roverSpeedKmh: 7.2,
   roverBatterySoC: 96, // %
   roverOdometerKm: 0,
+  camFollow: true, // Auto-follow vehicle with camera during drive simulation
   
   setRoverDriving: (val) => {
     set({ isRoverDriving: val });
@@ -109,10 +115,13 @@ const useMapStore = create((set, get) => ({
       marsAudio.playQuindarTone(true);
     }
   },
+  setDriveTargetWaypointId: (id) => set({ driveTargetWaypointId: id }),
   setRoverProgress: (prog) => set({ roverProgress: prog }),
   setRoverCurrentPosition: (pos) => set({ roverCurrentPosition: pos }),
   setRoverBatterySoC: (soc) => set({ roverBatterySoC: Math.max(0, Math.min(100, soc)) }),
   setRoverOdometerKm: (km) => set({ roverOdometerKm: km }),
+  setCamFollow: (val) => set({ camFollow: val }),
+  toggleCamFollow: () => set((state) => ({ camFollow: !state.camFollow })),
 
   // ========================
   // MAP TOOLS (WALKBACK & RULER)
@@ -138,12 +147,17 @@ const useMapStore = create((set, get) => ({
       activePresetId: preset.id,
       mapCenter: preset.center,
       mapZoom: preset.zoom,
-      waypoints: preset.waypoints,
-      selectedWaypointId: preset.waypoints[0]?.id || null,
+      waypoints: (preset.waypoints || []).map(w => ({
+        ...w,
+        lon: w.lon !== undefined ? w.lon : (w.lng !== undefined ? w.lng : 0)
+      })),
+      selectedWaypointId: preset.waypoints?.[0]?.id || null,
+      driveTargetWaypointId: null,
       sidebarTab: 'route',
       sidebarOpen: true,
       isRoverDriving: false,
       roverProgress: 0,
+      evaCurrentWaypointIndex: 0,
       missionActivities: (preset.timeline || []).map((item, idx) => ({
         id: `act-preset-${idx}`,
         title: item.title,

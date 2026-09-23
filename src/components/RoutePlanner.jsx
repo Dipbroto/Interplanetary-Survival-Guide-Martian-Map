@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import useMapStore from '../store/useMapStore';
-import { routeDistance, estimateEVATime } from '../utils/marsUtils';
+import { routeDistance, estimateEVATime, marsDistance } from '../utils/marsUtils';
 import { getElevationProfile, getProfileStats } from '../utils/elevationService';
 import { expeditionPresets } from '../data/expeditionPresets';
 import { 
   MapPin, Plus, Trash2, Navigation, Clock, ArrowUpDown, Route, 
-  Compass, Play, Cpu, ShieldCheck, Sparkles, Zap, ChevronRight, 
+  Compass, Play, Pause, Cpu, ShieldCheck, Sparkles, Zap, ChevronRight, 
   FileText, ShieldAlert, CheckCircle2, Info, RotateCcw 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -33,6 +33,14 @@ export default function RoutePlanner() {
     setMapCenter,
     setMapZoom,
     addWaypoint,
+    selectedWaypointId,
+    setSelectedWaypoint,
+    isRoverDriving,
+    setRoverDriving,
+    roverProgress,
+    setRoverProgress,
+    driveTargetWaypointId,
+    setDriveTargetWaypointId,
   } = useMapStore();
 
   const [activeTab, setActiveTab] = useState('manual'); // 'manual' | 'auto'
@@ -64,6 +72,81 @@ export default function RoutePlanner() {
 
   const handleNameChange = (id, newName) => {
     updateWaypoint(id, { name: newName });
+  };
+
+  // Precompute cumulative physical distances along route
+  const routeDistances = useMemo(() => {
+    if (!waypoints || waypoints.length < 2) return { cumDists: [0], totalDistKm: 0 };
+    const cumDists = [0];
+    let sum = 0;
+    for (let i = 0; i < waypoints.length - 1; i++) {
+      const latA = waypoints[i].lat;
+      const lonA = waypoints[i].lon !== undefined ? waypoints[i].lon : waypoints[i].lng;
+      const latB = waypoints[i+1].lat;
+      const lonB = waypoints[i+1].lon !== undefined ? waypoints[i+1].lon : waypoints[i+1].lng;
+      const d = Math.max(0.01, marsDistance(latA, lonA, latB, lonB));
+      sum += d;
+      cumDists.push(sum);
+    }
+    return { cumDists, totalDistKm: sum };
+  }, [waypoints]);
+
+  const handleSimulateToWaypoint = (wp, index, customWaypoints = null) => {
+    const activeWps = customWaypoints || waypoints;
+    if (index === 0) {
+      setDriveTargetWaypointId(null);
+      setSelectedWaypoint(wp.id);
+      setRoverDriving(false);
+      setRoverProgress(0);
+      marsAudio.playQuindarTone(true);
+      return;
+    }
+
+    if (isRoverDriving && driveTargetWaypointId === wp.id) {
+      setRoverDriving(false);
+    } else {
+      let targetDist = 0;
+      let totalDist = 0;
+      if (activeWps && activeWps.length > 1) {
+        let sum = 0;
+        for (let i = 1; i < activeWps.length; i++) {
+          const p1 = activeWps[i - 1];
+          const p2 = activeWps[i];
+          const lon1 = p1.lon !== undefined ? p1.lon : (p1.lng !== undefined ? p1.lng : 0);
+          const lon2 = p2.lon !== undefined ? p2.lon : (p2.lng !== undefined ? p2.lng : 0);
+          sum += marsDistance(p1.lat, lon1, p2.lat, lon2);
+          if (i === index) targetDist = sum;
+        }
+        totalDist = sum;
+      }
+
+      const currentDist = (roverProgress || 0) * (totalDist || 1);
+
+      // If rover is already at or past this target, restart from beginning
+      if (currentDist >= targetDist - 0.05) {
+        setRoverProgress(0);
+      }
+
+      setDriveTargetWaypointId(wp.id);
+      setSelectedWaypoint(wp.id);
+      const displayLon = wp.lon !== undefined ? wp.lon : (wp.lng !== undefined ? wp.lng : 0);
+
+      // Frame both rover starting point and target station with optimal framing zoom
+      if (activeWps && activeWps.length > 0) {
+        const startWp = activeWps[0];
+        const startLon = startWp.lon !== undefined ? startWp.lon : (startWp.lng !== undefined ? startWp.lng : 0);
+        const midLat = (startWp.lat + wp.lat) / 2;
+        const midLon = (startLon + displayLon) / 2;
+        const distKm = marsDistance(startWp.lat, startLon, wp.lat, displayLon);
+        const dynamicZoom = distKm < 4 ? 9 : (distKm < 15 ? 8 : (distKm < 50 ? 7 : 6));
+        setMapCenter([midLat, midLon]);
+        setMapZoom(dynamicZoom);
+      } else {
+        setMapCenter([wp.lat, displayLon]);
+        setMapZoom(8);
+      }
+      setRoverDriving(true);
+    }
   };
 
   const handleRunAutoRouter = (pairId = selectedPairId, mode = routingMode, autoApply = true) => {
@@ -270,35 +353,117 @@ export default function RoutePlanner() {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="flex items-center gap-2 p-2 bg-space-800/60 hover:bg-space-800 border border-space-700/60 hover:border-space-600 rounded-lg group transition-all"
+                      onClick={() => {
+                        setSelectedWaypoint(wp.id);
+                        setMapCenter([wp.lat, displayLon]);
+                        setMapZoom(8);
+                        marsAudio.playQuindarTone(true);
+                      }}
+                      className={`flex flex-col gap-1 p-2 rounded-lg group transition-all cursor-pointer border ${
+                        selectedWaypointId === wp.id
+                          ? 'bg-space-800 border-mars-500 shadow-md shadow-mars-500/25 ring-1 ring-mars-500/60'
+                          : 'bg-space-800/60 hover:bg-space-800 border-space-700/60 hover:border-space-600'
+                      }`}
                     >
-                      <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs font-bold text-space-950 shrink-0 shadow-sm"
-                        style={{ backgroundColor: wpColor }}
-                      >
-                        {index + 1}
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <input
-                          type="text"
-                          value={wp.name || `Waypoint ${index + 1}`}
-                          onChange={(e) => handleNameChange(wp.id, e.target.value)}
-                          className="bg-transparent border-none text-xs font-semibold focus:ring-0 w-full p-0 text-primary placeholder-space-500 focus:outline-none transition-colors hover:text-white"
-                          placeholder={`Waypoint ${index + 1}`}
-                        />
-                        <div className="text-[10px] text-space-400 font-mono truncate mt-0.5">
-                          {wp.lat.toFixed(4)}°, {displayLon.toFixed(4)}° | Elev: {wp.elevation ? wp.elevation.toFixed(0) : 0} m
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs font-bold text-space-950 shrink-0 shadow-sm"
+                          style={{ backgroundColor: wpColor }}
+                        >
+                          {index + 1}
                         </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              value={wp.name || `Waypoint ${index + 1}`}
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => handleNameChange(wp.id, e.target.value)}
+                              className="bg-transparent border-none text-xs font-semibold focus:ring-0 w-full p-0 text-primary placeholder-space-500 focus:outline-none transition-colors hover:text-white"
+                              placeholder={`Waypoint ${index + 1}`}
+                            />
+                            {selectedWaypointId === wp.id && (
+                              <span className="text-[8px] bg-mars-500/20 text-mars-300 px-1.5 py-0.5 rounded font-mono shrink-0 font-bold">
+                                Selected
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-space-400 font-mono truncate mt-0.5">
+                            {wp.lat.toFixed(4)}°, {displayLon.toFixed(4)}° | Elev: {wp.elevation ? wp.elevation.toFixed(0) : 0} m
+                          </div>
+                        </div>
+
+                        {/* Quick Drive Rover to this Spot */}
+                        {index > 0 && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSimulateToWaypoint(wp, index);
+                            }}
+                            className={`p-1.5 rounded-md transition-all shrink-0 cursor-pointer ${
+                              isRoverDriving && driveTargetWaypointId === wp.id
+                                ? 'bg-amber-600 text-white animate-pulse'
+                                : 'text-amber-400 hover:text-amber-300 hover:bg-space-700/80'
+                            }`}
+                            title={
+                              isRoverDriving && driveTargetWaypointId === wp.id
+                                ? 'Pause Rover Drive'
+                                : `Simulate Rover Drive to Station #${index + 1}`
+                            }
+                          >
+                            {isRoverDriving && driveTargetWaypointId === wp.id ? (
+                              <Pause className="w-3.5 h-3.5" />
+                            ) : (
+                              <Play className="w-3.5 h-3.5 fill-current" />
+                            )}
+                          </button>
+                        )}
+                        
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeWaypoint(wp.id);
+                          }}
+                          className="p-1.5 text-space-500 hover:text-red-400 opacity-60 group-hover:opacity-100 transition-all rounded-md hover:bg-space-700/80 shrink-0"
+                          title="Remove Waypoint"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
-                      
-                      <button
-                        onClick={() => removeWaypoint(wp.id)}
-                        className="p-1.5 text-space-500 hover:text-red-400 opacity-60 group-hover:opacity-100 transition-all rounded-md hover:bg-space-700/80 shrink-0"
-                        title="Remove Waypoint"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+
+                      {/* Selected Station Expanded Action: Run / Simulate Rover directly to this spot */}
+                      {selectedWaypointId === wp.id && (
+                        <div className="pt-2 mt-1 border-t border-space-700/80 flex items-center justify-between pl-8">
+                          <span className="text-[10px] text-space-400 font-mono">
+                            {index === 0 ? '🏁 Basecamp Origin' : `🎯 Station #${index + 1} (${(routeDistances.cumDists[index] || 0).toFixed(1)} km)`}
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSimulateToWaypoint(wp, index);
+                            }}
+                            className={`py-1.5 px-3 rounded-lg font-mono text-[10px] font-bold flex items-center gap-1.5 transition-all shadow-md cursor-pointer ${
+                              isRoverDriving && driveTargetWaypointId === wp.id
+                                ? 'bg-amber-600 hover:bg-amber-500 text-white animate-pulse'
+                                : 'bg-gradient-to-r from-amber-600 to-mars-600 hover:from-amber-500 hover:to-mars-500 text-white hover:scale-[1.02]'
+                            }`}
+                          >
+                            {isRoverDriving && driveTargetWaypointId === wp.id ? (
+                              <Pause className="w-3 h-3" />
+                            ) : (
+                              <Play className="w-3 h-3 fill-white" />
+                            )}
+                            <span>
+                              {index === 0
+                                ? 'Reset to Origin'
+                                : isRoverDriving && driveTargetWaypointId === wp.id
+                                ? 'Pause Rover'
+                                : `Simulate Drive to This Station`}
+                            </span>
+                          </button>
+                        </div>
+                      )}
                     </motion.div>
                   );
                 })
@@ -467,6 +632,170 @@ export default function RoutePlanner() {
                   <span>Edit Points</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* Recommended Corridor Stations & Science Outcrops */}
+          {generatedRouteResult && generatedRouteResult.waypoints && (
+            <div className="bg-space-900/90 p-3 rounded-xl border border-space-700/60 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase font-mono tracking-wider text-space-300 font-bold flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-mars-400" />
+                  <span>Recommended Stations ({generatedRouteResult.waypoints.length})</span>
+                </span>
+                <span className="text-[9px] text-space-400 font-mono">Click to Select</span>
+              </div>
+
+              <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
+                {generatedRouteResult.waypoints.map((wp, idx) => {
+                  const isSelected = selectedWaypointId === wp.id;
+                  const isStart = idx === 0;
+                  const isEnd = idx === generatedRouteResult.waypoints.length - 1;
+                  const isScience = wp.type === 'science';
+
+                  let badgeLabel = 'Pass';
+                  let badgeColor = 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+                  if (isStart) {
+                    badgeLabel = 'Base';
+                    badgeColor = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+                  } else if (isEnd) {
+                    badgeLabel = 'Target';
+                    badgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+                  } else if (isScience) {
+                    badgeLabel = 'Outcrop';
+                    badgeColor = 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+                  }
+
+                  return (
+                    <div
+                      key={wp.id || `auto-wp-${idx}`}
+                      onClick={() => {
+                        // Ensure store waypoints match generatedRouteResult
+                        if (generatedRouteResult?.waypoints) {
+                          const currentIds = (waypoints || []).map(w => w.id).join(',');
+                          const genIds = generatedRouteResult.waypoints.map(w => w.id).join(',');
+                          if (currentIds !== genIds) {
+                            setWaypoints(generatedRouteResult.waypoints);
+                          }
+                        }
+                        setSelectedWaypoint(wp.id);
+                        setMapCenter([wp.lat, wp.lon]);
+                        setMapZoom(9);
+                        marsAudio.playQuindarTone(true);
+                      }}
+                      className={`p-2 rounded-lg border transition-all cursor-pointer flex flex-col gap-1 ${
+                        isSelected
+                          ? 'bg-space-800 border-mars-500 shadow-md shadow-mars-500/25 ring-1 ring-mars-500/60'
+                          : 'bg-space-800/60 hover:bg-space-800 border-space-700/60 hover:border-space-600'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-1.5">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className={`w-5 h-5 rounded-full flex items-center justify-center font-mono text-[10px] font-bold shrink-0 ${
+                            isSelected ? 'bg-mars-500 text-white' : 'bg-space-700 text-space-300'
+                          }`}>
+                            {idx + 1}
+                          </span>
+                          <span className={`text-xs font-semibold truncate ${isSelected ? 'text-white' : 'text-space-200'}`}>
+                            {wp.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className={`text-[8px] font-mono uppercase px-1.5 py-0.5 rounded border shrink-0 ${badgeColor}`}>
+                            {badgeLabel}
+                          </span>
+                          {idx > 0 && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (generatedRouteResult?.waypoints) {
+                                  const currentIds = (waypoints || []).map(w => w.id).join(',');
+                                  const genIds = generatedRouteResult.waypoints.map(w => w.id).join(',');
+                                  if (currentIds !== genIds) {
+                                    setWaypoints(generatedRouteResult.waypoints);
+                                  }
+                                }
+                                handleSimulateToWaypoint(wp, idx, generatedRouteResult?.waypoints);
+                              }}
+                              className={`p-1 rounded transition-all cursor-pointer ${
+                                isRoverDriving && driveTargetWaypointId === wp.id
+                                  ? 'bg-amber-600 text-white animate-pulse'
+                                  : 'text-amber-400 hover:text-amber-300 hover:bg-space-700/80'
+                              }`}
+                              title={
+                                isRoverDriving && driveTargetWaypointId === wp.id
+                                  ? 'Pause Rover Drive'
+                                  : `Simulate Rover Drive to Station #${idx + 1}`
+                              }
+                            >
+                              {isRoverDriving && driveTargetWaypointId === wp.id ? (
+                                <Pause className="w-3.5 h-3.5" />
+                              ) : (
+                                <Play className="w-3.5 h-3.5 fill-current" />
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-[10px] text-space-400 font-mono pl-7">
+                        <span>{wp.lat.toFixed(4)}°, {wp.lon.toFixed(4)}° • {wp.elevation}m</span>
+                        {wp.slopeFromPrev !== undefined && (
+                          <span className={wp.slopeFromPrev > 10 ? 'text-amber-400' : 'text-emerald-400'}>
+                            {wp.slopeFromPrev}° grade
+                          </span>
+                        )}
+                      </div>
+
+                      {wp.reason && (
+                        <p className="text-[10px] text-space-300 font-sans pl-7 line-clamp-1 italic">
+                          "{wp.reason}"
+                        </p>
+                      )}
+
+                      {/* Drive to station action button if selected */}
+                      {isSelected && (
+                        <div className="pt-2 mt-1 border-t border-space-700/80 flex items-center justify-between pl-7">
+                          <span className="text-[10px] text-space-400 font-mono">
+                            {idx === 0 ? '🏁 Traverse Origin' : `🎯 Station #${idx + 1}`}
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (generatedRouteResult?.waypoints) {
+                                const currentIds = (waypoints || []).map(w => w.id).join(',');
+                                const genIds = generatedRouteResult.waypoints.map(w => w.id).join(',');
+                                if (currentIds !== genIds) {
+                                  setWaypoints(generatedRouteResult.waypoints);
+                                }
+                              }
+                              handleSimulateToWaypoint(wp, idx, generatedRouteResult?.waypoints);
+                            }}
+                            className={`py-1.5 px-3 rounded-lg font-mono text-[10px] font-bold flex items-center gap-1.5 transition-all shadow-md cursor-pointer ${
+                              isRoverDriving && driveTargetWaypointId === wp.id
+                                ? 'bg-amber-600 hover:bg-amber-500 text-white animate-pulse' 
+                                : 'bg-gradient-to-r from-amber-600 to-mars-600 hover:from-amber-500 hover:to-mars-500 text-white hover:scale-[1.02]'
+                            }`}
+                          >
+                            {isRoverDriving && driveTargetWaypointId === wp.id ? (
+                              <Pause className="w-3 h-3" />
+                            ) : (
+                              <Play className="w-3 h-3 fill-white" />
+                            )}
+                            <span>
+                              {idx === 0 
+                                ? 'Reset to Origin' 
+                                : isRoverDriving && driveTargetWaypointId === wp.id 
+                                ? 'Pause Rover' 
+                                : 'Simulate Drive to This Station'}
+                            </span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

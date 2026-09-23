@@ -11,7 +11,7 @@ export const AUTONOMOUS_TARGET_PAIRS = [
   {
     id: 'jezero-delta',
     name: 'Jezero Western Delta Traverse',
-    location: 'Jezero Crater',
+    location: 'Jezero Crater (Perseverance)',
     center: [18.4716, 77.3979],
     zoom: 7,
     origin: {
@@ -30,7 +30,7 @@ export const AUTONOMOUS_TARGET_PAIRS = [
   {
     id: 'gale-sharp',
     name: 'Gale Mount Sharp Ascent',
-    location: 'Gale Crater',
+    location: 'Gale Crater (Curiosity)',
     center: [-4.6372, 137.4118],
     zoom: 7,
     origin: {
@@ -49,7 +49,7 @@ export const AUTONOMOUS_TARGET_PAIRS = [
   {
     id: 'olympus-escarpment',
     name: 'Olympus Mons Basal Escarpment',
-    location: 'Tharsis Rise',
+    location: 'Tharsis Rise (Volcano Shield)',
     center: [18.3150, -134.1250],
     zoom: 6,
     origin: {
@@ -63,6 +63,63 @@ export const AUTONOMOUS_TARGET_PAIRS = [
       lat: 18.3800,
       lon: -134.0500,
       elevation: 20100,
+    },
+  },
+  {
+    id: 'valles-marineris',
+    name: 'Valles Marineris Grand Canyon Floor',
+    location: 'Coprates Chasma (7km Deep Abyss)',
+    center: [-14.0500, -59.1500],
+    zoom: 6,
+    origin: {
+      name: 'Coprates Chasma Rim Refuge',
+      lat: -13.8500,
+      lon: -59.4500,
+      elevation: -4200,
+    },
+    destination: {
+      name: 'Melas Chasma Sulfatic Layer Outcrop',
+      lat: -14.2800,
+      lon: -58.8200,
+      elevation: -5100,
+    },
+  },
+  {
+    id: 'arcadia-glacier',
+    name: 'Arcadia Planitia Human Ice Reserve',
+    location: 'Northern Plains (Subsurface Water Ice)',
+    center: [39.3000, -171.1500],
+    zoom: 6,
+    origin: {
+      name: 'Arcadia Primary ISRU Wellhead',
+      lat: 39.1000,
+      lon: -171.4500,
+      elevation: -4050,
+    },
+    destination: {
+      name: 'Deuteronilus Sinuous Ridge Ice Exposure',
+      lat: 39.5500,
+      lon: -170.8500,
+      elevation: -3880,
+    },
+  },
+  {
+    id: 'elysium-plains',
+    name: 'Elysium Planitia Volcanic Plains',
+    location: 'Cerberus Fossae (InSight Seismology)',
+    center: [4.6200, 135.7800],
+    zoom: 6,
+    origin: {
+      name: 'InSight Landed Habitat Alpha',
+      lat: 4.5024,
+      lon: 135.6234,
+      elevation: -2613,
+    },
+    destination: {
+      name: 'Cerberus Fossae Tectonic Fault Fissure',
+      lat: 4.7800,
+      lon: 135.9800,
+      elevation: -2420,
     },
   },
 ];

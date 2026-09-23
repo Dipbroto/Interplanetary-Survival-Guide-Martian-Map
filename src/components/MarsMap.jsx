@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { MapContainer, TileLayer, useMap, useMapEvents, CircleMarker, Popup, Polyline, Circle, Marker } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -9,20 +9,86 @@ import { marsDistance, calculateSlope } from '../utils/marsUtils';
 import CoordinateDisplay from './CoordinateDisplay';
 import POIMarkers from './POIMarkers';
 import { marsAudio } from '../utils/audioSynthesizer';
-import { Shield, Play, Pause, Square, Ruler, AlertTriangle, Battery, Gauge, Compass, Globe, Crosshair, RotateCcw } from 'lucide-react';
+import { Shield, Play, Pause, Square, Ruler, AlertTriangle, Battery, Gauge, Compass, Globe, Crosshair, RotateCcw, Video, VideoOff } from 'lucide-react';
 
-// Custom Rover Div Icon
-const createRoverIcon = () => {
+// Custom Directional High-Visibility Rover Div Icon with Expanding Radar Pulse Rings & Floating HUD
+const createRoverIcon = (heading = 0, isDriving = false, speed = 14.5) => {
   return L.divIcon({
     className: 'custom-rover-icon',
     html: `
-      <div style="background: #ea580c; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2.5px solid white; box-shadow: 0 0 16px rgba(234,88,12,0.9); animation: pulse 2s infinite;">
-        🚜
+      <div style="position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+        ${isDriving ? `
+          <div class="rover-radar-ring-1"></div>
+          <div class="rover-radar-ring-2"></div>
+        ` : ''}
+
+        <!-- Rotating Vehicle Container aligned to heading -->
+        <div style="transform: rotate(${Math.round(heading)}deg); transition: transform 0.15s ease-out; position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+          ${isDriving ? `
+            <!-- Directional Forward Light Cone -->
+            <div class="rover-headlight-cone"></div>
+          ` : ''}
+
+          <!-- Rover Body -->
+          <div style="
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 60%, #c2410c 100%);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            border: 2.5px solid #ffffff;
+            box-shadow: 0 0 20px ${isDriving ? 'rgba(56,189,248,0.95)' : 'rgba(234,88,12,0.9)'}, inset 0 0 8px rgba(0,0,0,0.4);
+            z-index: 10;
+          ">
+            🚜
+          </div>
+
+          <!-- Forward Direction Arrow Pointer -->
+          <div style="
+            position: absolute;
+            top: -7px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 12px solid #38bdf8;
+            filter: drop-shadow(0 0 5px #38bdf8);
+            z-index: 12;
+          "></div>
+        </div>
+
+        <!-- Floating High-Visibility HUD Label Attached to Vehicle (glides with rover) -->
+        <div style="
+          position: absolute;
+          bottom: -22px;
+          left: 50%;
+          transform: translateX(-50%);
+          white-space: nowrap;
+          background: rgba(10, 15, 29, 0.92);
+          border: 1.5px solid ${isDriving ? '#06b6d4' : '#f97316'};
+          color: ${isDriving ? '#38bdf8' : '#fed7aa'};
+          font-family: monospace;
+          font-size: 9px;
+          font-weight: 800;
+          padding: 1px 6px;
+          border-radius: 10px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.8), 0 0 6px ${isDriving ? 'rgba(6,182,212,0.6)' : 'rgba(249,115,22,0.4)'};
+          letter-spacing: 0.5px;
+          z-index: 20;
+          pointer-events: none;
+        ">
+          ${isDriving ? `▶ ${speed.toFixed(1)} km/h` : 'STANDBY'}
+        </div>
       </div>
     `,
-    iconSize: [34, 34],
-    iconAnchor: [17, 17],
-    popupAnchor: [0, -17],
+    iconSize: [44, 44],
+    iconAnchor: [22, 22],
+    popupAnchor: [0, -22],
   });
 };
 
@@ -65,7 +131,7 @@ const MapViewController = () => {
 
   useEffect(() => {
     if (mapCenter && Array.isArray(mapCenter) && mapCenter.length === 2) {
-      const targetZoom = Math.min(Math.max(typeof mapZoom === 'number' ? mapZoom : 2, 0), 8);
+      const targetZoom = Math.min(Math.max(typeof mapZoom === 'number' ? mapZoom : 2, 0), 12);
       map.flyTo(mapCenter, targetZoom, { duration: 1.2 });
     }
   }, [mapCenter, mapZoom, map]);
@@ -82,85 +148,274 @@ const RoverSimulator = ({ waypoints }) => {
     roverProgress, 
     setRoverProgress,
     roverBatterySoC,
-    setRoverBatterySoC
+    setRoverBatterySoC,
+    evaCurrentWaypointIndex,
+    setEVACurrentWaypointIndex,
+    driveTargetWaypointId,
+    setDriveTargetWaypointId,
+    camFollow,
   } = useMapStore();
 
   const [currentCoord, setCurrentCoord] = useState(null);
-  const [currentSpeed, setCurrentSpeed] = useState(7.5);
+  const [currentHeading, setCurrentHeading] = useState(0);
+  const [currentSpeed, setCurrentSpeed] = useState(14.5);
   const [currentSlope, setCurrentSlope] = useState(0);
+  const [currentSegIdx, setCurrentSegIdx] = useState(0);
 
+  const progRef = useRef(roverProgress || 0);
+  const lastPanTime = useRef(0);
+  const lastStoreSync = useRef(0);
+  const batteryRef = useRef(roverBatterySoC || 96);
+
+  // Precompute cumulative physical distances along route for constant medium speed
+  const routeDistances = useMemo(() => {
+    if (!waypoints || waypoints.length < 2) return { cumDists: [0], totalDistKm: 0 };
+    const cumDists = [0];
+    let sum = 0;
+    for (let i = 0; i < waypoints.length - 1; i++) {
+      const lon1 = waypoints[i].lon !== undefined ? waypoints[i].lon : (waypoints[i].lng !== undefined ? waypoints[i].lng : 0);
+      const lon2 = waypoints[i+1].lon !== undefined ? waypoints[i+1].lon : (waypoints[i+1].lng !== undefined ? waypoints[i+1].lng : 0);
+      const d = Math.max(0.01, marsDistance(waypoints[i].lat, lon1, waypoints[i+1].lat, lon2));
+      sum += d;
+      cumDists.push(sum);
+    }
+    return { cumDists, totalDistKm: sum };
+  }, [waypoints]);
+
+  // Target spot calculation: if driveTargetWaypointId is set, drive to that specific station!
+  const targetIndex = (driveTargetWaypointId && waypoints) 
+    ? waypoints.findIndex(w => w.id === driveTargetWaypointId) 
+    : -1;
+
+  const targetDistKm = (targetIndex > 0 && routeDistances.cumDists[targetIndex]) 
+    ? routeDistances.cumDists[targetIndex] 
+    : routeDistances.totalDistKm;
+
+  // Active target waypoint for popup & telemetry
+  const targetWaypoint = targetIndex >= 0 ? waypoints[targetIndex] : (waypoints ? waypoints[waypoints.length - 1] : null);
+
+  // Dynamic Traveled Path behind rover wheels (illuminated cyan breadcrumb trail)
+  const traveledPositions = useMemo(() => {
+    if (!waypoints || waypoints.length < 2 || !currentCoord) return [];
+    const pts = [];
+    for (let i = 0; i <= currentSegIdx && i < waypoints.length; i++) {
+      const lon = waypoints[i].lon !== undefined ? waypoints[i].lon : (waypoints[i].lng !== undefined ? waypoints[i].lng : 0);
+      pts.push([waypoints[i].lat, lon]);
+    }
+    pts.push(currentCoord);
+    return pts;
+  }, [waypoints, currentSegIdx, currentCoord]);
+
+  // Sync initial coordinate when waypoints load or change, or progress reset
   useEffect(() => {
     if (!waypoints || waypoints.length < 2) return;
-    setCurrentCoord([waypoints[0].lat, waypoints[0].lon]);
-  }, [waypoints]);
+    const startLon = waypoints[0].lon !== undefined ? waypoints[0].lon : (waypoints[0].lng !== undefined ? waypoints[0].lng : 0);
+    if (!currentCoord || roverProgress === 0) {
+      setCurrentCoord([waypoints[0].lat, startLon]);
+      progRef.current = roverProgress || 0;
+      setCurrentSegIdx(0);
+    }
+  }, [waypoints, roverProgress]);
+
+  // Keep progRef in sync when store progress changes externally
+  useEffect(() => {
+    if (!isRoverDriving || roverProgress === 0) {
+      progRef.current = roverProgress || 0;
+    }
+  }, [roverProgress, isRoverDriving]);
 
   useEffect(() => {
     let animId;
-    if (isRoverDriving && waypoints && waypoints.length > 1) {
-      const speed = 0.003; // progress increment per frame
-      let prog = roverProgress;
+    if (!isRoverDriving || !waypoints || waypoints.length < 2) return;
 
-      const drive = () => {
-        prog += speed;
-        if (prog >= 1.0) {
-          prog = 1.0;
-          setRoverProgress(1.0);
-          setRoverDriving(false);
-          marsAudio.playQuindarTone(false);
-          return;
+    const totalDistKm = routeDistances.totalDistKm;
+    if (totalDistKm <= 0) return;
+
+    // Track traveled distance directly in km for constant medium traversal speed
+    let currentDistKm = progRef.current * totalDistKm;
+
+    // If rover was already at or beyond target, restart from beginning
+    if (progRef.current >= 0.99 || (targetDistKm > 0.1 && currentDistKm >= targetDistKm - 0.05)) {
+      currentDistKm = 0;
+      progRef.current = 0;
+      setRoverProgress(0);
+      setCurrentSegIdx(0);
+    }
+
+    let lastTime = performance.now();
+
+    // Trip distance: if targeted to a waypoint, the segment distance to target; otherwise total route
+    const tripDistKm = (targetIndex > 0 && targetDistKm > 0) ? targetDistKm : totalDistKm;
+
+    // Balanced, highly perceptible pacing:
+    // - Very short manual points (< 5 km): ~6 to 8 seconds total traverse (clearly visible movement!)
+    // - Medium routes (5-30 km): ~10 to 14 seconds
+    // - Long routes (30-200 km): ~16 to 22 seconds
+    const traverseDurationSec = Math.max(6, Math.min(22, 5.5 + Math.sqrt(tripDistKm) * 1.3));
+    const kmPerSec = tripDistKm / traverseDurationSec;
+
+    const drive = (now) => {
+      const dt = Math.min((now - lastTime) / 1000, 0.08); // delta time clamped
+      lastTime = now;
+
+      // Traversal step proportional to physical distance
+      currentDistKm += kmPerSec * dt;
+
+      // Arrival check for target (either specific station or full destination)
+      if (currentDistKm >= targetDistKm) {
+        currentDistKm = targetDistKm;
+        const finalProg = totalDistKm > 0 ? (targetDistKm / totalDistKm) : 1.0;
+        progRef.current = finalProg;
+        setRoverProgress(finalProg);
+        setRoverDriving(false);
+        marsAudio.playQuindarTone(false);
+
+        // Snap to exact target coordinates
+        const arrivalWp = targetIndex >= 0 ? waypoints[targetIndex] : waypoints[waypoints.length - 1];
+        if (arrivalWp) {
+          const arrLon = arrivalWp.lon !== undefined ? arrivalWp.lon : (arrivalWp.lng !== undefined ? arrivalWp.lng : 0);
+          setCurrentCoord([arrivalWp.lat, arrLon]);
         }
+        return;
+      }
 
-        // Calculate segment interpolation
-        const totalSegments = waypoints.length - 1;
-        const segmentFloat = prog * totalSegments;
-        const segIndex = Math.min(Math.floor(segmentFloat), totalSegments - 1);
-        const segFraction = segmentFloat - segIndex;
+      // Find exact segment from current physical distance
+      let segIdx = 0;
+      while (
+        segIdx < routeDistances.cumDists.length - 2 && 
+        currentDistKm > routeDistances.cumDists[segIdx + 1]
+      ) {
+        segIdx++;
+      }
 
-        const wpA = waypoints[segIndex];
-        const wpB = waypoints[segIndex + 1];
+      const segStartDist = routeDistances.cumDists[segIdx];
+      const segEndDist = routeDistances.cumDists[segIdx + 1];
+      const segLength = Math.max(0.0001, segEndDist - segStartDist);
+      const segFraction = Math.max(0, Math.min(1, (currentDistKm - segStartDist) / segLength));
 
+      const wpA = waypoints[segIdx];
+      const wpB = waypoints[segIdx + 1];
+
+      if (wpA && wpB) {
+        const lonA = wpA.lon !== undefined ? wpA.lon : (wpA.lng !== undefined ? wpA.lng : 0);
+        const lonB = wpB.lon !== undefined ? wpB.lon : (wpB.lng !== undefined ? wpB.lng : 0);
         const lat = wpA.lat + (wpB.lat - wpA.lat) * segFraction;
-        const lon = wpA.lon + (wpB.lon - wpA.lon) * segFraction;
-        const elev = (wpA.elevation || 0) + ((wpB.elevation || 0) - (wpA.elevation || 0)) * segFraction;
+        const lon = lonA + (lonB - lonA) * segFraction;
 
         setCurrentCoord([lat, lon]);
-        setRoverProgress(prog);
+        setCurrentSegIdx(segIdx);
+
+        const curProg = currentDistKm / totalDistKm;
+        progRef.current = curProg;
+
+        // Dynamic vehicle orientation heading
+        const dLat = wpB.lat - wpA.lat;
+        const dLon = lonB - lonA;
+        const heading = ((Math.atan2(dLon, dLat) * 180 / Math.PI) + 360) % 360;
+        setCurrentHeading(heading);
 
         // Slope calculation for telemetry
-        const segDistKm = marsDistance(wpA.lat, wpA.lon, wpB.lat, wpB.lon);
-        const slope = calculateSlope(wpA.elevation, wpB.elevation, segDistKm * 1000);
+        const segDistKm = marsDistance(wpA.lat, lonA, wpB.lat, lonB);
+        const slope = calculateSlope(wpA.elevation || 0, wpB.elevation || 0, segDistKm * 1000);
         setCurrentSlope(slope);
 
-        // Regenerative braking downhill vs uphill power consumption
+        // Consistent medium steady speed readout (~14.5 km/h nominal)
+        const mediumSpeed = Math.max(12.0, 15.0 - Math.abs(slope) * 0.12);
+        setCurrentSpeed(mediumSpeed);
+
+        // Battery consumption
         if (slope < -2) {
-          setRoverBatterySoC(Math.min(100, roverBatterySoC + 0.01)); // Regenerative charging
+          batteryRef.current = Math.min(100, batteryRef.current + 0.003);
         } else {
-          setRoverBatterySoC(Math.max(10, roverBatterySoC - 0.02));
+          batteryRef.current = Math.max(10, batteryRef.current - 0.004);
         }
 
-        // Speed modulation (slower on steep slopes)
-        const modulatedSpeed = Math.max(3.0, 9.5 - Math.abs(slope) * 0.35);
-        setCurrentSpeed(modulatedSpeed);
+        // Keep active waypoint synced as rover physically crosses segments
+        if (evaCurrentWaypointIndex !== segIdx && setEVACurrentWaypointIndex) {
+          setEVACurrentWaypointIndex(segIdx);
+        }
 
-        animId = requestAnimationFrame(drive);
-      };
+        // Throttled sync to Zustand store (every 120ms)
+        if (now - lastStoreSync.current > 120) {
+          lastStoreSync.current = now;
+          setRoverProgress(curProg);
+          setRoverBatterySoC(Math.round(batteryRef.current));
+        }
+
+        // Smooth camera follow (actively tracks rover when camFollow is on)
+        if (camFollow && now - lastPanTime.current > 650) {
+          lastPanTime.current = now;
+          map.panTo([lat, lon], { animate: true, duration: 0.55 });
+        } else if (!camFollow && now - lastPanTime.current > 1200) {
+          try {
+            const bounds = map.getBounds();
+            if (bounds && !bounds.contains([lat, lon])) {
+              lastPanTime.current = now;
+              map.panTo([lat, lon], { animate: true, duration: 0.6 });
+            }
+          } catch (e) {
+            // Guard against unmounted/uninitialized map bounds
+          }
+        }
+      }
 
       animId = requestAnimationFrame(drive);
-    }
-    return () => cancelAnimationFrame(animId);
-  }, [isRoverDriving, waypoints, roverProgress, roverBatterySoC]);
+    };
+
+    animId = requestAnimationFrame(drive);
+    return () => {
+      cancelAnimationFrame(animId);
+      // Sync progress when paused
+      if (progRef.current > 0) {
+        setRoverProgress(progRef.current);
+      }
+    };
+  }, [isRoverDriving, waypoints, targetDistKm, targetIndex, routeDistances, map, camFollow, evaCurrentWaypointIndex, setEVACurrentWaypointIndex, setRoverProgress, setRoverDriving, setRoverBatterySoC]);
 
   if (!currentCoord || !waypoints || waypoints.length < 2) return null;
 
   return (
     <>
-      <Marker position={currentCoord} icon={createRoverIcon()}>
+      {/* Dynamic Traveled Track: Glowing Cyan Trail Laid Down Live Behind Moving Wheels */}
+      {traveledPositions.length > 1 && (
+        <>
+          <Polyline
+            positions={traveledPositions}
+            pathOptions={{
+              color: '#06b6d4',
+              weight: 8,
+              opacity: 0.45,
+              lineCap: 'round',
+              lineJoin: 'round',
+            }}
+          />
+          <Polyline
+            positions={traveledPositions}
+            pathOptions={{
+              color: '#38bdf8',
+              weight: 4.5,
+              opacity: 0.98,
+              lineCap: 'round',
+              lineJoin: 'round',
+            }}
+          />
+        </>
+      )}
+
+      <Marker position={currentCoord} icon={createRoverIcon(currentHeading, isRoverDriving, currentSpeed)}>
         <Popup>
-          <div className="font-mono text-xs p-1">
-            <strong>PRESSURIZED EXPLORATION ROVER 01</strong>
-            <p>Speed: {currentSpeed.toFixed(1)} km/h</p>
-            <p>Slope: {currentSlope.toFixed(1)}°</p>
-            <p>Battery: {roverBatterySoC.toFixed(0)}%</p>
+          <div className="font-mono text-xs p-1 min-w-[190px]">
+            <div className="font-bold text-amber-500 border-b border-space-700 pb-1 mb-1 flex items-center justify-between">
+              <span>🚜 PER-01 ROVER</span>
+              <span className="text-[10px] text-space-400 font-sans">{isRoverDriving ? 'DRIVING' : 'STANDBY'}</span>
+            </div>
+            <div className="space-y-0.5 text-space-800">
+              <p>🎯 Target: <strong>{targetWaypoint?.name || 'Objective'}</strong></p>
+              <p>⚡ Speed: <strong>{currentSpeed.toFixed(1)} km/h</strong></p>
+              <p>⛰️ Slope: <strong>{currentSlope.toFixed(1)}°</strong></p>
+              <p>🔋 Battery: <strong>{Math.round(batteryRef.current)}%</strong></p>
+              <p>🏁 Progress: <strong>{(progRef.current * 100).toFixed(0)}%</strong></p>
+            </div>
           </div>
         </Popup>
       </Marker>
@@ -181,8 +436,13 @@ const MarsMap = () => {
   const toggleWalkbackLimits = useMapStore((s) => s.toggleWalkbackLimits);
   const isRoverDriving = useMapStore((s) => s.isRoverDriving);
   const setRoverDriving = useMapStore((s) => s.setRoverDriving);
+  const roverProgress = useMapStore((s) => s.roverProgress);
   const setRoverProgress = useMapStore((s) => s.setRoverProgress);
   const roverBatterySoC = useMapStore((s) => s.roverBatterySoC);
+  const driveTargetWaypointId = useMapStore((s) => s.driveTargetWaypointId);
+  const setDriveTargetWaypointId = useMapStore((s) => s.setDriveTargetWaypointId);
+  const camFollow = useMapStore((s) => s.camFollow);
+  const setCamFollow = useMapStore((s) => s.setCamFollow);
   const isRulerActive = useMapStore((s) => s.isRulerActive);
   const setRulerActive = useMapStore((s) => s.setRulerActive);
   const rulerPoints = useMapStore((s) => s.rulerPoints);
@@ -257,7 +517,7 @@ const MarsMap = () => {
         center={[0, 0]}
         zoom={2}
         minZoom={0}
-        maxZoom={8}
+        maxZoom={12}
         crs={L.CRS.EPSG4326}
         style={{ height: '100%', width: '100%', background: '#090b14' }}
         maxBounds={[[-90, -180], [90, 180]]}
@@ -278,7 +538,7 @@ const MarsMap = () => {
             bounds={[[-90, -180], [90, 180]]}
             minZoom={0}
             maxNativeZoom={layer.maxZoom}
-            maxZoom={8}
+            maxZoom={12}
           />
         ))}
 
@@ -342,30 +602,97 @@ const MarsMap = () => {
           />
         )}
 
+        {/* Pulsating Target Reticle for Selected Waypoint */}
+        {selectedWaypointId && (
+          (() => {
+            const selectedWp = waypoints.find(w => w.id === selectedWaypointId);
+            if (!selectedWp) return null;
+            return (
+              <CircleMarker
+                center={[selectedWp.lat, selectedWp.lon]}
+                radius={16}
+                pathOptions={{
+                  color: '#38bdf8',
+                  fillColor: '#38bdf8',
+                  fillOpacity: 0.2,
+                  weight: 2,
+                  dashArray: '3, 3'
+                }}
+              />
+            );
+          })()
+        )}
+
         {/* Waypoint Markers */}
         {waypoints.map((wp, i) => (
           <CircleMarker
             key={wp.id}
             center={[wp.lat, wp.lon]}
-            radius={selectedWaypointId === wp.id ? 10 : 7}
+            radius={selectedWaypointId === wp.id ? 11 : 7}
             pathOptions={{
-              color: waypointColor(i),
+              color: selectedWaypointId === wp.id ? '#ffffff' : waypointColor(i),
               fillColor: waypointColor(i),
-              fillOpacity: 0.85,
-              weight: selectedWaypointId === wp.id ? 3 : 2,
+              fillOpacity: 0.92,
+              weight: selectedWaypointId === wp.id ? 3.5 : 2,
             }}
             eventHandlers={{
-              click: () => setSelectedWaypoint(wp.id),
+              click: () => {
+                setSelectedWaypoint(wp.id);
+                marsAudio.playQuindarTone(true);
+              },
             }}
           >
             <Popup>
-              <div className="min-w-[160px] font-mono text-xs">
+              <div className="min-w-[170px] font-mono text-xs">
                 <h4 className="font-bold text-sm mb-1 text-space-950 font-sans">{wp.name}</h4>
                 <div className="space-y-0.5 text-space-800">
                   <p>📍 {wp.lat.toFixed(4)}°N, {wp.lon.toFixed(4)}°E</p>
                   <p>⛰️ Elev: {wp.elevation?.toLocaleString()} m</p>
-                  <p>🏁 Waypoint #{i + 1}</p>
+                  <p>🏁 Station #{i + 1}</p>
+                  {wp.reason && <p className="text-[10px] text-space-600 font-sans mt-1">"{wp.reason}"</p>}
                 </div>
+                {i > 0 && (
+                  <div className="mt-2 pt-1.5 border-t border-space-200">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedWaypoint(wp.id);
+                        if (isRoverDriving && driveTargetWaypointId === wp.id) {
+                          setRoverDriving(false);
+                        } else {
+                          let targetDist = 0;
+                          let totalDist = 0;
+                          for (let j = 1; j < waypoints.length; j++) {
+                            const lon1 = waypoints[j-1].lon !== undefined ? waypoints[j-1].lon : (waypoints[j-1].lng !== undefined ? waypoints[j-1].lng : 0);
+                            const lon2 = waypoints[j].lon !== undefined ? waypoints[j].lon : (waypoints[j].lng !== undefined ? waypoints[j].lng : 0);
+                            const d = marsDistance(waypoints[j-1].lat, lon1, waypoints[j].lat, lon2);
+                            totalDist += d;
+                            if (j === i) targetDist = totalDist;
+                          }
+                          const curDist = (roverProgress || 0) * (totalDist || 1);
+                          if (curDist >= targetDist - 0.05) {
+                            setRoverProgress(0);
+                          }
+                          setDriveTargetWaypointId(wp.id);
+                          setRoverDriving(true);
+                        }
+                      }}
+                      className="w-full py-1.5 px-2 rounded bg-gradient-to-r from-amber-600 to-mars-600 hover:from-amber-500 hover:to-mars-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                    >
+                      {isRoverDriving && driveTargetWaypointId === wp.id ? (
+                        <>
+                          <Pause className="w-3 h-3" />
+                          <span>Pause Rover</span>
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-3 h-3 fill-white" />
+                          <span>Simulate Drive to Station #{i + 1}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             </Popup>
           </CircleMarker>
@@ -435,23 +762,102 @@ const MarsMap = () => {
 
         {/* Drive Rover Button */}
         {waypoints && waypoints.length > 1 && (
-          <button
-            onClick={() => {
-              if (isRoverDriving) {
-                setRoverDriving(false);
-              } else {
-                setRoverDriving(true);
-              }
-            }}
-            className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all ${
-              isRoverDriving 
-                ? 'bg-amber-600 text-white animate-pulse' 
-                : 'bg-space-800 hover:bg-space-700 text-amber-400 border border-space-700'
-            }`}
-          >
-            {isRoverDriving ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-amber-400" />}
-            <span>{isRoverDriving ? 'PAUSE' : 'DRIVE'}</span>
-          </button>
+          (() => {
+            const targetIdx = driveTargetWaypointId 
+              ? waypoints.findIndex(w => w.id === driveTargetWaypointId) 
+              : -1;
+            const isAtEnd = roverProgress >= 0.99;
+            const isPausedMidway = !isRoverDriving && roverProgress > 0.01 && !isAtEnd;
+
+            let driveLabel = targetIdx > 0 ? `DRIVE TO #${targetIdx + 1}` : 'DRIVE ALL';
+            if (isRoverDriving) {
+              driveLabel = targetIdx > 0 ? `DRIVING TO #${targetIdx + 1}` : 'PAUSE';
+            } else if (isPausedMidway) {
+              driveLabel = targetIdx > 0 ? `RESUME TO #${targetIdx + 1}` : `RESUME (${(roverProgress * 100).toFixed(0)}%)`;
+            } else if (isAtEnd) {
+              driveLabel = targetIdx > 0 ? `REPLAY TO #${targetIdx + 1}` : 'REPLAY ROUTE';
+            }
+
+            return (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => {
+                    if (isRoverDriving) {
+                      setRoverDriving(false);
+                    } else {
+                      if (isAtEnd) {
+                        setRoverProgress(0);
+                      }
+                      setRoverDriving(true);
+                    }
+                  }}
+                  className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all shadow-md ${
+                    isRoverDriving 
+                      ? 'bg-amber-600 hover:bg-amber-500 text-white animate-pulse' 
+                      : isPausedMidway
+                      ? 'bg-gradient-to-r from-emerald-600 to-amber-600 hover:from-emerald-500 hover:to-amber-500 text-white'
+                      : isAtEnd
+                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white'
+                      : 'bg-space-800 hover:bg-space-700 text-amber-400 border border-space-700'
+                  }`}
+                  title={
+                    isRoverDriving 
+                      ? 'Pause Rover Drive' 
+                      : targetIdx > 0
+                      ? `Simulate rover drive to Station #${targetIdx + 1}`
+                      : 'Simulate rover traverse along entire route'
+                  }
+                >
+                  {isRoverDriving ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+                  <span>{driveLabel}</span>
+                </button>
+
+                {/* If targeted to a specific station, allow one-click toggle to Drive All */}
+                {targetIdx > 0 && (
+                  <button
+                    onClick={() => {
+                      setDriveTargetWaypointId(null);
+                      if (isAtEnd) setRoverProgress(0);
+                      if (!isRoverDriving) setRoverDriving(true);
+                    }}
+                    className="px-2 py-1.5 rounded-lg bg-space-800 hover:bg-space-700 text-cyan-400 hover:text-white border border-space-700 text-xs font-mono font-bold transition-colors cursor-pointer"
+                    title="Switch to Drive Entire Route to Destination"
+                  >
+                    DRIVE ALL
+                  </button>
+                )}
+
+                {/* Cam Follow / Tracking Toggle Button */}
+                <button
+                  onClick={() => setCamFollow(!camFollow)}
+                  className={`px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all border font-bold cursor-pointer ${
+                    camFollow
+                      ? 'bg-cyan-950/80 border-cyan-400 text-cyan-300 ring-1 ring-cyan-400/50'
+                      : 'bg-space-800 border-space-700 text-space-400 hover:text-white'
+                  }`}
+                  title={camFollow ? 'Vehicle Tracking Active: Camera follows vehicle automatically' : 'Free Camera: Manual pan and zoom'}
+                >
+                  {camFollow ? <Video className="w-3.5 h-3.5 text-cyan-400" /> : <VideoOff className="w-3.5 h-3.5" />}
+                  <span className="hidden md:inline">{camFollow ? 'TRACKING' : 'FREE CAM'}</span>
+                </button>
+
+                {roverProgress > 0.01 && !isRoverDriving && (
+                  <button
+                    onClick={() => {
+                      setRoverDriving(false);
+                      setRoverProgress(0);
+                      setDriveTargetWaypointId(null);
+                      marsAudio.playQuindarTone(false);
+                    }}
+                    className="p-1.5 rounded-lg bg-space-800 hover:bg-space-700 text-space-400 hover:text-white border border-space-700 transition-colors"
+                    title="Reset Rover to Route Origin"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            );
+          })()
         )}
 
         {/* Walkback Limits Toggle */}
@@ -523,28 +929,39 @@ const MarsMap = () => {
 
       {/* ROVER TELEMETRY HUD (Floating when driving) */}
       {isRoverDriving && (
-        <div className="absolute top-16 left-3 z-[400] bg-space-950/95 backdrop-blur-md p-3.5 rounded-xl border border-amber-500/50 shadow-2xl font-mono text-xs w-64 flex flex-col gap-2">
+        <div className="absolute top-16 left-3 z-[400] bg-space-950/95 backdrop-blur-md p-3.5 rounded-xl border border-amber-500/50 shadow-2xl font-mono text-xs w-68 flex flex-col gap-2">
           <div className="flex items-center justify-between text-amber-400 font-bold border-b border-space-800 pb-1">
             <span className="flex items-center gap-1.5">
-              <span>🚜</span> ROVER TELEMETRY
+              <span>🚜</span> ROVER EN ROUTE
             </span>
             <button 
               onClick={() => setRoverDriving(false)}
-              className="text-space-400 hover:text-white p-1 rounded hover:bg-space-800 transition-colors"
+              className="text-space-400 hover:text-white p-1 rounded hover:bg-space-800 transition-colors text-xs font-bold"
               title="Stop Rover & Close Telemetry"
             >
               ✕
             </button>
           </div>
 
+          {(() => {
+            const selectedIdx = selectedWaypointId ? waypoints.findIndex(w => w.id === selectedWaypointId) : -1;
+            const targetWp = selectedIdx > 0 ? waypoints[selectedIdx] : waypoints[waypoints.length - 1];
+            return (
+              <div className="text-[10px] bg-amber-950/40 p-1.5 rounded border border-amber-500/30 text-amber-200 truncate">
+                <span className="text-amber-400 font-bold">TARGET: </span>
+                <span>{targetWp?.name || 'Primary Mission Objective'}</span>
+              </div>
+            );
+          })()}
+
           <div className="grid grid-cols-2 gap-2 text-[10px]">
-            <div className="bg-space-900 p-1.5 rounded border border-space-800">
-              <span className="text-space-400 block">SPEED</span>
-              <span className="text-white font-bold text-xs">7.4 km/h</span>
-            </div>
             <div className="bg-space-900 p-1.5 rounded border border-space-800">
               <span className="text-space-400 block">BATTERY</span>
               <span className="text-green-400 font-bold text-xs">{roverBatterySoC.toFixed(0)}%</span>
+            </div>
+            <div className="bg-space-900 p-1.5 rounded border border-space-800">
+              <span className="text-space-400 block">TRAVERSE</span>
+              <span className="text-cyan-400 font-bold text-xs">{(roverProgress * 100).toFixed(0)}%</span>
             </div>
           </div>
         </div>

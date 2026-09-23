@@ -247,6 +247,72 @@ html, body, #root {
   animation: countUp 0.3s ease-out;
 }
 
+/* Custom Rover Icon & Motion Radar Rings */
+.custom-rover-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+@keyframes roverRadarPing {
+  0% {
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 0.95;
+  }
+  60% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.6);
+    opacity: 0;
+  }
+}
+
+.rover-radar-ring-1 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #06b6d4;
+  box-shadow: 0 0 14px #06b6d4;
+  pointer-events: none;
+  animation: roverRadarPing 1.8s cubic-bezier(0.1, 0.5, 0.4, 1) infinite;
+}
+
+.rover-radar-ring-2 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #f59e0b;
+  box-shadow: 0 0 16px #f59e0b;
+  pointer-events: none;
+  animation: roverRadarPing 1.8s cubic-bezier(0.1, 0.5, 0.4, 1) infinite 0.9s;
+}
+
+@keyframes roverHeadlightPulse {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+
+.rover-headlight-cone {
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-bottom: 28px solid rgba(56, 189, 248, 0.55);
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.9));
+  pointer-events: none;
+  animation: roverHeadlightPulse 1.2s ease-in-out infinite;
+}
+
 @layer utilities {
   .text-shadow-glow {
     text-shadow: 0 0 10px rgba(244, 112, 80, 0.5), 0 0 20px rgba(244, 112, 80, 0.3);
