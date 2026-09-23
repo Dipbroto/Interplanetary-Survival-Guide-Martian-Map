@@ -175,29 +175,29 @@ export default function FlightPlanModal() {
         exit={{ opacity: 0, scale: 0.95 }}
         className="glass-panel-solid w-full max-w-4xl max-h-[92vh] rounded-2xl border-2 border-mars-500/60 bg-space-950 shadow-2xl flex flex-col overflow-hidden text-primary relative z-10 print:m-0 print:p-0 print:border-none print:shadow-none print:bg-white print:text-black print:max-h-none print:w-full print:h-auto"
       >
-        {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-space-800 bg-space-900/60 shrink-0 print:hidden">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center font-display font-bold text-white text-xs border border-white/40 shadow-sm">
+        {/* Modal Header (Horizontal Scrollable Menu Bar) */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-space-800 bg-space-900/60 shrink-0 print:hidden overflow-x-auto overflow-y-hidden custom-scrollbar-x gap-3">
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center font-display font-bold text-white text-xs border border-white/40 shadow-sm shrink-0">
               NASA
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold text-white tracking-widest uppercase">
+                <h2 className="text-sm font-bold text-white tracking-widest uppercase whitespace-nowrap">
                   OFFICIAL NASA EVA FLIGHT PLAN & BRIEF
                 </h2>
                 <ProvenanceBadge type="NASA_SPEC" size="xs" detail="Flight Rating" />
               </div>
-              <p className="text-[10px] text-space-400">
+              <p className="text-[10px] text-space-400 whitespace-nowrap">
                 DOCUMENT CODE: JPL-EVA-2026-MARS • SOL {currentSol} • EXPEDITION CLEARANCE
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleCopyMarkdown}
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all border ${
+              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all border shrink-0 whitespace-nowrap ${
                 copied 
                   ? 'bg-green-600 text-white border-green-500' 
                   : 'bg-space-800 hover:bg-space-700 text-space-200 border-space-700'
@@ -210,7 +210,7 @@ export default function FlightPlanModal() {
 
             <button
               onClick={() => window.print()}
-              className="px-3 py-1.5 bg-space-800 hover:bg-space-700 text-white rounded-lg flex items-center gap-1.5 transition-colors border border-space-700"
+              className="px-3 py-1.5 bg-space-800 hover:bg-space-700 text-white rounded-lg flex items-center gap-1.5 transition-colors border border-space-700 shrink-0 whitespace-nowrap"
               title="Print Official Document"
             >
               <Printer className="w-3.5 h-3.5" />
@@ -219,7 +219,7 @@ export default function FlightPlanModal() {
 
             <button
               onClick={handleDownloadJSON}
-              className="px-3 py-1.5 bg-mars-600 hover:bg-mars-500 text-white font-bold rounded-lg flex items-center gap-1.5 shadow-md shadow-mars-600/30 transition-all"
+              className="px-3 py-1.5 bg-mars-600 hover:bg-mars-500 text-white font-bold rounded-lg flex items-center gap-1.5 shadow-md shadow-mars-600/30 transition-all shrink-0 whitespace-nowrap"
               title="Download JSON for Rover Navigation Computer"
             >
               <Download className="w-3.5 h-3.5" />
@@ -228,7 +228,7 @@ export default function FlightPlanModal() {
 
             <button
               onClick={() => setFlightPlanOpen(false)}
-              className="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl flex items-center gap-1.5 shadow-lg transition-all border border-white/40 cursor-pointer ml-1"
+              className="px-3 py-1.5 bg-rose-500/25 hover:bg-rose-500/40 text-rose-200 font-bold rounded-xl flex items-center gap-1.5 shadow-neon-mars transition-all hover:scale-105 active:scale-95 border border-rose-400/60 cursor-pointer ml-1 backdrop-blur-md shrink-0 whitespace-nowrap"
               title="Close Flight Plan (ESC)"
             >
               <X className="w-4 h-4" />
@@ -237,8 +237,8 @@ export default function FlightPlanModal() {
           </div>
         </div>
 
-        {/* Scrollable Printable Plan Body */}
-        <div className="flex-1 p-6 overflow-y-auto custom-scrollbar space-y-6 print:p-0 print:space-y-4 print:text-black">
+        {/* Scrollable Printable Plan Body (Vertical Scrollable) */}
+        <div className="flex-1 p-6 overflow-y-auto overflow-x-hidden custom-scrollbar-y space-y-6 print:p-0 print:space-y-4 print:text-black">
           {/* Printable Header (Visible only in Print / PDF export) */}
           <div className="hidden print:block border-b-2 border-black pb-4 mb-4">
             <div className="flex justify-between items-start">

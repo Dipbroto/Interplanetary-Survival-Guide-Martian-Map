@@ -224,11 +224,11 @@ export default function RoutePlanner() {
         )}
       </div>
 
-      {/* Mode Tabs: Manual vs Autonomous */}
-      <div className="flex bg-space-900/80 p-0.5 rounded-lg border border-space-800 shrink-0">
+      {/* Mode Tabs: Manual vs Autonomous (Horizontal Scrollable Menu Bar) */}
+      <div className="flex bg-space-900/80 p-0.5 rounded-lg border border-space-800 shrink-0 overflow-x-auto overflow-y-hidden custom-scrollbar-x whitespace-nowrap">
         <button
           onClick={() => setActiveTab('manual')}
-          className={`flex-1 py-1.5 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+          className={`flex-1 py-1.5 px-2 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shrink-0 whitespace-nowrap ${
             activeTab === 'manual'
               ? 'bg-space-800 text-white shadow-sm'
               : 'text-space-400 hover:text-white'
@@ -324,8 +324,8 @@ export default function RoutePlanner() {
             )}
           </div>
 
-          {/* Waypoints List */}
-          <div className="flex-1 overflow-y-auto min-h-0 space-y-2 pr-1 custom-scrollbar">
+          {/* Waypoints List (Vertical Scrollable) */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 space-y-2 pr-1 custom-scrollbar-y">
             <AnimatePresence>
               {(!waypoints || waypoints.length === 0) ? (
                 <motion.div
@@ -647,7 +647,7 @@ export default function RoutePlanner() {
                 <span className="text-[9px] text-space-400 font-mono">Click to Select</span>
               </div>
 
-              <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
+              <div className="space-y-1.5 max-h-56 overflow-y-auto overflow-x-hidden pr-1 custom-scrollbar-y">
                 {generatedRouteResult.waypoints.map((wp, idx) => {
                   const isSelected = selectedWaypointId === wp.id;
                   const isStart = idx === 0;

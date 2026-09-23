@@ -43,24 +43,32 @@ const POIMarkers = () => {
           }}
         >
           <Popup className="mars-popup custom-popup">
-            <div className="text-space-950 font-sans p-1 min-w-[220px]">
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="font-bold text-base leading-tight text-space-950">{site.name}</h3>
-                <span className="bg-blue-100 text-blue-800 text-[9px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">Landing Site</span>
+            <div className="font-mono text-xs p-1 min-w-[250px] max-w-[280px] text-white">
+              {site.image && (
+                <div className="w-full h-24 rounded-lg overflow-hidden mb-2 relative border border-white/10">
+                  <img src={site.image} alt={site.name} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+                </div>
+              )}
+              <div className="flex items-center justify-between border-b border-white/10 pb-1.5 mb-1.5">
+                <h3 className="font-bold text-sm text-cyan-300 font-sans">{site.name}</h3>
+                <span className="bg-cyan-950/80 text-cyan-400 text-[9px] px-2 py-0.5 rounded border border-cyan-800 uppercase font-bold tracking-wider">
+                  Landing Site
+                </span>
               </div>
-              <p className="text-xs text-space-700 mb-2 leading-tight">{site.description}</p>
-              <div className="text-[11px] space-y-0.5 mb-2 bg-space-100 p-2 rounded">
-                <p><strong>Mission:</strong> {site.mission} ({site.agency})</p>
-                <p><strong>Status:</strong> {site.status}</p>
-                <p><strong>Date:</strong> {site.landingDate}</p>
-                <p><strong>Elevation:</strong> {site.elevation?.toLocaleString()} m</p>
+              <p className="text-[11px] text-space-300 mb-2 leading-relaxed font-sans">{site.description}</p>
+              <div className="text-[11px] space-y-1 mb-2.5 bg-space-900/80 p-2 rounded-lg border border-white/[0.06]">
+                <div className="flex justify-between"><span className="text-space-400">Mission:</span> <span className="text-white font-medium">{site.mission} ({site.agency})</span></div>
+                <div className="flex justify-between"><span className="text-space-400">Status:</span> <span className="text-emerald-400 font-medium">{site.status}</span></div>
+                <div className="flex justify-between"><span className="text-space-400">Landing Date:</span> <span className="text-white">{site.landingDate}</span></div>
+                <div className="flex justify-between"><span className="text-space-400">Elevation:</span> <span className="text-amber-400 font-bold">{site.elevation?.toLocaleString()} m</span></div>
               </div>
               <button
                 onClick={() => {
                   addWaypoint({ lat: site.lat, lon: site.lon, name: site.name, elevation: site.elevation });
                   marsAudio.playQuindarTone(true);
                 }}
-                className="w-full bg-mars-600 hover:bg-mars-500 text-white font-medium py-1 px-2 rounded text-xs transition-colors flex items-center justify-center gap-1 shadow-sm"
+                className="w-full bg-gradient-to-r from-mars-600 to-amber-600 hover:from-mars-500 hover:to-amber-500 text-white font-bold py-1.5 px-2 rounded-lg text-xs transition-all flex items-center justify-center gap-1.5 shadow-md border border-white/20"
               >
                 <span>➕ Add to Marswalk Route</span>
               </button>
@@ -85,23 +93,31 @@ const POIMarkers = () => {
           }}
         >
           <Popup className="mars-popup custom-popup">
-            <div className="text-space-950 font-sans p-1 min-w-[220px]">
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="font-bold text-base leading-tight text-space-950">{feature.name}</h3>
-                <span className="bg-mars-100 text-mars-800 text-[9px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">{feature.type}</span>
+            <div className="font-mono text-xs p-1 min-w-[250px] max-w-[280px] text-white">
+              {feature.image && (
+                <div className="w-full h-24 rounded-lg overflow-hidden mb-2 relative border border-white/10">
+                  <img src={feature.image} alt={feature.name} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+                </div>
+              )}
+              <div className="flex items-center justify-between border-b border-white/10 pb-1.5 mb-1.5">
+                <h3 className="font-bold text-sm text-mars-300 font-sans">{feature.name}</h3>
+                <span className="bg-mars-950/80 text-mars-400 text-[9px] px-2 py-0.5 rounded border border-mars-800 uppercase font-bold tracking-wider">
+                  {feature.type}
+                </span>
               </div>
-              <p className="text-xs text-space-700 mb-2 leading-tight">{feature.description || feature.scienceDescription}</p>
-              <div className="text-[11px] space-y-0.5 mb-2 bg-space-100 p-2 rounded">
-                <p><strong>Significance:</strong> {feature.significance || feature.geology}</p>
-                <p><strong>Elevation:</strong> {feature.elevation?.toLocaleString()} m</p>
-                <p className="font-mono text-[10px] text-space-500">Lat: {feature.lat.toFixed(2)}°, Lon: {feature.lon.toFixed(2)}°</p>
+              <p className="text-[11px] text-space-300 mb-2 leading-relaxed font-sans">{feature.description || feature.scienceDescription}</p>
+              <div className="text-[11px] space-y-1 mb-2.5 bg-space-900/80 p-2 rounded-lg border border-white/[0.06]">
+                <div className="flex justify-between"><span className="text-space-400">Category:</span> <span className="text-white font-medium">{feature.category}</span></div>
+                <div className="flex justify-between"><span className="text-space-400">Elevation:</span> <span className="text-amber-400 font-bold">{feature.elevation?.toLocaleString()} m</span></div>
+                <div className="flex justify-between font-mono text-[10px]"><span className="text-space-400">Coords:</span> <span className="text-cyan-300">{feature.lat.toFixed(2)}°N, {feature.lon.toFixed(2)}°E</span></div>
               </div>
               <button
                 onClick={() => {
                   addWaypoint({ lat: feature.lat, lon: feature.lon, name: feature.name, elevation: feature.elevation });
                   marsAudio.playQuindarTone(true);
                 }}
-                className="w-full bg-mars-600 hover:bg-mars-500 text-white font-medium py-1 px-2 rounded text-xs transition-colors flex items-center justify-center gap-1 shadow-sm"
+                className="w-full bg-gradient-to-r from-mars-600 to-amber-600 hover:from-mars-500 hover:to-amber-500 text-white font-bold py-1.5 px-2 rounded-lg text-xs transition-all flex items-center justify-center gap-1.5 shadow-md border border-white/20"
               >
                 <span>➕ Add to Marswalk Route</span>
               </button>

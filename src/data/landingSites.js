@@ -1,6 +1,4 @@
 // Mars Landing Sites Database
-// All confirmed landing sites with mission details and scientific context
-
 export const landingSites = [
   {
     id: 'perseverance',
@@ -15,7 +13,7 @@ export const landingSites = [
     description: 'Perseverance is searching for signs of ancient microbial life in Jezero Crater, a former lake bed with a river delta rich in clay minerals. It is also caching samples for future return to Earth.',
     objectives: ['Astrobiology', 'Sample caching', 'O₂ production (MOXIE)', 'Ingenuity helicopter flights'],
     elevation: -2600,
-    image: 'https://mars.nasa.gov/system/resources/detail_files/25611_PIA24420-web.jpg',
+    image: 'https://images-assets.nasa.gov/image/PIA26574/PIA26574~medium.jpg',
     color: '#22c55e',
     icon: '🚗',
   },
@@ -32,7 +30,7 @@ export const landingSites = [
     description: 'Curiosity has been exploring Gale Crater and climbing Mount Sharp since 2012, studying the geological history of Mars and finding evidence that Mars once had conditions favorable for microbial life.',
     objectives: ['Habitability assessment', 'Geological surveys', 'Climate study', 'Radiation measurements'],
     elevation: -4500,
-    image: 'https://mars.nasa.gov/system/resources/detail_files/25046_PIA23898-web.jpg',
+    image: 'https://images-assets.nasa.gov/image/PIA26310/PIA26310~medium.jpg',
     color: '#3b82f6',
     icon: '🚗',
   },
@@ -49,7 +47,7 @@ export const landingSites = [
     description: 'InSight studied the interior structure of Mars using a seismometer and heat probe. It detected hundreds of marsquakes and revealed the size and composition of Mars\'s core, mantle, and crust.',
     objectives: ['Seismology', 'Interior structure', 'Heat flow', 'Weather monitoring'],
     elevation: -2613,
-    image: 'https://mars.nasa.gov/system/resources/detail_files/25205_PIA24420-web.jpg',
+    image: 'https://images-assets.nasa.gov/image/PIA23202/PIA23202~small.jpg',
     color: '#eab308',
     icon: '📡',
   },
@@ -66,7 +64,7 @@ export const landingSites = [
     description: 'Opportunity set the off-Earth roving distance record at 45.16 km. It found strong evidence of past water activity including hematite spherules ("blueberries") and layered sedimentary rocks.',
     objectives: ['Water evidence', 'Geology', 'Mineralogy', 'Long-distance traverse'],
     elevation: -1440,
-    image: null,
+    image: 'https://images-assets.nasa.gov/image/PIA11185/PIA11185~medium.jpg',
     color: '#a855f7',
     icon: '🚗',
   },
@@ -83,7 +81,7 @@ export const landingSites = [
     description: 'Spirit explored the Columbia Hills in Gusev Crater, finding evidence of past hydrothermal activity and silica-rich soils that suggest hot springs once existed on Mars.',
     objectives: ['Volcanic history', 'Water evidence', 'Rock analysis', 'Soil composition'],
     elevation: -1920,
-    image: null,
+    image: 'https://images-assets.nasa.gov/image/PIA15292/PIA15292~medium.jpg',
     color: '#f97316',
     icon: '🚗',
   },
@@ -100,7 +98,7 @@ export const landingSites = [
     description: 'Phoenix confirmed the presence of water ice just below the Martian surface near the north pole and studied the arctic soil chemistry for potential habitability.',
     objectives: ['Water ice confirmation', 'Soil chemistry', 'Weather', 'Habitability'],
     elevation: -4126,
-    image: null,
+    image: 'https://images-assets.nasa.gov/image/PIA10651/PIA10651~small.jpg',
     color: '#06b6d4',
     icon: '📡',
   },
@@ -117,7 +115,7 @@ export const landingSites = [
     description: 'Pathfinder and its Sojourner rover were the first successful Mars rover mission. They analyzed rocks and soil at an ancient flood plain, demonstrating low-cost planetary exploration.',
     objectives: ['Technology demo', 'Rock analysis', 'Weather', 'Imaging'],
     elevation: -3682,
-    image: null,
+    image: 'https://images-assets.nasa.gov/image/PIA24466/PIA24466~medium.jpg',
     color: '#ec4899',
     icon: '🤖',
   },
@@ -134,7 +132,7 @@ export const landingSites = [
     description: 'Viking 1 was the first successful Mars lander. It conducted biology experiments searching for life, took the first surface photos, and monitored weather for over 6 years.',
     objectives: ['Life detection', 'Surface imaging', 'Weather', 'Soil analysis'],
     elevation: -3627,
-    image: null,
+    image: 'https://images-assets.nasa.gov/image/PIA14564/PIA14564~medium.jpg',
     color: '#f43f5e',
     icon: '📡',
   },
@@ -151,7 +149,7 @@ export const landingSites = [
     description: 'Viking 2 landed in the northern plains of Utopia Planitia. It conducted similar experiments to Viking 1 and observed ground frost on the Martian surface for the first time.',
     objectives: ['Life detection', 'Surface imaging', 'Weather', 'Frost observation'],
     elevation: -4505,
-    image: null,
+    image: 'https://images-assets.nasa.gov/image/PIA10651/PIA10651~small.jpg',
     color: '#f43f5e',
     icon: '📡',
   },
@@ -168,14 +166,12 @@ export const landingSites = [
     description: 'China\'s first Mars rover explored the southern edge of Utopia Planitia, studying geology and searching for subsurface water ice with ground-penetrating radar.',
     objectives: ['Geology', 'Subsurface radar', 'Weather', 'Soil composition'],
     elevation: -4200,
-    image: null,
+    image: 'https://images-assets.nasa.gov/image/PIA26574/PIA26574~medium.jpg',
     color: '#dc2626',
     icon: '🚗',
   },
 ];
 
 export const getLandingSiteById = (id) => landingSites.find(s => s.id === id);
-
 export const getActiveMissions = () => landingSites.filter(s => s.status === 'Active');
-
 export default landingSites;

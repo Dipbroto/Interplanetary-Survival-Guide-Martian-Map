@@ -308,16 +308,36 @@ const useMapStore = create((set, get) => ({
   setAudioRackOpen: (val) => set({ isAudioRackOpen: val }),
 
   // ========================
+  // NASA HIRISE & ROVER RAW IMAGERY
+  // ========================
+  isImageryModalOpen: false,
+  selectedImage: null,
+  setImageryModalOpen: (val) => set((state) => {
+    const next = typeof val === 'boolean' ? val : !state.isImageryModalOpen;
+    return {
+      isImageryModalOpen: next,
+      ...(next ? { isScienceLabOpen: false, isSkyEphemerisOpen: false, isFlightPlanOpen: false, isEVASimulating: false } : {})
+    };
+  }),
+  setSelectedImage: (img) => set({ selectedImage: img }),
+  flyToCoordinate: (lat, lon, zoom = 4) => set({
+    mapCenter: [lat, lon],
+    mapZoom: zoom
+  }),
+
+  // ========================
   // UI STATE & OVERLAY CONTROLS
   // ========================
   sidebarOpen: true,
-  sidebarTab: 'layers', // 'layers' | 'route' | 'poi' | 'mission'
+  sidebarTab: 'guide', // 'guide' | 'layers' | 'route' | 'poi' | 'mission'
+  rightSidebarOpen: true,
   bottomPanelOpen: true,
   bottomPanelTab: 'elevation', // 'elevation' | 'weather' | 'radiation' | 'dust'
   showLoadingScreen: true,
   
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
   setSidebarTab: (tab) => set({ sidebarTab: tab, sidebarOpen: true, isEVASimulating: false }),
+  setRightSidebarOpen: (open) => set({ rightSidebarOpen: open }),
   setBottomPanelOpen: (open) => set({ bottomPanelOpen: open }),
   setBottomPanelTab: (tab) => set({ bottomPanelTab: tab, bottomPanelOpen: true }),
   setShowLoadingScreen: (show) => set({ showLoadingScreen: show }),

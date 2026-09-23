@@ -235,7 +235,7 @@ export default function EVAHelmetHUD() {
                 setEVASimulating(false);
                 marsAudio.playQuindarTone(false);
               }}
-              className="bg-red-600 hover:bg-red-500 active:scale-95 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-2xl border-2 border-white/60 transition-all pointer-events-auto cursor-pointer"
+              className="bg-rose-500/25 hover:bg-rose-500/40 text-rose-200 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-neon-mars border border-rose-400/60 transition-all hover:scale-105 active:scale-95 pointer-events-auto cursor-pointer backdrop-blur-md"
               title="Exit Marswalk Simulator and return to Map view"
             >
               <X className="w-4 h-4" />

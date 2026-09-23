@@ -88,22 +88,22 @@ export default function MartianSkyEphemeris() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="glass-panel-solid w-full max-w-4xl rounded-2xl border-2 border-amber-500/60 p-6 bg-space-950 shadow-2xl flex flex-col gap-5 text-primary relative z-10"
+        className="glass-panel-solid w-full max-w-4xl max-h-[92vh] overflow-y-auto overflow-x-hidden custom-scrollbar-y rounded-2xl border-2 border-amber-500/60 p-6 bg-space-950 shadow-2xl flex flex-col gap-5 text-primary relative z-10"
       >
-        {/* Header with prominent Back button */}
-        <div className="flex items-center justify-between pb-3 border-b border-space-800">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30">
+        {/* Header with prominent Back button (Horizontal Scrollable Menu Bar) */}
+        <div className="flex items-center justify-between pb-3 border-b border-space-800 shrink-0 overflow-x-auto overflow-y-hidden custom-scrollbar-x gap-3">
+          <div className="flex items-center gap-2.5 shrink-0">
+            <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 shrink-0">
               <Orbit className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-display font-bold text-white tracking-wider flex items-center gap-2">
+              <h2 className="text-base font-display font-bold text-white tracking-wider flex items-center gap-2 whitespace-nowrap">
                 MARTIAN CELESTIAL EPHEMERIS
                 <span className="text-[10px] font-normal text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-500/30">
                   Phobos & Deimos Moons
                 </span>
               </h2>
-              <p className="text-[11px] text-space-400">
+              <p className="text-[11px] text-space-400 whitespace-nowrap">
                 Sol {currentSol} • Local Sky Dome & Solar Transit Simulator (JPL Horizons Model)
               </p>
             </div>
@@ -111,7 +111,7 @@ export default function MartianSkyEphemeris() {
           
           <button
             onClick={() => setSkyEphemerisOpen(false)}
-            className="px-3.5 py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl flex items-center gap-1.5 shadow-lg transition-all hover:scale-105 active:scale-95 border border-white/40 cursor-pointer"
+            className="px-3.5 py-1.5 bg-rose-500/25 hover:bg-rose-500/40 text-rose-200 font-bold rounded-xl flex items-center gap-1.5 shadow-neon-mars transition-all hover:scale-105 active:scale-95 border border-rose-400/60 cursor-pointer backdrop-blur-md shrink-0 whitespace-nowrap"
             title="Close Ephemeris (ESC)"
           >
             <X className="w-4 h-4" />

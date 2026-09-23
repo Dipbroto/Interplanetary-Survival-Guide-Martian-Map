@@ -13,9 +13,14 @@ import MartianSkyEphemeris from './components/MartianSkyEphemeris';
 import AudioSynthesizerRack from './components/AudioSynthesizerRack';
 import ContingencySimulator from './components/ContingencySimulator';
 import ErrorBoundary from './components/ErrorBoundary';
+import SpaceAtmosphere from './components/SpaceAtmosphere';
+import RightSidebar from './components/RightSidebar';
+import MarsImageryModal from './components/MarsImageryModal';
+
+import { Radar, ChevronLeft } from 'lucide-react';
 
 function App() {
-  const { viewMode, showLoadingScreen } = useMapStore();
+  const { viewMode, showLoadingScreen, rightSidebarOpen, setRightSidebarOpen } = useMapStore();
 
   // Update weather data periodically
   useEffect(() => {
@@ -26,7 +31,10 @@ function App() {
   }, []);
 
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden bg-space-950 relative">
+    <div className="h-screen w-screen flex flex-col overflow-hidden bg-space-900 relative selection:bg-mars-400/40 selection:text-white">
+      {/* Dynamic Cosmic Background Atmosphere */}
+      <SpaceAtmosphere />
+
       {/* Loading Screen */}
       {showLoadingScreen && <LoadingScreen />}
 
@@ -41,7 +49,7 @@ function App() {
         </ErrorBoundary>
 
         {/* Map / 3D Viewport */}
-        <div className="flex-1 flex flex-col relative overflow-hidden">
+        <div className="flex-1 flex flex-col relative overflow-hidden min-w-0">
           {/* Map Container */}
           <div className="flex-1 relative">
             <ErrorBoundary>
@@ -68,13 +76,33 @@ function App() {
                 </div>
               )}
             </ErrorBoundary>
+
+            {/* Quick Uncollapse Floating Tab when HUD Feed is closed */}
+            {!rightSidebarOpen && (
+              <button
+                onClick={() => setRightSidebarOpen(true)}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-30 bg-[#0B0C10]/95 border-l border-t border-b border-cyber-cyan/40 hover:border-cyber-cyan hover:bg-space-900 text-cyber-cyan px-1.5 py-3.5 rounded-l-xl flex flex-col items-center gap-1.5 shadow-hud-glass cursor-pointer transition-all hover:translate-x-[-2px] group"
+                title="Open HUD Telemetry Feed"
+              >
+                <Radar className="w-3.5 h-3.5 text-cyber-cyan group-hover:scale-110 transition-transform animate-pulse" />
+                <span className="[writing-mode:vertical-lr] text-[9px] font-mono tracking-widest uppercase font-bold text-space-300 group-hover:text-cyber-cyan">
+                  HUD FEED
+                </span>
+                <ChevronLeft className="w-3 h-3 text-space-400 group-hover:text-cyber-cyan" />
+              </button>
+            )}
           </div>
 
-          {/* Bottom Panel */}
+          {/* Bottom Panel (Spans Full Center Width) */}
           <ErrorBoundary>
             <BottomPanel />
           </ErrorBoundary>
         </div>
+
+        {/* Right Sidebar: HUD Telemetry Feed & Radar Scanner */}
+        <ErrorBoundary>
+          <RightSidebar />
+        </ErrorBoundary>
       </div>
 
       {/* Astronaut EVA Helmet HUD Simulator Overlay */}
@@ -105,6 +133,11 @@ function App() {
       {/* NASA What-If Contingency Simulator & Emergency Alert System */}
       <ErrorBoundary>
         <ContingencySimulator />
+      </ErrorBoundary>
+
+      {/* NASA HiRISE & Rover Raw Imagery Explorer Modal */}
+      <ErrorBoundary>
+        <MarsImageryModal />
       </ErrorBoundary>
 
       {/* Version Badge */}

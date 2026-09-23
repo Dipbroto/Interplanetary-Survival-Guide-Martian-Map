@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Map, Box, Columns, Clock, Globe2, Volume2, VolumeX, Play, FlaskConical, Radio, Orbit, Sliders, X, ShieldAlert, FileText } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Map, Box, Columns, Clock, Globe2, Volume2, VolumeX, Play, 
+  FlaskConical, Radio, Orbit, Sliders, X, ShieldAlert, FileText, 
+  Radar, Camera, ChevronLeft, ChevronRight 
+} from 'lucide-react';
 import useMapStore from '../store/useMapStore';
 import { marsDateFromEarthDate } from '../utils/marsUtils';
 import { getSolarLongitude, getSolFromDate } from '../data/weatherSimulation';
@@ -21,8 +25,22 @@ export default function TopBar() {
     setFlightPlanOpen,
     activeContingency,
     setContingencyModalOpen,
+    rightSidebarOpen,
+    setRightSidebarOpen,
+    isImageryModalOpen,
+    setImageryModalOpen,
   } = useMapStore();
   const [time, setTime] = useState(new Date());
+  const opsHubRef = useRef(null);
+
+  const scrollOpsHub = (direction) => {
+    if (opsHubRef.current) {
+      opsHubRef.current.scrollBy({
+        left: direction === 'left' ? -180 : 180,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -45,156 +63,222 @@ export default function TopBar() {
   ];
 
   return (
-    <header className="h-12 w-full glass-panel-solid border-b border-mars-500/30 flex items-center justify-between px-3 z-50 shrink-0 bg-space-950/95 backdrop-blur-xl">
-      {/* Left: Logo & Audio Control */}
-      <div className="flex items-center gap-2.5">
-        <div className="flex items-center gap-2">
-          <Globe2 className="text-mars-400 w-5 h-5 shrink-0" />
-          <h1 className="font-display text-mars-400 font-bold text-base tracking-widest leading-none">
-            MARSWALK
-          </h1>
-          <span className="font-display text-mars-300/60 font-normal text-[11px] tracking-[0.25em] hidden lg:inline">
-            EXPLORER
-          </span>
+    <header 
+      onWheel={(e) => {
+        if (e.deltaY !== 0 && e.deltaX === 0) {
+          e.currentTarget.scrollLeft += e.deltaY;
+        }
+      }}
+      className="h-14 w-full border-b border-white/[0.06] flex items-center justify-between px-3.5 z-50 shrink-0 bg-[#0B0C10]/95 backdrop-blur-2xl relative shadow-hud-glass overflow-x-auto overflow-y-hidden custom-scrollbar-x gap-3"
+    >
+      {/* Subtle top edge laser line */}
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-mars-500/40 to-transparent pointer-events-none" />
+
+      {/* Left: Brand Identity & Audio Control */}
+      <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-mars-400 to-mars-500 flex items-center justify-center shadow-neon-mars border border-white/15 shrink-0">
+            <Globe2 className="text-white w-4.5 h-4.5 animate-spin-slow" />
+          </div>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5 leading-none">
+              <span className="font-display text-transparent bg-clip-text bg-gradient-to-r from-white via-mars-200 to-mars-400 font-bold text-[15px] tracking-[0.15em]">
+                MARSWALK
+              </span>
+              <span className="font-mono text-cyber-cyan/80 text-[10px] tracking-[0.2em] font-semibold">
+                OS-26
+              </span>
+            </div>
+            <span className="text-[9px] text-space-300 font-mono tracking-[0.12em] hidden sm:inline">
+              NASA Planetary Mission Control
+            </span>
+          </div>
         </div>
 
-        {/* Audio Toggle & Rack Trigger */}
-        <div className="flex items-center bg-space-900/60 rounded-md border border-space-800 p-0.5">
+        {/* Tactical Ambient Audio Pill */}
+        <div className="flex items-center bg-space-900/70 rounded-xl border border-white/[0.06] p-0.5 shadow-bento shrink-0">
           <button
             onClick={toggleAudio}
-            className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs font-mono transition-all ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${
               isAudioActive
-                ? 'bg-cyan-500/20 text-cyan-300'
-                : 'text-space-400 hover:text-white'
+                ? 'bg-cyber-cyan/10 text-cyber-cyan shadow-neon-cyan border border-cyber-cyan/25'
+                : 'text-space-300 hover:text-white hover:bg-space-800/50 border border-transparent'
             }`}
-            title="Toggle Martian Ambient Audio"
+            title="Toggle Ambient Martian Audio (Wind, Life Support & Geiger)"
           >
-            {isAudioActive ? <Volume2 className="w-3.5 h-3.5 text-cyan-400 animate-pulse" /> : <VolumeX className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">{isAudioActive ? 'AUDIO ON' : 'AUDIO OFF'}</span>
+            {isAudioActive ? (
+              <div className="flex items-center gap-1">
+                <Volume2 className="w-3.5 h-3.5 text-cyber-cyan shrink-0" />
+                <div className="flex items-end gap-[2px] h-3 px-0.5">
+                  <span className="w-[2px] bg-cyber-cyan rounded-full eq-bar-1" />
+                  <span className="w-[2px] bg-cyber-cyan rounded-full eq-bar-2" />
+                  <span className="w-[2px] bg-cyber-cyan rounded-full eq-bar-3" />
+                  <span className="w-[2px] bg-cyber-cyan rounded-full eq-bar-4" />
+                </div>
+              </div>
+            ) : (
+              <VolumeX className="w-3.5 h-3.5" />
+            )}
+            <span className="hidden xl:inline text-[11px] font-semibold">{isAudioActive ? 'AUDIO ON' : 'AUDIO'}</span>
           </button>
           
           <button
             onClick={() => setAudioRackOpen(true)}
-            className="p-1 hover:text-cyan-300 text-space-400 border-l border-space-800 transition-colors"
-            title="Open Audio Mixer & Visualizer Console"
+            className="p-1 hover:text-cyan-300 text-space-400 border-l border-white/[0.08] transition-colors rounded-r"
+            title="Open Audio Synthesizer Rack"
           >
             <Sliders className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* Center: Mission Clock & Systems Status */}
-      <div className="hidden md:flex items-center gap-3 text-xs font-mono bg-space-900/70 px-3.5 py-1.5 rounded-full border border-space-700/70">
-        <div className="flex items-center gap-1.5 text-mars-400">
-          <Clock className="w-3.5 h-3.5" />
-          <span className="font-semibold">{md.formatted}</span>
+      {/* Center: Mission Control Flight Deck Telemetry Capsule */}
+      <div className="hidden lg:flex items-center gap-3.5 text-xs font-mono bg-space-900/80 px-4 py-1.5 rounded-2xl border border-white/[0.06] shadow-hud-glass backdrop-blur-xl shrink-0">
+        <div className="flex items-center gap-1.5 text-mars-400 font-semibold">
+          <Clock className="w-3.5 h-3.5 text-mars-400" />
+          <span>{md.formatted}</span>
         </div>
-        <div className="text-white font-bold text-sm">
+        <div className="text-white font-bold text-sm tracking-wider font-mono">
           {md.timeFormatted}
         </div>
-        <div className="text-space-400 border-l border-space-700 pl-2.5 text-[11px]">
+        <div className="text-space-300 border-l border-white/[0.06] pl-3 text-[11px]">
           {earthUTC}
         </div>
-        <div className="text-space-400 border-l border-space-700 pl-2.5 text-[11px]">
-          Ls {ls.toFixed(1)}°
+        <div className="text-space-300 border-l border-white/[0.06] pl-3 text-[11px] flex items-center gap-1">
+          <span className="text-cyber-amber font-medium">Ls</span> {ls.toFixed(1)}°
         </div>
-        <div className="hidden xl:flex items-center gap-1 text-[11px] text-space-400 border-l border-space-700 pl-2.5" title="One-way light time speed from Mars to NASA Houston DSN">
-          <Radio className="w-3 h-3 text-amber-400" />
+        <div className="hidden xl:flex items-center gap-1.5 text-[11px] text-space-300 border-l border-white/[0.06] pl-3" title="One-way light time speed from Mars to NASA Houston DSN">
+          <Radio className="w-3 h-3 text-cyber-amber animate-pulse" />
           <span>DSN: {commsMinutes}m {commsSeconds}s</span>
         </div>
-        <div className="flex items-center gap-1.5 border-l border-space-700 pl-2.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_6px_rgba(34,197,94,0.7)]" />
-          <span className="text-green-500 text-[10px] font-semibold tracking-wider">NOMINAL</span>
+        <div className="flex items-center gap-1.5 border-l border-white/[0.06] pl-3">
+          <span className="status-dot active" />
+          <span className="text-cyber-cyan text-[10px] font-bold tracking-widest uppercase glow-text-cyan">NOMINAL</span>
         </div>
       </div>
 
-      {/* Right: Sky Ephemeris, Science Lab, Marswalk Sim & View Modes */}
-      <div className="flex items-center gap-2">
-        {/* Martian Sky & Moons Ephemeris Trigger */}
-        <button
-          onClick={() => setSkyEphemerisOpen(!isSkyEphemerisOpen)}
-          className={`px-2.5 py-1.5 border rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm ${
-            isSkyEphemerisOpen
-              ? 'bg-amber-600 hover:bg-amber-500 text-white border-amber-400 ring-2 ring-amber-400/50'
-              : 'bg-gradient-to-r from-amber-950/60 to-amber-900/60 hover:from-amber-900 hover:to-amber-800 border-amber-500/40 text-amber-200'
-          }`}
-          title="Toggle Martian Sky & Moons (Phobos/Deimos) Ephemeris"
-        >
-          {isSkyEphemerisOpen ? (
-            <>
-              <X className="w-3.5 h-3.5" />
-              <span>Close Sky</span>
-            </>
-          ) : (
-            <>
-              <Orbit className="w-3.5 h-3.5 text-amber-400" />
-              <span className="hidden md:inline">Sky & Moons</span>
-              <span className="inline md:hidden">Sky</span>
-            </>
-          )}
-        </button>
+      {/* Right: Operations Suite & Viewport Switcher */}
+      <div className="flex items-center gap-2 shrink-0">
+        {/* Operations Hub (Lab, Sky, Contingency, Brief, Imagery, HUD) with Horizontal Scroll Bar */}
+        <div className="flex items-center bg-space-900/60 p-0.5 rounded-xl border border-white/[0.06] shadow-bento">
+          <button
+            onClick={() => scrollOpsHub('left')}
+            className="w-5 h-7 flex items-center justify-center text-space-400 hover:text-white hover:bg-space-800/60 rounded-l transition-colors shrink-0"
+            title="Scroll Operations Left"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </button>
 
-        {/* Science Lab Modal Trigger */}
-        <button
-          onClick={() => setScienceLabOpen(!isScienceLabOpen)}
-          className={`px-2.5 py-1.5 border rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm ${
-            isScienceLabOpen
-              ? 'bg-purple-600 hover:bg-purple-500 text-white border-purple-400 ring-2 ring-purple-400/50'
-              : 'bg-gradient-to-r from-purple-900/60 to-indigo-900/60 hover:from-purple-800/80 hover:to-indigo-800/80 border-purple-500/40 text-purple-200'
-          }`}
-          title="Toggle In-Situ Science Laboratory & SuperCam Spectrometer"
-        >
-          {isScienceLabOpen ? (
-            <>
-              <X className="w-3.5 h-3.5" />
-              <span>Close Lab</span>
-            </>
-          ) : (
-            <>
-              <FlaskConical className="w-3.5 h-3.5 text-purple-400" />
-              <span className="hidden md:inline">Science Lab</span>
-              <span className="inline md:hidden">Lab</span>
-            </>
-          )}
-        </button>
+          <div 
+            ref={opsHubRef}
+            onWheel={(e) => {
+              if (e.deltaY !== 0 && e.deltaX === 0) {
+                e.currentTarget.scrollLeft += e.deltaY;
+              }
+            }}
+            className="flex items-center gap-1.5 overflow-x-auto overflow-y-hidden custom-scrollbar-x py-0.5 px-1 max-w-[280px] sm:max-w-[360px] md:max-w-[480px] lg:max-w-[620px] xl:max-w-none whitespace-nowrap scroll-smooth"
+          >
+            {/* Science Lab */}
+            <button
+              onClick={() => setScienceLabOpen(!isScienceLabOpen)}
+              className={`px-2.5 py-1.5 border rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all shadow-sm shrink-0 whitespace-nowrap ${
+                isScienceLabOpen
+                  ? 'bg-purple-600 text-white border-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.4)]'
+                  : 'bg-space-900/80 hover:bg-space-850 border-white/[0.08] hover:border-purple-500/40 text-space-200'
+              }`}
+              title="In-Situ Science Laboratory & SuperCam Spectrometer"
+            >
+              {isScienceLabOpen ? <X className="w-3.5 h-3.5" /> : <FlaskConical className="w-3.5 h-3.5 text-purple-400" />}
+              <span>Science Lab</span>
+            </button>
 
-        {/* What-If Contingency Simulator Trigger */}
-        <button
-          onClick={() => setContingencyModalOpen(true)}
-          className={`px-2.5 py-1.5 border rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm ${
-            activeContingency
-              ? 'bg-red-600 hover:bg-red-500 text-white border-red-400 ring-2 ring-red-400/60 animate-pulse'
-              : 'bg-gradient-to-r from-red-950/60 to-rose-900/60 hover:from-red-900 hover:to-rose-800 border-red-500/40 text-red-200'
-          }`}
-          title="Open NASA What-If Contingency & Anomaly Simulator"
-        >
-          <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
-          <span className="hidden lg:inline">{activeContingency ? 'CONTINGENCY!' : 'What-If Sim'}</span>
-          <span className="inline lg:hidden">{activeContingency ? 'ALERT' : 'What-If'}</span>
-        </button>
+            {/* Martian Sky & Moons */}
+            <button
+              onClick={() => setSkyEphemerisOpen(!isSkyEphemerisOpen)}
+              className={`px-2.5 py-1.5 border rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all shadow-sm shrink-0 whitespace-nowrap ${
+                isSkyEphemerisOpen
+                  ? 'bg-amber-600 text-white border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.4)]'
+                  : 'bg-space-900/80 hover:bg-space-850 border-white/[0.08] hover:border-amber-500/40 text-space-200'
+              }`}
+              title="Martian Sky & Moons (Phobos/Deimos Orbital Ephemeris)"
+            >
+              {isSkyEphemerisOpen ? <X className="w-3.5 h-3.5" /> : <Orbit className="w-3.5 h-3.5 text-amber-400" />}
+              <span>Sky & Moons</span>
+            </button>
 
-        {/* Flight Plan Brief Modal Trigger */}
-        <button
-          onClick={() => setFlightPlanOpen(!isFlightPlanOpen)}
-          className={`px-2.5 py-1.5 border rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm ${
-            isFlightPlanOpen
-              ? 'bg-blue-600 hover:bg-blue-500 text-white border-blue-400 ring-2 ring-blue-400/50'
-              : 'bg-gradient-to-r from-blue-950/60 to-cyan-900/60 hover:from-blue-900 hover:to-cyan-800 border-blue-500/40 text-blue-200'
-          }`}
-          title="View & Export Official NASA EVA Flight Briefing"
-        >
-          <FileText className="w-3.5 h-3.5 text-blue-400" />
-          <span className="hidden lg:inline">Flight Brief</span>
-          <span className="inline lg:hidden">Brief</span>
-        </button>
+            {/* What-If Contingency Simulator */}
+            <button
+              onClick={() => setContingencyModalOpen(true)}
+              className={`px-2.5 py-1.5 border rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all shadow-sm shrink-0 whitespace-nowrap ${
+                activeContingency
+                  ? 'bg-rose-600 text-white border-rose-400 shadow-[0_0_16px_rgba(244,63,94,0.6)] animate-pulse'
+                  : 'bg-space-900/80 hover:bg-space-850 border-white/[0.08] hover:border-rose-500/40 text-space-200'
+              }`}
+              title="NASA What-If Contingency & Anomaly Simulator"
+            >
+              <ShieldAlert className={`w-3.5 h-3.5 ${activeContingency ? 'text-white' : 'text-rose-400'}`} />
+              <span>{activeContingency ? 'ALERT ACTIVE' : 'Contingency'}</span>
+            </button>
 
-        {/* Marswalk Simulator Button / Exit HUD */}
+            {/* Flight Plan Brief */}
+            <button
+              onClick={() => setFlightPlanOpen(!isFlightPlanOpen)}
+              className={`px-2.5 py-1.5 border rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all shadow-sm shrink-0 whitespace-nowrap ${
+                isFlightPlanOpen
+                  ? 'bg-cyan-600 text-white border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
+                  : 'bg-space-900/80 hover:bg-space-850 border-white/[0.08] hover:border-cyan-500/40 text-space-200'
+              }`}
+              title="Official NASA EVA Flight Plan & Checklist"
+            >
+              <FileText className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Flight Brief</span>
+            </button>
+
+            {/* NASA HiRISE & Rover Raw Imagery Explorer */}
+            <button
+              onClick={() => setImageryModalOpen(!isImageryModalOpen)}
+              className={`px-2.5 py-1.5 border rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all shadow-sm shrink-0 whitespace-nowrap ${
+                isImageryModalOpen
+                  ? 'bg-rose-600 text-white border-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.4)]'
+                  : 'bg-space-900/80 hover:bg-space-850 border-white/[0.08] hover:border-rose-500/40 text-space-200'
+              }`}
+              title="NASA HiRISE & Rover Raw Imagery Explorer (PDS / Mastcam-Z)"
+            >
+              <Camera className="w-3.5 h-3.5 text-rose-400" />
+              <span>Imagery</span>
+            </button>
+
+            {/* HUD Telemetry Feed Toggle */}
+            <button
+              onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+              className={`px-2.5 py-1.5 border rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all shadow-sm shrink-0 whitespace-nowrap ${
+                rightSidebarOpen
+                  ? 'bg-cyber-cyan/15 text-cyber-cyan border-cyber-cyan/40 shadow-neon-cyan'
+                  : 'bg-space-900/80 hover:bg-space-850 border-white/[0.08] hover:border-cyber-cyan/40 text-space-200'
+              }`}
+              title="Toggle Right HUD Telemetry & Radar Panel"
+            >
+              <Radar className="w-3.5 h-3.5 text-cyber-cyan" />
+              <span>HUD Feed</span>
+            </button>
+          </div>
+
+          <button
+            onClick={() => scrollOpsHub('right')}
+            className="w-5 h-7 flex items-center justify-center text-space-400 hover:text-white hover:bg-space-800/60 rounded-r transition-colors shrink-0"
+            title="Scroll Operations Right"
+          >
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Marswalk First-Person Helmet HUD Simulation (Primary CTA) */}
         <button
           onClick={() => setEVASimulating(!isEVASimulating)}
-          className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-md ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-display font-bold uppercase tracking-[0.12em] flex items-center gap-1.5 transition-all shadow-lg relative overflow-hidden shrink-0 whitespace-nowrap ${
             isEVASimulating
-              ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/30 ring-2 ring-red-400 animate-pulse'
-              : 'bg-gradient-to-r from-mars-600 to-amber-600 hover:from-mars-500 hover:to-amber-500 text-white shadow-mars-600/25'
+              ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-neon-mars ring-2 ring-rose-400/50 animate-pulse'
+              : 'bg-gradient-to-r from-mars-400 to-mars-500 hover:brightness-110 text-white shadow-neon-mars border border-white/15'
           }`}
           title={isEVASimulating ? "Exit Marswalk Helmet HUD" : "Launch First-Person Astronaut Helmet EVA HUD"}
         >
@@ -206,22 +290,21 @@ export default function TopBar() {
           ) : (
             <>
               <Play className="w-3.5 h-3.5 fill-white" />
-              <span className="hidden md:inline">Marswalk HUD</span>
-              <span className="inline md:hidden">HUD</span>
+              <span className="tracking-[0.15em]">EVA HUD</span>
             </>
           )}
         </button>
 
-        {/* 2D / 3D / Split Switcher */}
-        <div className="flex items-center gap-0.5 bg-space-900/60 rounded-lg p-0.5 border border-space-700">
+        {/* Viewport Segmented Switcher (2D / 3D / Split) */}
+        <div className="flex items-center bg-space-900/90 rounded-lg p-0.5 border border-white/[0.08] shadow-inner shrink-0 whitespace-nowrap">
           {viewModes.map(({ id, icon: Icon, label }) => (
             <button
               key={id}
               onClick={() => setViewMode(id)}
-              className={`px-2 py-1 rounded-md flex items-center gap-1 transition-all text-xs font-medium ${
+              className={`px-2 py-1 rounded-md flex items-center gap-1 transition-all text-xs font-mono font-medium shrink-0 ${
                 viewMode === id
-                  ? 'bg-mars-500/20 text-mars-400 shadow-sm'
-                  : 'text-space-400 hover:text-white hover:bg-space-800'
+                  ? 'bg-gradient-to-r from-mars-500/25 to-mars-600/20 text-mars-300 border border-mars-500/40 shadow-[0_0_8px_rgba(244,112,80,0.25)]'
+                  : 'text-space-400 hover:text-white hover:bg-space-800/40 border border-transparent'
               }`}
               title={label}
             >

@@ -164,20 +164,20 @@ export default function ScienceLabModal() {
         exit={{ opacity: 0, scale: 0.95 }}
         className="glass-panel-solid w-full max-w-5xl h-[90vh] rounded-2xl flex flex-col overflow-hidden border-2 border-mars-500/60 shadow-2xl bg-space-950 relative z-10"
       >
-        {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-space-800 bg-space-900/60 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-mars-500/20 text-mars-400 border border-mars-500/30">
+        {/* Modal Header (Horizontal Scrollable Menu Bar) */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-space-800 bg-space-900/60 shrink-0 overflow-x-auto overflow-y-hidden custom-scrollbar-x gap-3">
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="p-2 rounded-lg bg-mars-500/20 text-mars-400 border border-mars-500/30 shrink-0">
               <FlaskConical className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-display font-bold text-white tracking-wide flex items-center gap-2">
+              <h2 className="text-lg font-display font-bold text-white tracking-wide flex items-center gap-2 whitespace-nowrap">
                 IN-SITU SCIENCE LABORATORY
                 <span className="text-xs font-mono font-normal text-mars-400 bg-mars-950/80 px-2 py-0.5 rounded border border-mars-500/30">
                   SuperCam & PIXL Suite
                 </span>
               </h2>
-              <p className="text-xs text-space-400 font-mono">
+              <p className="text-xs text-space-400 font-mono whitespace-nowrap">
                 Laser-Induced Breakdown Spectroscopy (LIBS) & Planetary Astrobiology Caching
               </p>
             </div>
@@ -185,7 +185,7 @@ export default function ScienceLabModal() {
           
           <button 
             onClick={() => setScienceLabOpen(false)}
-            className="px-3.5 py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl flex items-center gap-1.5 shadow-lg transition-all hover:scale-105 active:scale-95 border border-white/40 cursor-pointer font-mono text-xs"
+            className="px-3.5 py-1.5 bg-rose-500/25 hover:bg-rose-500/40 text-rose-200 font-bold rounded-xl flex items-center gap-1.5 shadow-neon-mars transition-all hover:scale-105 active:scale-95 border border-rose-400/60 cursor-pointer font-mono text-xs backdrop-blur-md shrink-0 whitespace-nowrap"
             title="Close Science Lab (ESC)"
           >
             <X className="w-4 h-4" />
@@ -195,8 +195,8 @@ export default function ScienceLabModal() {
 
         {/* Modal Body */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Left: Rock Target Selection */}
-          <div className="w-80 border-r border-space-800 p-4 flex flex-col gap-3 shrink-0 overflow-y-auto custom-scrollbar bg-space-900/30">
+          {/* Left: Rock Target Selection (Vertical Scrollable) */}
+          <div className="w-80 border-r border-space-800 p-4 flex flex-col gap-3 shrink-0 overflow-y-auto overflow-x-hidden custom-scrollbar-y bg-space-900/30">
             <div className="text-xs font-mono text-space-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-mars-400" />
               <span>Select Geological Target</span>
@@ -235,7 +235,7 @@ export default function ScienceLabModal() {
                   <span>Sample Tubes ({safeSamples.length}/38)</span>
                 </span>
               </div>
-              <div className="space-y-1.5 max-h-36 overflow-y-auto custom-scrollbar">
+              <div className="space-y-1.5 max-h-36 overflow-y-auto overflow-x-hidden custom-scrollbar-y">
                 {safeSamples.map((s) => (
                   <div key={s.id} className="text-[11px] p-2 bg-space-800/60 rounded border border-space-700/50 flex flex-col">
                     <span className="font-semibold text-space-200">{s.name}</span>
@@ -249,8 +249,8 @@ export default function ScienceLabModal() {
             </div>
           </div>
 
-          {/* Right: Spectrometer Analysis & Biosignature Evaluation */}
-          <div className="flex-1 p-6 overflow-y-auto custom-scrollbar flex flex-col gap-6">
+          {/* Right: Spectrometer Analysis & Biosignature Evaluation (Vertical Scrollable) */}
+          <div className="flex-1 p-6 overflow-y-auto overflow-x-hidden custom-scrollbar-y flex flex-col gap-6">
             {/* Target Overview Card */}
             <div className="p-4 rounded-xl bg-space-900/60 border border-space-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>

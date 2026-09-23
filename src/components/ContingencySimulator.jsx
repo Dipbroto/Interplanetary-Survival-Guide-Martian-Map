@@ -129,18 +129,18 @@ export default function ContingencySimulator() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="glass-panel-solid w-full max-w-2xl max-h-[92vh] rounded-2xl border-2 border-red-500/60 bg-space-950 shadow-2xl flex flex-col overflow-hidden text-primary"
             >
-              {/* Modal Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-space-800 bg-space-900/60 shrink-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-red-600/30 border border-red-500 flex items-center justify-center text-red-400">
+              {/* Modal Header (Horizontal Scrollable Menu Bar) */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-space-800 bg-space-900/60 shrink-0 overflow-x-auto overflow-y-hidden custom-scrollbar-x gap-3">
+                <div className="flex items-center gap-3 shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-red-600/30 border border-red-500 flex items-center justify-center text-red-400 shrink-0">
                     <ShieldAlert className="w-5 h-5" />
                   </div>
                   <div>
-                    <h2 className="text-sm font-bold text-white tracking-widest uppercase flex items-center gap-2">
+                    <h2 className="text-sm font-bold text-white tracking-widest uppercase flex items-center gap-2 whitespace-nowrap">
                       <span>NASA What-If Mission Simulator</span>
                       <ProvenanceBadge type="SIMULATED" size="xs" detail="Contingency Model" />
                     </h2>
-                    <p className="text-[10px] text-space-400">
+                    <p className="text-[10px] text-space-400 whitespace-nowrap">
                       DYNAMIC MARSWALK RISK & ABORT DECISION SUPPORT
                     </p>
                   </div>
@@ -148,15 +148,15 @@ export default function ContingencySimulator() {
 
                 <button
                   onClick={() => setContingencyModalOpen(false)}
-                  className="px-3 py-1.5 bg-space-800 hover:bg-space-700 text-white rounded-xl flex items-center gap-1.5 transition-all border border-space-700 cursor-pointer"
+                  className="px-3 py-1.5 bg-rose-500/25 hover:bg-rose-500/40 text-rose-200 rounded-xl flex items-center gap-1.5 transition-all border border-rose-400/60 cursor-pointer shadow-neon-mars backdrop-blur-md font-bold shrink-0 whitespace-nowrap"
                 >
                   <X className="w-4 h-4" />
                   <span>CLOSE (ESC)</span>
                 </button>
               </div>
 
-              {/* Modal Content */}
-              <div className="flex-1 p-6 overflow-y-auto custom-scrollbar space-y-5">
+              {/* Modal Content (Vertical Scrollable) */}
+              <div className="flex-1 p-6 overflow-y-auto overflow-x-hidden custom-scrollbar-y space-y-5">
                 {/* Select Contingency Scenario */}
                 <div>
                   <div className="text-[11px] font-bold text-space-300 uppercase tracking-wider mb-2 flex items-center justify-between">

@@ -90,7 +90,7 @@ const MissionTimeline = () => {
         </form>
       </div>
 
-      <div className="p-5 flex-1 overflow-y-auto">
+      <div className="p-5 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar-y">
         <div className="relative pl-6 space-y-6 before:absolute before:left-2 before:top-3 before:bottom-3 before:w-0.5 before:bg-space-800">
           <AnimatePresence>
             {missionActivities.length === 0 ? (

@@ -157,7 +157,7 @@ const LayerPanel = () => {
   };
 
   return (
-    <div className="p-4 h-full overflow-y-auto custom-scrollbar bg-space-950/80 rounded-xl">
+    <div className="p-4 h-full overflow-y-auto overflow-x-hidden custom-scrollbar-y bg-space-950/80 rounded-xl">
       <h2 className="font-orbitron text-xl text-primary mb-6 flex items-center gap-2">
         <Layers className="text-mars-500" />
         Map Layers

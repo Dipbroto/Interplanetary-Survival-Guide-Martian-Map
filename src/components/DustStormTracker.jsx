@@ -60,7 +60,7 @@ const DustStormTracker = () => {
   }, [currentSol]);
 
   return (
-    <div className="w-full h-full text-primary flex flex-col gap-4 overflow-y-auto custom-scrollbar p-2">
+    <div className="w-full h-full text-primary flex flex-col gap-4 overflow-y-auto overflow-x-hidden custom-scrollbar-y p-2">
       {/* Header */}
       <div className="flex justify-between items-center mb-2">
         <div>

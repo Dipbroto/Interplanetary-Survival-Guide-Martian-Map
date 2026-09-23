@@ -253,6 +253,88 @@ class MarsAudioSynthesizer {
     this.geigerVol = val;
   }
 
+  playUiClick(pitch = 880) {
+    if (!this.ctx) this.init();
+    if (!this.ctx || this.isMuted) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(pitch, now);
+      osc.frequency.exponentialRampToValueAtTime(pitch * 0.5, now + 0.04);
+      
+      gain.gain.setValueAtTime(0.04, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+      
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start(now);
+      osc.stop(now + 0.04);
+    } catch (e) {}
+  }
+
+  playUiHover() {
+    if (!this.ctx || this.isMuted) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(1200, now);
+      gain.gain.setValueAtTime(0.015, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.02);
+      
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start(now);
+      osc.stop(now + 0.02);
+    } catch (e) {}
+  }
+
+  playUiSwoosh() {
+    if (!this.ctx || this.isMuted) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.exponentialRampToValueAtTime(440, now + 0.08);
+      
+      gain.gain.setValueAtTime(0.03, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+      
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start(now);
+      osc.stop(now + 0.08);
+    } catch (e) {}
+  }
+
+  playSuccessChime() {
+    if (!this.ctx) this.init();
+    if (!this.ctx || this.isMuted) return;
+    try {
+      const now = this.ctx.currentTime;
+      [587.33, 880].forEach((freq, i) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + i * 0.08);
+        gain.gain.setValueAtTime(0.05, now + i * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.08 + 0.3);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(now + i * 0.08);
+        osc.stop(now + i * 0.08 + 0.3);
+      });
+    } catch (e) {}
+  }
+
   getFrequencyData(array) {
     if (this.analyser) {
       this.analyser.getByteFrequencyData(array);
@@ -261,3 +343,8 @@ class MarsAudioSynthesizer {
 }
 
 export const marsAudio = new MarsAudioSynthesizer();
+
+export const playUiClick = () => marsAudio.playUiClick();
+export const playUiHover = () => marsAudio.playUiHover();
+export const playUiSwoosh = () => marsAudio.playUiSwoosh();
+export const playSuccessChime = () => marsAudio.playSuccessChime();

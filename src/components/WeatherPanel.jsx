@@ -38,7 +38,7 @@ const WeatherPanel = () => {
   const dustOp = isDustContingency ? 2.9 : (weather.dustOpacity ?? 0.5);
 
   return (
-    <div className="w-full h-full text-primary flex flex-col gap-4 overflow-y-auto custom-scrollbar p-2">
+    <div className="w-full h-full text-primary flex flex-col gap-4 overflow-y-auto overflow-x-hidden custom-scrollbar-y p-2">
       {/* Header */}
       <div className="flex justify-between items-center mb-2">
         <div>
@@ -185,9 +185,16 @@ const WeatherPanel = () => {
             </h3>
             <ProvenanceBadge type="SIMULATED" size="xs" detail="Seasonal Sol Model" />
           </div>
-          <div className="flex justify-between items-stretch gap-2 overflow-x-auto custom-scrollbar pb-2">
+          <div 
+            onWheel={(e) => {
+              if (e.deltaY !== 0 && e.deltaX === 0) {
+                e.currentTarget.scrollLeft += e.deltaY;
+              }
+            }}
+            className="flex justify-between items-stretch gap-2 overflow-x-auto overflow-y-hidden custom-scrollbar-x pb-2"
+          >
             {forecast.map((day) => (
-              <div key={day.sol} className="flex-1 min-w-[70px] bg-space-800/40 border border-space-700/50 rounded-lg p-2 flex flex-col items-center justify-between">
+              <div key={day.sol} className="flex-1 min-w-[70px] shrink-0 bg-space-800/40 border border-space-700/50 rounded-lg p-2 flex flex-col items-center justify-between">
                 <div className="text-xs text-secondary font-mono mb-2">Sol {day.sol}</div>
                 <CloudFog size={20} className={day.dustOpacity > 1.0 ? 'text-mars-400' : 'text-space-400'} />
                 <div className="mt-3 text-center">

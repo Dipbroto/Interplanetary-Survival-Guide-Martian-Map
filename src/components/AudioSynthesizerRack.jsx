@@ -95,7 +95,7 @@ export default function AudioSynthesizerRack() {
           </div>
           <button
             onClick={() => setAudioRackOpen(false)}
-            className="px-3 py-1 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg flex items-center gap-1 shadow transition-all border border-white/40 cursor-pointer"
+            className="px-3 py-1 bg-rose-500/25 hover:bg-rose-500/40 text-rose-200 font-bold rounded-xl flex items-center gap-1 shadow-neon-mars transition-all hover:scale-105 active:scale-95 border border-rose-400/60 cursor-pointer backdrop-blur-md"
             title="Close Audio Mixer (ESC)"
           >
             <X className="w-3.5 h-3.5" />

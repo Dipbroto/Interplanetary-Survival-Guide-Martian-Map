@@ -3,19 +3,20 @@
 @tailwind utilities;
 
 :root {
-  --mars-primary: #f47050;
-  --mars-secondary: #ec4c2e;
-  --mars-dark: #410e09;
-  --space-bg: #0d0f18;
-  --space-surface: #1a1d2e;
-  --space-border: #2a2d40;
-  --text-primary: #f0f2f7;
-  --text-secondary: #97a3c5;
-  --text-muted: #546197;
-  --success: #22c55e;
-  --warning: #eab308;
-  --danger: #ef4444;
-  --info: #3b82f6;
+  --mars-primary: #E27B58;
+  --mars-accent: #FF4C29;
+  --mars-dark: #380d08;
+  --space-bg: #0B0C10;
+  --space-surface: #0f1420;
+  --space-surface-elevated: #141a2d;
+  --space-border: #1e2640;
+  --text-primary: #e8eaf0;
+  --text-secondary: #9ea5be;
+  --text-muted: #4a5478;
+  --success: #10b981;
+  --warning: #F5A623;
+  --danger: #f43f5e;
+  --info: #00FFCC;
 }
 
 * {
@@ -30,73 +31,185 @@ html, body, #root {
   overflow: hidden;
   background-color: var(--space-bg);
   color: var(--text-primary);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Scrollbar */
+/* ================================
+   ULTRA-THIN SCROLLBAR — AEROSPACE
+   ================================ */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--space-bg);
+  background: rgba(11, 12, 16, 0.85);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--space-border);
-  border-radius: 3px;
+  background: linear-gradient(180deg, rgba(226,123,88,0.45), rgba(255,76,41,0.35));
+  border-radius: 9999px;
+  transition: background 0.3s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: var(--mars-primary);
+  box-shadow: 0 0 8px rgba(226,123,88,0.5);
 }
 
-/* Leaflet Overrides for Mars Theme */
+/* Universal custom-scrollbar class (WebKit + Firefox + Mobile) */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(226, 123, 88, 0.45) rgba(11, 12, 16, 0.85);
+  -webkit-overflow-scrolling: touch;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(11, 12, 16, 0.85);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(226,123,88,0.45), rgba(255,76,41,0.35));
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--mars-primary);
+  box-shadow: 0 0 8px rgba(226,123,88,0.6);
+}
+
+/* Horizontal scrollbar styling for aerospace menus & toolbars */
+.custom-scrollbar-x {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 255, 204, 0.35) rgba(11, 12, 16, 0.85);
+  -webkit-overflow-scrolling: touch;
+}
+
+.custom-scrollbar-x::-webkit-scrollbar {
+  height: 4px;
+}
+
+.custom-scrollbar-x::-webkit-scrollbar-track {
+  background: rgba(11, 12, 16, 0.9);
+}
+
+.custom-scrollbar-x::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, rgba(226,123,88,0.5), rgba(0,255,204,0.4));
+  border-radius: 9999px;
+}
+
+.custom-scrollbar-x::-webkit-scrollbar-thumb:hover {
+  background: #00FFCC;
+  box-shadow: 0 0 8px rgba(0, 255, 204, 0.7);
+}
+
+/* Vertical scrollbar styling for aerospace drawers, sidebars & cards */
+.custom-scrollbar-y {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(226, 123, 88, 0.45) rgba(11, 12, 16, 0.85);
+  -webkit-overflow-scrolling: touch;
+}
+
+.custom-scrollbar-y::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar-y::-webkit-scrollbar-track {
+  background: rgba(11, 12, 16, 0.9);
+}
+
+.custom-scrollbar-y::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(226,123,88,0.45), rgba(255,76,41,0.35));
+  border-radius: 9999px;
+}
+
+.custom-scrollbar-y::-webkit-scrollbar-thumb:hover {
+  background: var(--mars-primary);
+  box-shadow: 0 0 8px rgba(226,123,88,0.6);
+}
+
+/* ================================
+   LEAFLET — MODERN MARS ASTRONAUTICS
+   ================================ */
 .leaflet-container {
-  background: #1a1d2e !important;
-  font-family: 'Inter', sans-serif !important;
+  background: #0B0C10 !important;
+  font-family: 'Space Grotesk', sans-serif !important;
 }
 
 .leaflet-control-zoom a {
-  background-color: rgba(26, 29, 46, 0.9) !important;
-  color: #f0f2f7 !important;
-  border-color: var(--space-border) !important;
-  backdrop-filter: blur(10px);
+  background-color: rgba(15, 20, 32, 0.92) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 10px !important;
+  backdrop-filter: blur(20px);
+  transition: all 0.25s ease;
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 600 !important;
 }
 
 .leaflet-control-zoom a:hover {
-  background-color: rgba(42, 45, 64, 0.95) !important;
+  background-color: rgba(226, 123, 88, 0.15) !important;
   color: var(--mars-primary) !important;
+  border-color: rgba(226, 123, 88, 0.4) !important;
+  box-shadow: 0 0 15px rgba(226, 123, 88, 0.3), inset 0 0 8px rgba(226,123,88,0.1) !important;
 }
 
 .leaflet-control-attribution {
-  background-color: rgba(13, 15, 24, 0.8) !important;
+  background-color: rgba(11, 12, 16, 0.9) !important;
   color: var(--text-muted) !important;
-  font-size: 10px !important;
-  backdrop-filter: blur(10px);
+  font-size: 9px !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  backdrop-filter: blur(16px);
+  border-top-left-radius: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-left: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .leaflet-control-attribution a {
   color: var(--mars-primary) !important;
 }
 
+/* Leaflet Popup — Glassmorphism Bento Card */
 .leaflet-popup-content-wrapper {
-  background: rgba(26, 29, 46, 0.95) !important;
+  background: rgba(15, 20, 32, 0.95) !important;
   color: var(--text-primary) !important;
-  border: 1px solid var(--space-border) !important;
-  border-radius: 12px !important;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(226, 123, 88, 0.25) !important;
+  border-radius: 16px !important;
+  backdrop-filter: blur(28px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 25px rgba(226, 123, 88, 0.1), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+}
+
+.leaflet-popup-content {
+  margin: 14px 16px !important;
+  line-height: 1.5 !important;
+  font-family: 'Space Grotesk', sans-serif !important;
 }
 
 .leaflet-popup-tip {
-  background: rgba(26, 29, 46, 0.95) !important;
-  border: 1px solid var(--space-border) !important;
+  background: rgba(15, 20, 32, 0.95) !important;
+  border: 1px solid rgba(226, 123, 88, 0.25) !important;
 }
 
 .leaflet-popup-close-button {
   color: var(--text-secondary) !important;
+  padding: 7px !important;
+  font-size: 16px !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: var(--mars-accent) !important;
 }
 
 /* Mars Map Cursor */
@@ -104,91 +217,187 @@ html, body, #root {
   cursor: crosshair !important;
 }
 
-/* Panel Glass Effect */
+/* ================================
+   GLASSMORPHISM PANELS — BENTO BOX
+   ================================ */
 .glass-panel {
-  background: rgba(26, 29, 46, 0.85);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(42, 45, 64, 0.6);
-  border-radius: 12px;
+  background: rgba(15, 20, 32, 0.78);
+  backdrop-filter: blur(28px) saturate(1.4);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
 }
 
 .glass-panel-solid {
-  background: rgba(26, 29, 46, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(42, 45, 64, 0.8);
+  background: rgba(15, 20, 32, 0.96);
+  backdrop-filter: blur(28px) saturate(1.3);
+  -webkit-backdrop-filter: blur(28px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 12px 44px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-/* Glow Effects */
+/* Bento Box Card Tile */
+.bento-card {
+  background: linear-gradient(145deg, rgba(20, 26, 45, 0.85) 0%, rgba(11, 12, 16, 0.92) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bento-card:hover {
+  border-color: rgba(226, 123, 88, 0.2);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 20px rgba(226, 123, 88, 0.08), inset 0 1px 0 rgba(255,255,255,0.06);
+  transform: translateY(-1px);
+}
+
+/* ================================
+   TACTICAL HUD BRACKETS (CORNER MARKS)
+   ================================ */
+.hud-bracket {
+  position: relative;
+}
+
+.hud-bracket::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid var(--info);
+  border-left: 2px solid var(--info);
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.hud-bracket::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 8px;
+  height: 8px;
+  border-bottom: 2px solid var(--info);
+  border-right: 2px solid var(--info);
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* ================================
+   GLOW / NEON UTILITY EFFECTS
+   ================================ */
 .glow-mars {
-  box-shadow: 0 0 15px rgba(244, 112, 80, 0.2), 0 0 30px rgba(244, 112, 80, 0.1);
+  box-shadow: 0 0 20px rgba(255, 76, 41, 0.35), 0 0 40px rgba(255, 76, 41, 0.12);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.4), 0 0 40px rgba(0, 255, 204, 0.12);
+}
+
+.glow-amber {
+  box-shadow: 0 0 20px rgba(245, 166, 35, 0.4), 0 0 40px rgba(245, 166, 35, 0.12);
 }
 
 .glow-text {
-  text-shadow: 0 0 10px rgba(244, 112, 80, 0.5);
+  text-shadow: 0 0 12px rgba(255, 76, 41, 0.6), 0 0 24px rgba(255, 76, 41, 0.25);
 }
 
-/* Status Indicators */
+.glow-text-cyan {
+  text-shadow: 0 0 12px rgba(0, 255, 204, 0.6), 0 0 24px rgba(0, 255, 204, 0.25);
+}
+
+.glow-text-amber {
+  text-shadow: 0 0 12px rgba(245, 166, 35, 0.6), 0 0 24px rgba(245, 166, 35, 0.25);
+}
+
+/* ================================
+   AUDIO EQUALIZER MICRO-BARS
+   ================================ */
+@keyframes eqBounce {
+  0%, 100% { height: 3px; }
+  50% { height: 14px; }
+}
+
+.eq-bar-1 { animation: eqBounce 0.8s ease-in-out infinite; }
+.eq-bar-2 { animation: eqBounce 0.6s ease-in-out infinite 0.2s; }
+.eq-bar-3 { animation: eqBounce 0.9s ease-in-out infinite 0.4s; }
+.eq-bar-4 { animation: eqBounce 0.7s ease-in-out infinite 0.1s; }
+
+/* ================================
+   STATUS DOT INDICATORS
+   ================================ */
 .status-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   display: inline-block;
   animation: pulse 2s ease-in-out infinite;
 }
 
 .status-dot.active {
-  background-color: var(--success);
-  box-shadow: 0 0 6px var(--success);
+  background-color: var(--info);
+  box-shadow: 0 0 10px var(--info);
 }
 
 .status-dot.warning {
   background-color: var(--warning);
-  box-shadow: 0 0 6px var(--warning);
+  box-shadow: 0 0 8px var(--warning);
 }
 
 .status-dot.danger {
   background-color: var(--danger);
-  box-shadow: 0 0 6px var(--danger);
+  box-shadow: 0 0 8px var(--danger);
 }
 
-/* Data Grid Lines */
+/* ================================
+   DATA GRID LINES (BLUEPRINT)
+   ================================ */
 .grid-lines {
   background-image: 
-    linear-gradient(rgba(42, 45, 64, 0.3) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(42, 45, 64, 0.3) 1px, transparent 1px);
-  background-size: 20px 20px;
+    linear-gradient(rgba(30, 38, 64, 0.25) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 38, 64, 0.25) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
-/* Gauge Styles */
+/* ================================
+   GAUGE RING SVG
+   ================================ */
 .gauge-ring {
   fill: none;
   stroke-linecap: round;
-  transition: stroke-dashoffset 1s ease-in-out;
+  transition: stroke-dashoffset 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Tooltip */
+/* ================================
+   RECHARTS TOOLTIP & THEME
+   ================================ */
 .mars-tooltip {
-  background: rgba(26, 29, 46, 0.95) !important;
+  background: rgba(15, 20, 32, 0.96) !important;
   border: 1px solid var(--space-border) !important;
   color: var(--text-primary) !important;
-  border-radius: 8px !important;
-  padding: 8px 12px !important;
+  border-radius: 12px !important;
+  padding: 10px 14px !important;
   font-size: 12px !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 255, 204, 0.08) !important;
 }
 
-/* Recharts Theme Overrides */
 .recharts-cartesian-grid-horizontal line,
 .recharts-cartesian-grid-vertical line {
-  stroke: rgba(42, 45, 64, 0.5) !important;
+  stroke: rgba(30, 38, 64, 0.45) !important;
 }
 
 .recharts-text {
   fill: var(--text-secondary) !important;
   font-size: 11px !important;
+  font-family: 'JetBrains Mono', monospace !important;
 }
 
-/* Loading animation */
+/* ================================
+   LOADING & SCAN ANIMATIONS
+   ================================ */
 @keyframes marsRotate {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -198,7 +407,6 @@ html, body, #root {
   animation: marsRotate 20s linear infinite;
 }
 
-/* Scan line effect */
 @keyframes scanline {
   0% { transform: translateY(-100%); }
   100% { transform: translateY(100vh); }
@@ -210,34 +418,32 @@ html, body, #root {
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(244, 112, 80, 0.3), transparent);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 204, 0.25), transparent);
   animation: scanline 8s linear infinite;
   pointer-events: none;
 }
 
-/* Route line animation */
+/* ================================
+   ROUTE LINE & WAYPOINT ANIMATIONS
+   ================================ */
 @keyframes dashMove {
-  to {
-    stroke-dashoffset: -20;
-  }
+  to { stroke-dashoffset: -20; }
 }
 
 .route-line-animated {
   animation: dashMove 1s linear infinite;
 }
 
-/* Waypoint marker pulse */
 @keyframes waypointPulse {
   0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.5); opacity: 0.5; }
+  50% { transform: scale(1.6); opacity: 0.4; }
 }
 
 .waypoint-pulse {
   animation: waypointPulse 2s ease-in-out infinite;
 }
 
-/* Number ticker */
 @keyframes countUp {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -247,7 +453,9 @@ html, body, #root {
   animation: countUp 0.3s ease-out;
 }
 
-/* Custom Rover Icon & Motion Radar Rings */
+/* ================================
+   ROVER ICON & RADAR RING EFFECTS
+   ================================ */
 .custom-rover-icon {
   background: transparent !important;
   border: none !important;
@@ -256,13 +464,11 @@ html, body, #root {
 @keyframes roverRadarPing {
   0% {
     transform: translate(-50%, -50%) scale(0.6);
-    opacity: 0.95;
+    opacity: 0.9;
   }
-  60% {
-    opacity: 0.5;
-  }
+  60% { opacity: 0.45; }
   100% {
-    transform: translate(-50%, -50%) scale(2.6);
+    transform: translate(-50%, -50%) scale(2.8);
     opacity: 0;
   }
 }
@@ -274,8 +480,8 @@ html, body, #root {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 2px solid #06b6d4;
-  box-shadow: 0 0 14px #06b6d4;
+  border: 2px solid var(--info);
+  box-shadow: 0 0 18px var(--info);
   pointer-events: none;
   animation: roverRadarPing 1.8s cubic-bezier(0.1, 0.5, 0.4, 1) infinite;
 }
@@ -287,14 +493,14 @@ html, body, #root {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 2px solid #f59e0b;
-  box-shadow: 0 0 16px #f59e0b;
+  border: 2px solid var(--warning);
+  box-shadow: 0 0 18px var(--warning);
   pointer-events: none;
   animation: roverRadarPing 1.8s cubic-bezier(0.1, 0.5, 0.4, 1) infinite 0.9s;
 }
 
 @keyframes roverHeadlightPulse {
-  0%, 100% { opacity: 0.75; }
+  0%, 100% { opacity: 0.7; }
   50% { opacity: 1; }
 }
 
@@ -307,14 +513,112 @@ html, body, #root {
   height: 0;
   border-left: 14px solid transparent;
   border-right: 14px solid transparent;
-  border-bottom: 28px solid rgba(56, 189, 248, 0.55);
-  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.9));
+  border-bottom: 28px solid rgba(0, 255, 204, 0.45);
+  filter: drop-shadow(0 0 10px rgba(0, 255, 204, 0.8));
   pointer-events: none;
   animation: roverHeadlightPulse 1.2s ease-in-out infinite;
 }
 
+/* ================================
+   FUTURISTIC BUTTON SYSTEM
+   ================================ */
+.btn-astro {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: linear-gradient(145deg, rgba(20, 26, 45, 0.9) 0%, rgba(11, 12, 16, 0.95) 100%);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.btn-astro:hover {
+  border-color: rgba(226, 123, 88, 0.35);
+  color: var(--text-primary);
+  box-shadow: 0 0 20px rgba(226, 123, 88, 0.15), inset 0 1px 0 rgba(255,255,255,0.08);
+  transform: translateY(-1px);
+}
+
+.btn-astro:active {
+  transform: scale(0.97);
+}
+
+.btn-astro-primary {
+  background: linear-gradient(135deg, #FF4C29 0%, #E27B58 100%);
+  color: white;
+  border-color: rgba(255, 76, 41, 0.5);
+  box-shadow: 0 0 20px rgba(255, 76, 41, 0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+.btn-astro-primary:hover {
+  box-shadow: 0 0 30px rgba(255, 76, 41, 0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+  filter: brightness(1.1);
+}
+
+.btn-astro-cyan {
+  border-color: rgba(0, 255, 204, 0.3);
+  color: var(--info);
+  box-shadow: 0 0 12px rgba(0, 255, 204, 0.15);
+}
+
+.btn-astro-cyan:hover {
+  border-color: rgba(0, 255, 204, 0.5);
+  box-shadow: 0 0 25px rgba(0, 255, 204, 0.25), inset 0 1px 0 rgba(0, 255, 204, 0.1);
+}
+
+/* ================================
+   RADAR SWEEP (USED IN HUD / TELEMETRY)
+   ================================ */
+@keyframes radarPing {
+  0% { transform: scale(0.3); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+.radar-ping {
+  animation: radarPing 2s cubic-bezier(0.1, 0.5, 0.4, 1) infinite;
+}
+
+/* ================================
+   MICRO-BEVEL CARD ACCENTS (1px TECH LINES)
+   ================================ */
+.tech-line-top {
+  position: relative;
+}
+
+.tech-line-top::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 204, 0.3), transparent);
+  pointer-events: none;
+}
+
+/* ================================
+   TEXT SELECTION
+   ================================ */
+::selection {
+  background: rgba(226, 123, 88, 0.35);
+  color: white;
+}
+
 @layer utilities {
   .text-shadow-glow {
-    text-shadow: 0 0 10px rgba(244, 112, 80, 0.5), 0 0 20px rgba(244, 112, 80, 0.3);
+    text-shadow: 0 0 14px rgba(255, 76, 41, 0.5), 0 0 28px rgba(255, 76, 41, 0.25);
+  }
+  .text-shadow-cyan {
+    text-shadow: 0 0 14px rgba(0, 255, 204, 0.5), 0 0 28px rgba(0, 255, 204, 0.25);
   }
 }

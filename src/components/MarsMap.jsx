@@ -404,17 +404,19 @@ const RoverSimulator = ({ waypoints }) => {
 
       <Marker position={currentCoord} icon={createRoverIcon(currentHeading, isRoverDriving, currentSpeed)}>
         <Popup>
-          <div className="font-mono text-xs p-1 min-w-[190px]">
-            <div className="font-bold text-amber-500 border-b border-space-700 pb-1 mb-1 flex items-center justify-between">
-              <span>🚜 PER-01 ROVER</span>
-              <span className="text-[10px] text-space-400 font-sans">{isRoverDriving ? 'DRIVING' : 'STANDBY'}</span>
+          <div className="font-mono text-xs p-1 min-w-[200px] text-white">
+            <div className="font-bold text-amber-400 border-b border-white/10 pb-1.5 mb-1.5 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">🚜 PER-01 ROVER</span>
+              <span className="text-[10px] text-cyan-400 bg-cyan-950/80 px-1.5 py-0.5 rounded border border-cyan-800 font-sans">
+                {isRoverDriving ? 'DRIVING' : 'STANDBY'}
+              </span>
             </div>
-            <div className="space-y-0.5 text-space-800">
-              <p>🎯 Target: <strong>{targetWaypoint?.name || 'Objective'}</strong></p>
-              <p>⚡ Speed: <strong>{currentSpeed.toFixed(1)} km/h</strong></p>
-              <p>⛰️ Slope: <strong>{currentSlope.toFixed(1)}°</strong></p>
-              <p>🔋 Battery: <strong>{Math.round(batteryRef.current)}%</strong></p>
-              <p>🏁 Progress: <strong>{(progRef.current * 100).toFixed(0)}%</strong></p>
+            <div className="space-y-1 text-space-300 text-[11px]">
+              <div className="flex justify-between"><span className="text-space-400">Target:</span> <strong className="text-white truncate max-w-[120px]">{targetWaypoint?.name || 'Objective'}</strong></div>
+              <div className="flex justify-between"><span className="text-space-400">Speed:</span> <strong className="text-cyan-300">{currentSpeed.toFixed(1)} km/h</strong></div>
+              <div className="flex justify-between"><span className="text-space-400">Terrain Slope:</span> <strong className="text-white">{currentSlope.toFixed(1)}°</strong></div>
+              <div className="flex justify-between"><span className="text-space-400">Battery SoC:</span> <strong className="text-emerald-400">{Math.round(batteryRef.current)}%</strong></div>
+              <div className="flex justify-between"><span className="text-space-400">Progress:</span> <strong className="text-amber-400">{(progRef.current * 100).toFixed(0)}%</strong></div>
             </div>
           </div>
         </Popup>
@@ -643,16 +645,30 @@ const MarsMap = () => {
             }}
           >
             <Popup>
-              <div className="min-w-[170px] font-mono text-xs">
-                <h4 className="font-bold text-sm mb-1 text-space-950 font-sans">{wp.name}</h4>
-                <div className="space-y-0.5 text-space-800">
-                  <p>📍 {wp.lat.toFixed(4)}°N, {wp.lon.toFixed(4)}°E</p>
-                  <p>⛰️ Elev: {wp.elevation?.toLocaleString()} m</p>
-                  <p>🏁 Station #{i + 1}</p>
-                  {wp.reason && <p className="text-[10px] text-space-600 font-sans mt-1">"{wp.reason}"</p>}
+              <div className="min-w-[190px] font-mono text-xs text-white">
+                <div className="flex items-center justify-between border-b border-white/10 pb-1.5 mb-1.5">
+                  <h4 className="font-bold text-sm text-mars-300 font-sans">{wp.name}</h4>
+                  <span className="text-[10px] text-cyan-400 bg-cyan-950/80 px-1.5 py-0.5 rounded border border-cyan-800">
+                    Station #{i + 1}
+                  </span>
+                </div>
+                <div className="space-y-1 text-space-300 text-[11px]">
+                  <div className="flex justify-between">
+                    <span className="text-space-400">Coords:</span>
+                    <span className="text-white font-mono">{wp.lat.toFixed(4)}°N, {wp.lon.toFixed(4)}°E</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-space-400">Elevation:</span>
+                    <span className="text-amber-400 font-bold">{wp.elevation?.toLocaleString()} m</span>
+                  </div>
+                  {wp.reason && (
+                    <p className="text-[10px] text-amber-200/90 italic mt-1 bg-amber-950/30 p-1.5 rounded border border-amber-500/20 font-sans">
+                      "{wp.reason}"
+                    </p>
+                  )}
                 </div>
                 {i > 0 && (
-                  <div className="mt-2 pt-1.5 border-t border-space-200">
+                  <div className="mt-2.5 pt-2 border-t border-white/10">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -677,7 +693,7 @@ const MarsMap = () => {
                           setRoverDriving(true);
                         }
                       }}
-                      className="w-full py-1.5 px-2 rounded bg-gradient-to-r from-amber-600 to-mars-600 hover:from-amber-500 hover:to-mars-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                      className="w-full py-1.5 px-2 rounded-lg bg-gradient-to-r from-amber-600 to-mars-600 hover:from-amber-500 hover:to-mars-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer border border-white/20"
                     >
                       {isRoverDriving && driveTargetWaypointId === wp.id ? (
                         <>
@@ -687,7 +703,7 @@ const MarsMap = () => {
                       ) : (
                         <>
                           <Play className="w-3 h-3 fill-white" />
-                          <span>Simulate Drive to Station #{i + 1}</span>
+                          <span>Drive to Station #{i + 1}</span>
                         </>
                       )}
                     </button>
@@ -719,14 +735,14 @@ const MarsMap = () => {
       </MapContainer>
 
       {/* FLOATING MAP TOOLBAR (Top Left) */}
-      <div className="absolute top-3 left-3 z-[400] flex items-center gap-1.5 bg-space-950/90 backdrop-blur-md p-1.5 rounded-xl border border-space-700/80 shadow-2xl font-mono text-xs">
+      <div className="absolute top-3.5 left-3.5 z-[400] flex flex-wrap items-center gap-1.5 bg-[#0B0C10]/95 backdrop-blur-2xl p-1.5 rounded-2xl border border-white/[0.06] shadow-hud-glass font-mono text-xs">
         {/* Quick Global Mars / Jezero Views */}
         <button
           onClick={() => {
             setMapCenter([0, 0]);
             setMapZoom(1);
           }}
-          className="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all border bg-space-800 text-space-300 hover:text-white hover:bg-space-700 border-space-700"
+          className="px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-all border bg-space-900/80 text-space-300 hover:text-white hover:bg-space-850 border-white/[0.06] hover:border-mars-400/40"
           title="Fit whole Mars planet in view (Global Scale)"
         >
           <Globe className="w-3.5 h-3.5 text-mars-400" />
@@ -738,10 +754,10 @@ const MarsMap = () => {
             setMapCenter([18.4447, 77.4508]);
             setMapZoom(4);
           }}
-          className="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all border bg-space-800 text-space-300 hover:text-white hover:bg-space-700 border-space-700"
+          className="px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-all border bg-space-900/80 text-space-300 hover:text-white hover:bg-space-850 border-white/[0.06] hover:border-cyber-cyan/40"
           title="Zoom to Jezero Crater (Perseverance Landing Site)"
         >
-          <Crosshair className="w-3.5 h-3.5 text-cyan-400" />
+          <Crosshair className="w-3.5 h-3.5 text-cyber-cyan" />
           <span className="hidden sm:inline">JEZERO</span>
         </button>
 
@@ -752,7 +768,7 @@ const MarsMap = () => {
               undoLastPoint();
               marsAudio.playQuindarTone(false);
             }}
-            className="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all border bg-amber-950/70 hover:bg-amber-900/90 text-amber-300 hover:text-amber-100 border-amber-500/60 shadow-lg shadow-amber-950/40 font-bold"
+            className="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all border bg-amber-950/70 hover:bg-amber-900/90 text-amber-300 hover:text-amber-100 border-amber-500/50 shadow-md font-bold"
             title="Undo last placed point or measurement (Ctrl+Z)"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -791,14 +807,14 @@ const MarsMap = () => {
                       setRoverDriving(true);
                     }
                   }}
-                  className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all shadow-md ${
+                  className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all shadow-md border ${
                     isRoverDriving 
-                      ? 'bg-amber-600 hover:bg-amber-500 text-white animate-pulse' 
+                      ? 'bg-amber-600 hover:bg-amber-500 text-white animate-pulse border-amber-400' 
                       : isPausedMidway
-                      ? 'bg-gradient-to-r from-emerald-600 to-amber-600 hover:from-emerald-500 hover:to-amber-500 text-white'
+                      ? 'bg-gradient-to-r from-emerald-600 to-amber-600 hover:from-emerald-500 hover:to-amber-500 text-white border-white/20'
                       : isAtEnd
-                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white'
-                      : 'bg-space-800 hover:bg-space-700 text-amber-400 border border-space-700'
+                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white border-white/20'
+                      : 'bg-space-900/90 hover:bg-space-850 text-amber-400 border-amber-500/40'
                   }`}
                   title={
                     isRoverDriving 
@@ -820,7 +836,7 @@ const MarsMap = () => {
                       if (isAtEnd) setRoverProgress(0);
                       if (!isRoverDriving) setRoverDriving(true);
                     }}
-                    className="px-2 py-1.5 rounded-lg bg-space-800 hover:bg-space-700 text-cyan-400 hover:text-white border border-space-700 text-xs font-mono font-bold transition-colors cursor-pointer"
+                    className="px-2 py-1.5 rounded-lg bg-space-900/90 hover:bg-space-850 text-cyan-300 hover:text-white border border-cyan-500/40 text-xs font-mono font-bold transition-colors cursor-pointer"
                     title="Switch to Drive Entire Route to Destination"
                   >
                     DRIVE ALL
@@ -832,8 +848,8 @@ const MarsMap = () => {
                   onClick={() => setCamFollow(!camFollow)}
                   className={`px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all border font-bold cursor-pointer ${
                     camFollow
-                      ? 'bg-cyan-950/80 border-cyan-400 text-cyan-300 ring-1 ring-cyan-400/50'
-                      : 'bg-space-800 border-space-700 text-space-400 hover:text-white'
+                      ? 'bg-cyan-950/80 border-cyan-400 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
+                      : 'bg-space-900/80 border-white/[0.08] text-space-400 hover:text-white'
                   }`}
                   title={camFollow ? 'Vehicle Tracking Active: Camera follows vehicle automatically' : 'Free Camera: Manual pan and zoom'}
                 >
@@ -849,7 +865,7 @@ const MarsMap = () => {
                       setDriveTargetWaypointId(null);
                       marsAudio.playQuindarTone(false);
                     }}
-                    className="p-1.5 rounded-lg bg-space-800 hover:bg-space-700 text-space-400 hover:text-white border border-space-700 transition-colors"
+                    className="p-1.5 rounded-lg bg-space-900/80 hover:bg-space-850 text-space-400 hover:text-white border border-white/[0.08] transition-colors"
                     title="Reset Rover to Route Origin"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
@@ -865,8 +881,8 @@ const MarsMap = () => {
           onClick={toggleWalkbackLimits}
           className={`px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all border ${
             showWalkbackLimits
-              ? 'bg-green-500/20 text-green-400 border-green-500/40'
-              : 'bg-space-800 text-space-400 hover:text-white border-space-700'
+              ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.2)]'
+              : 'bg-space-900/80 text-space-400 hover:text-white border-white/[0.08]'
           }`}
           title="Toggle NASA 2km & 5km Walkback Safety Circles"
         >
@@ -886,8 +902,8 @@ const MarsMap = () => {
           }}
           className={`px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all border ${
             isRulerActive
-              ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40'
-              : 'bg-space-800 text-space-400 hover:text-white border-space-700'
+              ? 'bg-yellow-950/80 text-yellow-300 border-yellow-500/50 shadow-[0_0_10px_rgba(234,179,8,0.2)]'
+              : 'bg-space-900/80 text-space-400 hover:text-white border-white/[0.08]'
           }`}
           title="Measure distance & elevation between two points"
         >
