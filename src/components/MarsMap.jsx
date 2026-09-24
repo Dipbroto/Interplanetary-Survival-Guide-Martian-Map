@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { MapContainer, TileLayer, useMap, useMapEvents, CircleMarker, Popup, Polyline, Circle, Marker } from 'react-leaflet';
+import { MapContainer, TileLayer, useMap, useMapEvents, CircleMarker, Popup, Polyline, Circle, Marker, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import useMapStore from '../store/useMapStore';
@@ -534,6 +534,7 @@ const MarsMap = () => {
         maxBoundsViscosity={0.6}
         zoomControl={false}
       >
+        <ZoomControl position="bottomright" />
         <MapEvents />
         <MapViewController />
 
