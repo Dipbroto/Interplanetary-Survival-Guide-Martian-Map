@@ -33,8 +33,164 @@ html, body, #root {
   color: var(--text-primary);
   font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   letter-spacing: -0.01em;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* =========================================
+   AEROSPACE SEMANTIC TYPOGRAPHY SYSTEM
+   ========================================= */
+.font-mono, code, kbd, samp, pre {
+  font-feature-settings: 'tnum' 1, 'zero' 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.text-display-epic {
+  font-family: 'Rajdhani', 'Orbitron', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+  color: #f8fafc;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.85);
+}
+
+.text-section-header {
+  font-family: 'Rajdhani', 'Orbitron', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #e2e8f0;
+}
+
+.text-section-header-sm {
+  font-family: 'Rajdhani', 'Orbitron', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.75rem;
+  color: #cbd5e1;
+}
+
+.text-telemetry-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #f1f5f9;
+}
+
+.text-telemetry-label {
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.text-editorial-body {
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  font-weight: 400;
+  line-height: 1.65;
+  color: #cbd5e1;
+  letter-spacing: -0.01em;
+}
+
+.text-badge-micro {
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.5625rem; /* 9px */
+  font-weight: 600;
+}
+
+.text-caption-subtle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  color: #64748b;
+}
+
+/* =========================================
+   AEROSPACE BUTTON ARCHITECTURE — STITCH SPEC
+   ========================================= */
+button {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+.btn-aerospace-primary {
+  background: rgba(10, 13, 20, 0.82);
+  border: 1px solid rgba(241, 105, 56, 0.45);
+  color: #f3f4f6;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+.btn-aerospace-primary:hover {
+  background: rgba(18, 23, 36, 0.92);
+  border-color: rgba(241, 105, 56, 0.85);
+  box-shadow: 0 4px 24px rgba(241, 105, 56, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.btn-aerospace-secondary {
+  background: rgba(7, 10, 16, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.btn-aerospace-secondary:hover {
+  background: rgba(14, 19, 30, 0.85);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.btn-aerospace-ghost {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+  backdrop-filter: blur(12px);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+.btn-aerospace-ghost:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f1f5f9;
 }
 
 /* ================================

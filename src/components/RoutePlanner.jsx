@@ -288,37 +288,45 @@ export default function RoutePlanner() {
           </div>
 
           {/* Metrics Summary Card */}
-          <div className="grid grid-cols-2 gap-2 bg-space-800/50 p-2.5 rounded-lg border border-space-700 text-sm shrink-0">
-            <div className="flex items-center gap-2">
-              <Route className="w-4 h-4 text-mars-400" />
+          <div className="grid grid-cols-2 gap-2 bg-[#0A0D14]/70 p-3 rounded-xl border border-white/[0.08] text-sm shrink-0 backdrop-blur-md">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-[#F16938]/10 border border-[#F16938]/30 flex items-center justify-center shrink-0">
+                <Route className="w-3.5 h-3.5 text-[#F16938]" />
+              </div>
               <div>
-                <div className="text-space-400 text-[10px] uppercase tracking-wide">Distance</div>
-                <div className="font-mono text-sm font-semibold">{distance.toFixed(2)} km</div>
+                <div className="text-stone-400 font-mono text-[9px] uppercase tracking-wider font-medium">Distance</div>
+                <div className="font-mono text-sm font-bold tabular-nums text-stone-100">{distance.toFixed(2)} km</div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-mars-400" />
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0">
+                <Clock className="w-3.5 h-3.5 text-amber-400" />
+              </div>
               <div>
-                <div className="text-space-400 text-[10px] uppercase tracking-wide">Est. Duration</div>
-                <div className="font-mono text-sm font-semibold text-mars-400">{evaTime.toFixed(1)} hrs</div>
+                <div className="text-stone-400 font-mono text-[9px] uppercase tracking-wider font-medium">Est. Duration</div>
+                <div className="font-mono text-sm font-bold tabular-nums text-amber-300">{evaTime.toFixed(1)} hrs</div>
               </div>
             </div>
             {stats && (
               <>
-                <div className="flex items-center gap-2">
-                  <ArrowUpDown className="w-4 h-4 text-green-400" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                    <ArrowUpDown className="w-3.5 h-3.5 text-emerald-400" />
+                  </div>
                   <div>
-                    <div className="text-space-400 text-[10px] uppercase tracking-wide">Elev Gain</div>
-                    <div className="font-mono text-xs text-green-400">
+                    <div className="text-stone-400 font-mono text-[9px] uppercase tracking-wider font-medium">Elev Gain</div>
+                    <div className="font-mono text-xs font-bold tabular-nums text-emerald-400">
                       +{(stats.gain ?? stats.elevationGain ?? 0).toFixed(0)} m
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <ArrowUpDown className="w-4 h-4 text-red-400" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-center justify-center shrink-0">
+                    <ArrowUpDown className="w-3.5 h-3.5 text-rose-400" />
+                  </div>
                   <div>
-                    <div className="text-space-400 text-[10px] uppercase tracking-wide">Elev Loss</div>
-                    <div className="font-mono text-xs text-red-400">
+                    <div className="text-stone-400 font-mono text-[9px] uppercase tracking-wider font-medium">Elev Loss</div>
+                    <div className="font-mono text-xs font-bold tabular-nums text-rose-400">
                       -{(stats.loss ?? stats.elevationLoss ?? 0).toFixed(0)} m
                     </div>
                   </div>
@@ -393,8 +401,8 @@ export default function RoutePlanner() {
                               </span>
                             )}
                           </div>
-                          <div className="text-[10px] text-space-400 font-mono truncate mt-0.5">
-                            {wp.lat.toFixed(4)}°, {displayLon.toFixed(4)}° | Elev: {wp.elevation ? wp.elevation.toFixed(0) : 0} m
+                          <div className="text-[10px] text-stone-400 font-mono tabular-nums tracking-tight truncate mt-0.5">
+                            {wp.lat.toFixed(4)}°, {displayLon.toFixed(4)}° • Elev: <span className="text-stone-300 font-semibold">{wp.elevation ? wp.elevation.toFixed(0) : 0} m</span>
                           </div>
                         </div>
 
@@ -813,14 +821,14 @@ export default function RoutePlanner() {
       )}
 
       {/* Action Buttons Footer */}
-      <div className="flex flex-col gap-2 pt-2 border-t border-space-700/80 mt-auto shrink-0">
+      <div className="flex flex-col gap-2 pt-2.5 border-t border-white/[0.08] mt-auto shrink-0">
         <div className="flex gap-2">
           <button
             onClick={() => setPlacingWaypoint(!isPlacingWaypoint)}
-            className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 text-xs font-medium transition-all ${
+            className={`flex-1 py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 text-xs font-mono font-medium transition-all backdrop-blur-md border cursor-pointer ${
               isPlacingWaypoint 
-                ? 'bg-mars-500 text-white shadow-lg shadow-mars-500/25' 
-                : 'bg-space-800 hover:bg-space-700 text-primary border border-space-700'
+                ? 'bg-[#F16938]/30 text-white border-[#F16938] shadow-[0_0_15px_rgba(241,105,56,0.3)] animate-pulse' 
+                : 'bg-[#070A10]/70 hover:bg-[#101522]/90 text-stone-200 border-white/[0.08] hover:border-[#F16938]/50'
             }`}
           >
             <Plus className={`w-3.5 h-3.5 transition-transform ${isPlacingWaypoint ? 'rotate-45' : ''}`} />
@@ -833,7 +841,7 @@ export default function RoutePlanner() {
                 undoLastPoint();
                 marsAudio.playQuindarTone(false);
               }}
-              className="py-2 px-2.5 rounded-lg bg-space-800 hover:bg-amber-500/20 text-space-300 hover:text-amber-400 border border-space-700 transition-colors flex items-center gap-1.5 text-xs font-mono shrink-0"
+              className="py-2 px-3 rounded-xl bg-[#070A10]/70 hover:bg-amber-950/40 text-stone-300 hover:text-amber-400 border border-white/[0.08] hover:border-amber-500/40 transition-colors flex items-center gap-1.5 text-xs font-mono shrink-0 cursor-pointer backdrop-blur-md"
               title="Undo last placed point (Ctrl+Z)"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -848,7 +856,7 @@ export default function RoutePlanner() {
                   clearWaypoints();
                 }
               }}
-              className="p-2 rounded-lg bg-space-800 hover:bg-red-500/20 text-space-400 hover:text-red-400 border border-space-700 transition-colors shrink-0"
+              className="p-2 rounded-xl bg-[#070A10]/70 hover:bg-rose-950/40 text-stone-400 hover:text-rose-400 border border-white/[0.08] hover:border-rose-500/40 transition-colors shrink-0 cursor-pointer backdrop-blur-md"
               title="Clear entire route"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -860,19 +868,19 @@ export default function RoutePlanner() {
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => setFlightPlanOpen(true)}
-            className="py-1.5 px-2 bg-space-800 hover:bg-space-700 border border-space-700 rounded-lg text-[11px] font-mono flex items-center justify-center gap-1.5 text-space-200 transition-colors"
+            className="py-1.5 px-2 bg-[#070A10]/70 hover:bg-[#101522]/90 border border-white/[0.08] hover:border-cyan-500/40 rounded-xl text-[11px] font-mono flex items-center justify-center gap-1.5 text-stone-300 hover:text-white transition-colors cursor-pointer backdrop-blur-md"
             title="Export Official NASA Flight Brief"
           >
-            <FileText className="w-3.5 h-3.5 text-blue-400" />
+            <FileText className="w-3.5 h-3.5 text-cyan-400" />
             <span>Flight Brief (PDF/MD)</span>
           </button>
 
           <button
             onClick={() => setContingencyModalOpen(true)}
-            className={`py-1.5 px-2 border rounded-lg text-[11px] font-mono flex items-center justify-center gap-1.5 transition-colors ${
+            className={`py-1.5 px-2 border rounded-xl text-[11px] font-mono flex items-center justify-center gap-1.5 transition-colors cursor-pointer backdrop-blur-md ${
               activeContingency
-                ? 'bg-red-950 text-red-200 border-red-500 animate-pulse'
-                : 'bg-space-800 hover:bg-space-700 border-space-700 text-space-200'
+                ? 'bg-rose-950/70 text-rose-200 border-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.4)] animate-pulse'
+                : 'bg-[#070A10]/70 hover:bg-[#101522]/90 border-white/[0.08] hover:border-rose-500/40 text-stone-300 hover:text-white'
             }`}
             title="Simulate Mars Contingency / Hazard Anomaly"
           >
@@ -885,9 +893,9 @@ export default function RoutePlanner() {
         {waypoints && waypoints.length > 1 && (
           <button
             onClick={() => setEVASimulating(true)}
-            className="w-full py-2.5 px-3 rounded-lg bg-gradient-to-r from-mars-600 to-amber-600 hover:from-mars-500 hover:to-amber-500 text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-mars-600/30 transition-all hover:scale-[1.01]"
+            className="w-full py-2.5 px-3 rounded-xl bg-[#F16938]/20 hover:bg-[#F16938]/35 text-stone-100 text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 border border-[#F16938]/60 hover:border-[#F16938] shadow-[0_0_16px_rgba(241,105,56,0.25)] transition-all cursor-pointer backdrop-blur-md"
           >
-            <Play className="w-4 h-4 fill-white" />
+            <Play className="w-3.5 h-3.5 fill-current text-[#F16938]" />
             <span>Launch Marswalk Simulator (EVA HUD)</span>
           </button>
         )}

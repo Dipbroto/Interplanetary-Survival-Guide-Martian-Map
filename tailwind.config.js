@@ -52,6 +52,8 @@ export default {
         sans: ['Space Grotesk', 'Inter', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'Roboto Mono', 'Fira Code', 'monospace'],
         display: ['Rajdhani', 'Orbitron', 'sans-serif'],
+        orbitron: ['Orbitron', 'Rajdhani', 'sans-serif'],
+        rajdhani: ['Rajdhani', 'Orbitron', 'sans-serif'],
       },
       boxShadow: {
         'neon-mars': '0 0 20px rgba(255, 76, 41, 0.5), 0 0 40px rgba(255, 76, 41, 0.2), inset 0 0 12px rgba(255, 76, 41, 0.1)',

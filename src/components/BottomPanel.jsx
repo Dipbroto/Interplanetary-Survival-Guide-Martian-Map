@@ -63,25 +63,25 @@ export default function BottomPanel() {
     return (
       <div 
         onClick={() => setBottomPanelOpen(true)}
-        className="cursor-pointer group flex items-center justify-between gap-3 px-4 py-2 rounded-full bg-[#0B0C10]/85 border border-white/10 shadow-hud-glass backdrop-blur-2xl hover:bg-[#0B0C10]/95 hover:border-mars-500/40 transition-all font-mono text-xs text-space-300 hover:text-white"
+        className="cursor-pointer group flex items-center justify-between gap-3 px-4 py-2 rounded-full bg-[#0B0C10]/85 border border-white/10 shadow-hud-glass backdrop-blur-2xl hover:bg-[#0B0C10]/95 hover:border-[#F16938]/40 transition-all font-mono text-xs text-stone-300 hover:text-white"
         title="Click to Open Environmental & Elevation Telemetry Deck"
       >
         <div className="flex items-center gap-1.5 text-amber-300">
           <Cloud className="w-3.5 h-3.5 text-amber-400" />
-          <span>{weather?.temperature?.avg !== undefined ? `${Math.round(weather.temperature.avg)}°C` : '-62°C'}</span>
+          <span className="font-bold tabular-nums">{weather?.temperature?.avg !== undefined ? `${Math.round(weather.temperature.avg)}°C` : '-62°C'}</span>
         </div>
         <span className="text-white/20">|</span>
         <div className="flex items-center gap-1.5 text-purple-300">
           <Zap className="w-3.5 h-3.5 text-purple-400" />
-          <span>0.06 mSv/h</span>
+          <span className="font-bold tabular-nums">0.06 mSv/h</span>
         </div>
         <span className="text-white/20">|</span>
         <div className="flex items-center gap-1.5 text-cyan-300">
           <BarChart3 className="w-3.5 h-3.5 text-cyan-400" />
-          <span>{waypoints && waypoints.length > 1 ? `${waypoints.length} Waypoints` : 'Elevation'}</span>
+          <span className="font-semibold tracking-tight">{waypoints && waypoints.length > 1 ? `${waypoints.length} Waypoints` : 'Elevation'}</span>
         </div>
         <span className="text-white/20">|</span>
-        <div className="flex items-center gap-1 text-mars-400 group-hover:text-mars-300 font-bold text-[10px] uppercase tracking-wider">
+        <div className="flex items-center gap-1 text-[#F16938] group-hover:text-[#FF8A65] font-display font-bold text-[11px] uppercase tracking-[0.14em]">
           <span>Telemetry Deck</span>
           <ChevronUp className="w-3.5 h-3.5 group-hover:-translate-y-0.5 transition-transform" />
         </div>
@@ -115,19 +115,16 @@ export default function BottomPanel() {
               <button
                 key={tab.id}
                 onClick={() => setBottomPanelTab(tab.id)}
-                className={`relative shrink-0 flex items-center gap-2 px-3 h-full transition-all text-xs font-semibold ${
+                className={`relative shrink-0 flex items-center gap-2 px-3 h-full transition-all text-xs font-mono font-medium ${
                   isActive
-                    ? 'text-mars-300 bg-mars-500/10'
-                    : 'text-space-300 hover:text-white hover:bg-space-850/50'
+                    ? 'text-stone-100 bg-[#F16938]/15 border-b-2 border-[#F16938]'
+                    : 'text-stone-400 hover:text-white hover:bg-white/[0.03]'
                 }`}
               >
-                {isActive && (
-                  <span className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-mars-500 via-mars-400 to-amber-400 shadow-[0_0_8px_#f47050]" />
-                )}
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-mars-400' : 'text-space-400'}`} />
-                <span className="uppercase tracking-wider text-[11px] whitespace-nowrap">{tab.label}</span>
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#F16938]' : 'text-stone-400'}`} />
+                <span className="font-display font-bold uppercase tracking-[0.14em] text-[11px] whitespace-nowrap">{tab.label}</span>
                 {tab.badge && (
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded border font-mono ${tab.badgeColor} whitespace-nowrap`}>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded border font-mono tabular-nums font-semibold ${tab.badgeColor} whitespace-nowrap`}>
                     {tab.badge}
                   </span>
                 )}
@@ -137,7 +134,7 @@ export default function BottomPanel() {
         </div>
         <button
           onClick={() => setBottomPanelOpen(false)}
-          className="flex items-center gap-1 px-2.5 py-1 text-space-400 hover:text-mars-400 transition-colors rounded hover:bg-space-800 shrink-0 ml-2 text-[10px] font-mono uppercase"
+          className="flex items-center gap-1 px-2.5 py-1 text-stone-400 hover:text-[#F16938] transition-colors rounded-lg hover:bg-white/[0.04] shrink-0 ml-2 text-[10px] font-mono uppercase tracking-wider font-semibold"
           title="Minimize Telemetry Deck"
         >
           <span>Minimize</span>

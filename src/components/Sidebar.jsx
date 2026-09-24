@@ -88,22 +88,22 @@ export default function Sidebar() {
                   setSidebarTab(tab.id);
                   if (!sidebarOpen) setSidebarOpen(true);
                 }}
-                className={`relative flex items-center gap-2 py-2 px-2.5 rounded-xl transition-all text-xs font-sans font-medium shrink-0 ${
+                className={`relative flex items-center gap-2 py-2 px-2.5 rounded-xl transition-all text-xs font-mono font-medium shrink-0 ${
                   sidebarOpen ? 'flex-1 min-w-[70px] justify-center' : 'w-full justify-center'
                 } ${
                   isActive
-                    ? 'bg-mars-400/12 text-mars-300 border border-mars-400/30 shadow-[0_0_15px_rgba(226,123,88,0.15)]'
-                    : 'text-space-300 hover:text-white hover:bg-space-800/40 border border-transparent'
+                    ? 'bg-[#F16938]/15 text-stone-100 border border-[#F16938]/50 shadow-[0_0_12px_rgba(241,105,56,0.18)]'
+                    : 'text-stone-400 hover:text-white hover:bg-white/[0.04] border border-transparent'
                 }`}
                 title={tab.label}
               >
-                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-mars-400' : 'text-space-400'}`} />
+                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#F16938]' : 'text-stone-400'}`} />
                 {sidebarOpen && (
-                  <span className="font-semibold uppercase tracking-[0.1em] text-[11px] whitespace-nowrap">{tab.label}</span>
+                  <span className="font-display font-bold uppercase tracking-[0.14em] text-[11px] whitespace-nowrap">{tab.label}</span>
                 )}
                 {/* Active Laser Underline */}
                 {isActive && (
-                  <span className="absolute bottom-0 left-3 right-3 h-[2px] bg-gradient-to-r from-transparent via-mars-400 to-transparent shadow-[0_0_8px_rgba(226,123,88,0.6)]" />
+                  <span className="absolute bottom-0 left-3 right-3 h-[2px] bg-gradient-to-r from-transparent via-[#F16938] to-transparent shadow-[0_0_8px_rgba(241,105,56,0.6)]" />
                 )}
               </button>
             );
@@ -132,7 +132,7 @@ export default function Sidebar() {
       {/* Collapse Handle */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="absolute top-1/2 -right-3 -translate-y-1/2 w-6 h-12 bg-space-900/90 border border-white/10 rounded-r-lg flex items-center justify-center text-space-400 hover:text-mars-400 hover:border-mars-500/50 transition-all z-50 shadow-[0_0_10px_rgba(0,0,0,0.5)]"
+        className="absolute top-1/2 -right-3 -translate-y-1/2 w-6 h-12 bg-[#070A10]/90 border border-white/[0.08] hover:border-[#F16938]/50 rounded-r-xl flex items-center justify-center text-stone-400 hover:text-[#F16938] transition-all z-50 shadow-lg backdrop-blur-md"
         title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
       >
         {sidebarOpen ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}

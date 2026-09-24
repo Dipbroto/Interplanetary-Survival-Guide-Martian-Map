@@ -261,47 +261,47 @@ const POIDetailCard = () => {
           {/* Title & Category */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <h2 className="text-lg font-display font-bold text-white tracking-wide">
+              <h2 className="text-xl font-display font-bold text-stone-100 tracking-wide uppercase drop-shadow-sm">
                 {selectedPOI.name}
               </h2>
               {selectedPOI.status && (
-                <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full uppercase font-bold ${
+                <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full uppercase font-bold tracking-wider ${
                   selectedPOI.status === 'Active'
                     ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse'
-                    : 'bg-space-800 text-space-400 border border-white/10'
+                    : 'bg-space-800 text-stone-400 border border-white/10'
                 }`}>
                   {selectedPOI.status}
                 </span>
               )}
             </div>
             {selectedPOI.location && (
-              <p className="text-[11px] font-mono text-space-400">
-                Region: {selectedPOI.location}
+              <p className="text-[11px] font-mono uppercase tracking-wider text-stone-400">
+                REGION // {selectedPOI.location}
               </p>
             )}
           </div>
 
           {/* Scientific Context */}
-          <p className="text-xs text-space-300 leading-relaxed font-sans">
+          <p className="text-xs text-stone-300 leading-relaxed font-sans font-normal">
             {selectedPOI.description || selectedPOI.science}
           </p>
 
           {/* Telemetry Metrics Bento */}
           <div className="grid grid-cols-2 gap-2 font-mono text-xs">
-            <div className="bg-space-950/80 p-2.5 rounded-xl border border-white/[0.05]">
-              <div className="flex items-center text-space-400 text-[9px] uppercase tracking-wider mb-0.5">
-                <MapPin size={11} className="mr-1 text-mars-400" /> Coordinates
+            <div className="bg-[#0A0D14]/80 p-2.5 rounded-xl border border-white/[0.06] backdrop-blur-md">
+              <div className="flex items-center text-stone-400 text-[9px] uppercase tracking-wider mb-0.5 font-medium">
+                <MapPin size={11} className="mr-1 text-[#F16938]" /> Coordinates
               </div>
-              <div className="text-cyber-cyan font-bold">
+              <div className="text-cyan-300 font-bold tabular-nums">
                 {(selectedPOI.lat || 0).toFixed(4)}°, {(selectedPOI.lon !== undefined ? selectedPOI.lon : (selectedPOI.lng || 0)).toFixed(4)}°
               </div>
             </div>
 
-            <div className="bg-space-950/80 p-2.5 rounded-xl border border-white/[0.05]">
-              <div className="flex items-center text-space-400 text-[9px] uppercase tracking-wider mb-0.5">
-                <Mountain size={11} className="mr-1 text-cyber-amber" /> Elevation
+            <div className="bg-[#0A0D14]/80 p-2.5 rounded-xl border border-white/[0.06] backdrop-blur-md">
+              <div className="flex items-center text-stone-400 text-[9px] uppercase tracking-wider mb-0.5 font-medium">
+                <Mountain size={11} className="mr-1 text-amber-400" /> Elevation
               </div>
-              <div className="text-white font-bold">
+              <div className="text-stone-100 font-bold tabular-nums">
                 {selectedPOI.elevation?.toLocaleString()} m
               </div>
             </div>
@@ -309,15 +309,15 @@ const POIDetailCard = () => {
 
           {/* Mission Objectives / Science Context */}
           {selectedPOI.objectives && (
-            <div className="bg-space-950/60 p-3 rounded-xl border border-white/[0.05]">
-              <div className="text-[10px] uppercase font-mono tracking-wider text-space-400 font-bold mb-1.5 flex items-center gap-1">
-                <Target size={12} className="text-cyber-cyan" />
+            <div className="bg-[#0A0D14]/60 p-3 rounded-xl border border-white/[0.06]">
+              <div className="text-[10px] uppercase font-display tracking-[0.14em] text-stone-300 font-bold mb-1.5 flex items-center gap-1.5">
+                <Target size={12} className="text-cyan-400" />
                 <span>Primary Mission Objectives</span>
               </div>
-              <ul className="text-xs text-space-300 space-y-1 font-sans">
+              <ul className="text-xs text-stone-300 space-y-1 font-sans">
                 {selectedPOI.objectives.map((obj, i) => (
                   <li key={i} className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyber-cyan/60" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/70" />
                     <span>{obj}</span>
                   </li>
                 ))}
@@ -326,11 +326,11 @@ const POIDetailCard = () => {
           )}
 
           {selectedPOI.science && (
-            <div className="bg-space-950/60 p-3 rounded-xl border border-white/[0.05]">
-              <div className="text-[10px] uppercase font-mono tracking-wider text-cyber-amber font-bold mb-1">
+            <div className="bg-[#0A0D14]/60 p-3 rounded-xl border border-white/[0.06]">
+              <div className="text-[10px] uppercase font-display tracking-[0.14em] text-amber-300 font-bold mb-1">
                 Planetary Geology & Astrobiology
               </div>
-              <p className="text-xs text-space-300 font-sans leading-relaxed">
+              <p className="text-xs text-stone-300 font-sans leading-relaxed">
                 {selectedPOI.science}
               </p>
             </div>

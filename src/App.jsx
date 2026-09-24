@@ -22,6 +22,7 @@ import { Radar, ChevronLeft } from 'lucide-react';
 
 function App() {
   const { viewMode, showLoadingScreen, rightSidebarOpen, setRightSidebarOpen } = useMapStore();
+  const [activeSection, setActiveSection] = useState('home');
   const [isMapSectionActive, setIsMapSectionActive] = useState(false);
   const mapSectionRef = useRef(null);
 
@@ -33,20 +34,39 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Monitor when the user is scrolled into the interactive Map section
+  // Monitor all sections to update activeSection and isMapSectionActive
   useEffect(() => {
-    const target = mapSectionRef.current;
-    if (!target) return;
+    const sections = [
+      { id: 'section-home', key: 'home' },
+      { id: 'section-map', key: 'map' },
+      { id: 'section-imagery', key: 'imagery' },
+      { id: 'section-sky', key: 'sky' }
+    ];
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        // Show map sidebars/panels when at least 35% of the map viewport is visible
-        setIsMapSectionActive(entry.isIntersecting && entry.intersectionRatio >= 0.35);
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
+            const found = sections.find((s) => s.id === entry.target.id);
+            if (found) {
+              setActiveSection(found.key);
+              if (found.key === 'map') {
+                setIsMapSectionActive(true);
+              } else {
+                setIsMapSectionActive(false);
+              }
+            }
+          }
+        });
       },
-      { threshold: [0, 0.2, 0.35, 0.5, 0.8] }
+      { threshold: [0.1, 0.25, 0.45, 0.7] }
     );
 
-    observer.observe(target);
+    sections.forEach((s) => {
+      const el = document.getElementById(s.id);
+      if (el) observer.observe(el);
+    });
+
     return () => observer.disconnect();
   }, []);
 
@@ -58,7 +78,7 @@ function App() {
 
       {/* TOP NAVIGATION BAR (Fixed globally across all sections) */}
       <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
-        <TopBar />
+        <TopBar isMapActive={isMapSectionActive} activeSection={activeSection} />
       </div>
 
       {/* ======================================================== */}

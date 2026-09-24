@@ -391,71 +391,71 @@ export default function ScienceLabModal() {
         {/* HEADER: SuperCam & PIXL Rover Science Suite */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-space-900/60 shrink-0 gap-4 flex-wrap">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-mars-500/20 text-mars-400 border border-mars-500/30 shrink-0">
+            <div className="p-2.5 rounded-xl bg-mars-500/20 text-[#F16938] border border-mars-500/30 shrink-0 shadow-[0_0_12px_rgba(241,105,56,0.25)]">
               <FlaskConical className="w-5 h-5 animate-pulse" />
             </div>
             <div>
               <div className="flex items-center gap-2.5">
-                <h2 className="text-base sm:text-lg font-display font-bold text-white tracking-wide uppercase">
+                <h2 className="text-base sm:text-lg font-display font-black text-stone-100 tracking-[0.14em] uppercase">
                   In-Situ Planetary Science Laboratory
                 </h2>
-                <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded-md border border-cyan-800">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded-md border border-cyan-800 font-semibold">
                   SuperCam • PIXL • SHERLOC Suite
                 </span>
               </div>
-              <p className="text-xs text-stone-400 font-mono">
+              <p className="text-xs text-stone-400 font-mono tracking-wide">
                 Laser-Induced Breakdown Spectroscopy (LIBS) • Deep-UV Raman • Mars Sample Return
               </p>
             </div>
           </div>
 
           {/* Instrument Mode Selector Tabs */}
-          <div className="flex items-center gap-1.5 bg-space-950/90 p-1 rounded-xl border border-white/[0.08] font-mono text-xs">
+          <div className="flex items-center gap-1.5 bg-[#070A10]/75 p-1 rounded-2xl border border-white/[0.08] font-mono text-xs backdrop-blur-md">
             <button
               onClick={() => { setActiveInstrument('supercam'); playUiClick(); }}
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer uppercase tracking-wider text-xs border ${
                 activeInstrument === 'supercam'
-                  ? 'bg-mars-600 text-white font-bold shadow-md shadow-mars-600/30'
-                  : 'text-stone-400 hover:text-white'
+                  ? 'bg-[#F16938]/20 border-[#F16938]/60 text-stone-100 shadow-[0_0_12px_rgba(241,105,56,0.2)] font-semibold'
+                  : 'text-stone-400 hover:text-white border-transparent hover:bg-white/[0.03]'
               }`}
             >
-              <Zap className="w-3.5 h-3.5" />
+              <Zap className="w-3.5 h-3.5 text-[#F16938]" />
               <span>SuperCam LIBS</span>
             </button>
 
             <button
               onClick={() => { setActiveInstrument('sherloc'); playUiClick(); }}
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer uppercase tracking-wider text-xs border ${
                 activeInstrument === 'sherloc'
-                  ? 'bg-purple-600 text-white font-bold shadow-md shadow-purple-600/30'
-                  : 'text-stone-400 hover:text-white'
+                  ? 'bg-purple-950/40 border-purple-500/50 text-purple-200 shadow-[0_0_12px_rgba(168,85,247,0.2)] font-semibold'
+                  : 'text-stone-400 hover:text-white border-transparent hover:bg-white/[0.03]'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
               <span>SHERLOC UV Raman</span>
             </button>
 
             <button
               onClick={() => { setActiveInstrument('pixl'); playUiClick(); }}
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer uppercase tracking-wider text-xs border ${
                 activeInstrument === 'pixl'
-                  ? 'bg-cyan-600 text-white font-bold shadow-md shadow-cyan-600/30'
-                  : 'text-stone-400 hover:text-white'
+                  ? 'bg-cyan-950/40 border-cyan-500/50 text-cyan-200 shadow-[0_0_12px_rgba(0,255,204,0.2)] font-semibold'
+                  : 'text-stone-400 hover:text-white border-transparent hover:bg-white/[0.03]'
               }`}
             >
-              <Atom className="w-3.5 h-3.5" />
+              <Atom className="w-3.5 h-3.5 text-cyan-400" />
               <span>PIXL X-Ray</span>
             </button>
 
             <button
               onClick={() => { setActiveInstrument('msr'); playUiClick(); }}
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer uppercase tracking-wider text-xs border ${
                 activeInstrument === 'msr'
-                  ? 'bg-amber-600 text-white font-bold shadow-md shadow-amber-600/30'
-                  : 'text-stone-400 hover:text-white'
+                  ? 'bg-amber-950/40 border-amber-500/50 text-amber-200 shadow-[0_0_12px_rgba(245,166,35,0.2)] font-semibold'
+                  : 'text-stone-400 hover:text-white border-transparent hover:bg-white/[0.03]'
               }`}
             >
-              <Database className="w-3.5 h-3.5" />
+              <Database className="w-3.5 h-3.5 text-amber-400" />
               <span>MSR Tube Cache ({safeSamples.length})</span>
             </button>
           </div>
@@ -466,12 +466,12 @@ export default function ScienceLabModal() {
           
           {/* LEFT COLUMN: Target Geological Samples Selector */}
           <div className="w-full lg:w-80 border-b lg:border-b-0 lg:border-r border-white/[0.08] p-4 flex flex-col gap-2.5 shrink-0 bg-space-950/40">
-            <div className="text-xs font-mono text-stone-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+            <div className="text-xs font-display font-bold text-stone-300 uppercase tracking-[0.14em] mb-1 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-mars-400" />
+                <Layers className="w-3.5 h-3.5 text-[#F16938]" />
                 <span>Geological Target Specimens</span>
               </span>
-              <span className="text-[10px] text-stone-500 font-mono">6 Cataloged</span>
+              <span className="text-[10px] text-stone-500 font-mono tracking-wider">6 Cataloged</span>
             </div>
 
             <div className="space-y-2 overflow-y-auto max-h-[380px] lg:max-h-none custom-scrollbar pr-1">
@@ -482,36 +482,36 @@ export default function ScienceLabModal() {
                     setSelectedTarget(t);
                     playUiClick();
                   }}
-                  className={`w-full p-3 rounded-xl border text-left transition-all flex flex-col gap-1.5 cursor-pointer ${
+                  className={`w-full p-3 rounded-xl border text-left transition-all flex flex-col gap-1.5 cursor-pointer backdrop-blur-md ${
                     selectedTarget.id === t.id
-                      ? 'bg-mars-500/15 border-mars-400/70 shadow-lg shadow-mars-950/50 scale-[1.01]'
-                      : 'bg-space-900/40 border-white/[0.06] hover:border-white/20 text-stone-400 hover:text-white'
+                      ? 'bg-[#F16938]/15 border-[#F16938]/60 text-stone-100 shadow-[0_0_12px_rgba(241,105,56,0.18)] scale-[1.01]'
+                      : 'bg-[#070A10]/50 border-white/[0.05] hover:border-white/15 text-stone-400 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-xs text-white">{t.name}</span>
-                    <span className={`text-[9px] font-bold font-mono px-1.5 py-0.5 rounded border ${
-                      t.bpi > 80 ? 'bg-emerald-950/80 text-emerald-400 border-emerald-500/40' :
-                      t.bpi > 30 ? 'bg-amber-950/80 text-amber-400 border-amber-500/40' :
-                      'bg-stone-800/80 text-stone-400 border-stone-700'
+                    <span className="font-display font-bold text-xs text-stone-100 tracking-wide">{t.name}</span>
+                    <span className={`text-[9px] font-bold font-mono tabular-nums px-1.5 py-0.5 rounded border ${
+                      t.bpi > 80 ? 'bg-emerald-950/60 text-emerald-400 border-emerald-500/30' :
+                      t.bpi > 30 ? 'bg-amber-950/60 text-amber-400 border-amber-500/30' :
+                      'bg-stone-900/60 text-stone-400 border-stone-800'
                     }`}>
                       BPI {t.bpi}%
                     </span>
                   </div>
-                  <div className="text-[11px] text-stone-400 truncate">{t.formation}</div>
-                  <div className="text-[10px] text-stone-500 font-mono">{t.location}</div>
+                  <div className="text-[11px] text-stone-400 font-sans truncate">{t.formation}</div>
+                  <div className="text-[10px] text-stone-500 font-mono tabular-nums">{t.location}</div>
                 </button>
               ))}
             </div>
 
             {/* Quick Astrobiology Score Badge */}
             <div className="mt-auto pt-3 border-t border-white/[0.08]">
-              <div className="bg-space-900/60 p-2.5 rounded-xl border border-white/[0.06] flex items-center justify-between">
+              <div className="bg-[#070A10]/60 p-2.5 rounded-xl border border-white/[0.06] flex items-center justify-between backdrop-blur-md">
                 <div className="flex items-center gap-2">
                   <Award className="w-4 h-4 text-emerald-400" />
-                  <span className="text-[11px] font-mono text-stone-300">Habitability Confidence</span>
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-stone-300 font-medium">Habitability Confidence</span>
                 </div>
-                <span className="text-xs font-mono font-bold text-emerald-400">{target.bpi}%</span>
+                <span className="text-xs font-mono font-bold tabular-nums text-emerald-400">{target.bpi}%</span>
               </div>
             </div>
           </div>
@@ -520,14 +520,14 @@ export default function ScienceLabModal() {
           <div className="flex-1 p-5 lg:p-6 flex flex-col gap-5 overflow-y-auto custom-scrollbar">
 
             {/* TARGET HEADER & TACTICAL DESCRIPTION */}
-            <div className="bg-space-900/60 border border-white/[0.08] rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="bg-[#070A10]/70 border border-white/[0.08] rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 backdrop-blur-xl">
               <div>
                 <div className="flex items-center gap-2.5 mb-1.5 flex-wrap">
                   <h3 className="text-lg sm:text-xl font-bold font-display text-white">{target.name}</h3>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-space-800 text-stone-300 font-mono border border-white/10">
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-white/[0.04] text-stone-300 font-mono border border-white/10">
                     {target.formation}
                   </span>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-mars-950/70 text-mars-400 font-mono border border-mars-500/30">
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#F16938]/15 text-[#F16938] font-mono border border-[#F16938]/30">
                     {target.location}
                   </span>
                 </div>
@@ -542,17 +542,17 @@ export default function ScienceLabModal() {
                 <button
                   onClick={() => triggerLaserAblation(laserTargetPos.x, laserTargetPos.y)}
                   disabled={isFiringLaser}
-                  className="px-4 py-2.5 bg-gradient-to-r from-mars-600 to-amber-600 hover:from-mars-500 hover:to-amber-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold font-mono uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-mars-600/30 transition-all cursor-pointer border border-white/20 active:scale-95"
+                  className="px-4 py-2.5 bg-[#F16938]/20 hover:bg-[#F16938]/35 disabled:opacity-50 text-stone-100 rounded-xl text-xs font-bold font-mono uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_16px_rgba(241,105,56,0.2)] transition-all cursor-pointer border border-[#F16938]/60 hover:border-[#F16938] backdrop-blur-md active:scale-95"
                   title="Pulse SuperCam Laser at the selected target point"
                 >
-                  <Zap className={`w-4 h-4 ${isFiringLaser ? 'animate-bounce text-yellow-300' : ''}`} />
+                  <Zap className={`w-4 h-4 text-[#F16938] ${isFiringLaser ? 'animate-bounce text-yellow-300' : ''}`} />
                   <span>{isFiringLaser ? 'Pulsing Laser...' : 'Fire SuperCam Laser'}</span>
                 </button>
 
                 <button
                   onClick={handleCacheSample}
                   disabled={isSealingTube || cachedSuccess}
-                  className="px-4 py-2.5 bg-space-850 hover:bg-space-800 text-stone-200 border border-white/10 hover:border-amber-500/40 rounded-xl text-xs font-mono font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 shadow-md"
+                  className="px-4 py-2.5 bg-[#070A10]/70 hover:bg-[#101522]/90 text-stone-200 border border-white/[0.08] hover:border-amber-500/40 rounded-xl text-xs font-mono font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 shadow-sm backdrop-blur-md"
                 >
                   {cachedSuccess ? (
                     <>

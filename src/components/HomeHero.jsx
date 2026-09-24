@@ -1,119 +1,102 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import useMapStore from '../store/useMapStore';
 import { 
   Compass, Globe, Rocket, Shield, Activity, Thermometer, Wind, Eye, 
-  ChevronDown, Sparkles, MapPin, Play, ArrowRight, Radio, Layers, 
-  Orbit, Mountain, Sun, Zap, Satellite, ShieldAlert, Cpu, Heart
+  MapPin, ArrowRight, Layers, Orbit, Mountain, Sun, Zap, Satellite, 
+  Cpu, Target, Crosshair, Radar, CheckCircle2, ChevronRight, Radio, 
+  Box, Clock, AlertTriangle, ChevronDown, Download, RadioTower, Sparkles
 } from 'lucide-react';
 import { marsAudio } from '../utils/audioSynthesizer';
 import { marsDateFromEarthDate } from '../utils/marsUtils';
 
-const DESTINATIONS = [
+const FEATURED_DESTINATIONS = [
   {
-    id: 'jezero',
-    name: 'Jezero Crater Delta',
-    rover: 'Perseverance & Ingenuity',
+    id: 'basecamp',
+    name: 'Basecamp Alpha',
+    subtitle: 'Jezero Delta Outpost',
+    dotColor: 'bg-cyan-400/80',
+    description: 'Primary habitat and research base. Fully equipped for long-term stay.',
+    image: '/dest_basecamp.jpg',
     lat: 18.4447,
     lon: 77.4508,
     zoom: 4,
-    elevation: '-2,600 m',
-    highlight: 'Ancient Paleolake River Delta',
-    description: 'Sedimentary clay mudstones and layered river delta holding potential fossil biosignatures of ancient Martian microbial life.',
-    image: 'https://images-assets.nasa.gov/image/PIA26378/PIA26378~medium.jpg',
-    badgeColor: 'border-emerald-500/40 text-emerald-400 bg-emerald-950/40',
   },
   {
-    id: 'olympus',
-    name: 'Olympus Mons Caldera',
-    rover: 'Tharsis Volcanic Province',
-    lat: 18.65,
-    lon: -133.8,
-    zoom: 3,
-    elevation: '+21,229 m',
-    highlight: 'Tallest Volcano in Solar System',
-    description: 'Soaring 21.2 km above the datum—nearly triple Mount Everest. Features a multi-ring caldera with six collapsed magma chambers.',
-    image: 'https://images-assets.nasa.gov/image/PIA10020/PIA10020~small.jpg',
-    badgeColor: 'border-rose-500/40 text-rose-400 bg-rose-950/40',
-  },
-  {
-    id: 'valles',
-    name: 'Valles Marineris Chasma',
-    rover: 'Equatorial Rift System',
-    lat: -14.0,
-    lon: -59.2,
-    zoom: 3,
-    elevation: '-5,000 m',
-    highlight: 'Grand Canyon of the Red Planet',
-    description: 'A 4,000 km tectonic rift spanning up to 7 km deep. Would stretch across the entire continental United States from New York to San Francisco.',
-    image: 'https://images-assets.nasa.gov/image/PIA14564/PIA14564~medium.jpg',
-    badgeColor: 'border-amber-500/40 text-amber-400 bg-amber-950/40',
-  },
-  {
-    id: 'gale',
-    name: 'Gale Crater & Mount Sharp',
-    rover: 'Curiosity Rover (MSL)',
+    id: 'crater_zeta',
+    name: 'Crater Zeta',
+    subtitle: 'Gale Crater Strata',
+    dotColor: 'bg-amber-400/80',
+    description: 'Rich in geological data and mineral samples. High radiation levels.',
+    image: '/dest_crater_zeta.jpg',
     lat: -4.5895,
     lon: 137.4417,
     zoom: 4,
-    elevation: '-4,500 m',
-    highlight: 'Stratified Aqueous Bedrock',
-    description: 'Climbing Aeolis Mons through ancient lakebeds, hematite ridges, and clay strata confirming billions of years of habitable water history.',
-    image: 'https://images-assets.nasa.gov/image/PIA26310/PIA26310~medium.jpg',
-    badgeColor: 'border-cyan-500/40 text-cyan-400 bg-cyan-950/40',
   },
   {
-    id: 'polar',
-    name: 'Planum Boreum & Korolev',
-    rover: 'Northern Polar Caps',
-    lat: 73.0,
-    lon: 165.0,
+    id: 'mount_olympus',
+    name: 'Mount Olympus',
+    subtitle: 'Caldera Apex (+21.2 km)',
+    dotColor: 'bg-blue-400/80',
+    description: 'The largest volcano in the solar system. Stunning views, extreme conditions.',
+    image: '/dest_olympus.jpg',
+    lat: 18.65,
+    lon: -133.8,
     zoom: 3,
-    elevation: '-3,900 m',
-    highlight: 'Permanent 2,200 km³ Water Ice Reservoir',
-    description: 'Vast layered deposits of pristine water ice and dry ice. Korolev Crater houses an impact dome filled with 1.8 km thick pure water ice.',
-    image: 'https://images-assets.nasa.gov/image/PIA10651/PIA10651~small.jpg',
-    badgeColor: 'border-sky-500/40 text-sky-400 bg-sky-950/40',
+  },
+  {
+    id: 'elysium',
+    name: 'Elysium Planitia',
+    subtitle: 'Volcanic Lava Plains',
+    dotColor: 'bg-purple-400/80',
+    description: 'Vast plains and potential for future expansion. Low elevation zone.',
+    image: '/dest_elysium.jpg',
+    lat: 3.0,
+    lon: 154.7,
+    zoom: 3,
   },
 ];
 
-const CAPABILITIES = [
+const QUICK_NAV_ITEMS = [
   {
-    icon: Layers,
-    title: 'Multi-Spectral Cartography',
-    description: 'High-precision equirectangular & 3D tiles from NASA Mars Trek. Switch between Viking True Color, MOLA Elevation, THEMIS Thermal Inertia, and TES Dust opacity.',
-    color: 'text-mars-400',
-    border: 'border-mars-500/30',
-    glow: 'rgba(249,115,22,0.15)',
+    icon: Compass,
+    title: 'PLAN YOUR JOURNEY',
+    subtitle: 'Check conditions, find safe zones',
+    target: 'section-map',
+    is3d: false,
   },
   {
-    icon: Shield,
-    title: 'EVA Walkback Safety Engine',
-    description: 'Real-time hazard mitigation calculating terrain slope, metabolic O₂ burn rates, and dynamic 2 km safe / 5 km abort walkback radii per NASA EVA standards.',
-    color: 'text-cyber-cyan',
-    border: 'border-cyber-cyan/30',
-    glow: 'rgba(0,255,204,0.15)',
+    icon: MapPin,
+    title: 'EXPLORE LOCATIONS',
+    subtitle: 'Bases, craters, research sites',
+    target: 'section-map',
+    is3d: false,
   },
   {
-    icon: Orbit,
-    title: 'Martian Celestial Ephemeris',
-    description: 'Surface observer sky dome calculating live solar positions, night sky stellar views, and real-time Phobos & Deimos solar eclipse transit simulations.',
-    color: 'text-amber-400',
-    border: 'border-amber-500/30',
-    glow: 'rgba(245,158,11,0.15)',
+    icon: Box,
+    title: 'ACCESS RESOURCES',
+    subtitle: 'Water, oxygen, energy & more',
+    target: 'section-science',
+    is3d: false,
   },
   {
-    icon: Cpu,
-    title: 'Spectrometry & Rock Analysis',
-    description: 'Multi-wavelength absorption spectrometry for olivine, hematite, smectite clays, and gypsum, connected directly to Curiosity and Perseverance science logs.',
-    color: 'text-purple-400',
-    border: 'border-purple-500/30',
-    glow: 'rgba(168,85,247,0.15)',
+    icon: Radio,
+    title: 'STAY INFORMED',
+    subtitle: 'Live data & mission updates',
+    target: 'section-sky',
+    is3d: false,
   },
+];
+
+const MAP_LAYERS = [
+  'Mars Surface',
+  'Topography',
+  'Temperature',
+  'Radiation',
 ];
 
 export default function HomeHero() {
-  const { currentSol, weather, setMapCenter, setMapZoom, setViewMode, setEVASimulating } = useMapStore();
-  const [activeDestIdx, setActiveDestIdx] = useState(0);
+  const { weather, currentSol, setMapCenter, setMapZoom, setViewMode } = useMapStore();
+  const [activeLayerTab, setActiveLayerTab] = useState('Mars Surface');
 
   const marsDate = useMemo(() => marsDateFromEarthDate(new Date()), []);
 
@@ -132,198 +115,508 @@ export default function HomeHero() {
   };
 
   return (
-    <div className="relative w-full min-h-screen flex flex-col items-center justify-between text-white overflow-hidden pt-20 pb-16 px-4 sm:px-6">
-      {/* Background Ambience Layer with Warm Mars Atmospheric Glow */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-gradient-radial from-mars-500/15 via-amber-600/5 to-transparent blur-3xl opacity-80" />
-        <div className="absolute -bottom-24 left-1/4 w-[600px] h-[400px] bg-cyan-500/10 blur-3xl opacity-60" />
+    <div className="relative w-full text-stone-200 pt-24 pb-14 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto flex flex-col gap-6">
+      
+      {/* ========================================================================= */}
+      {/* TIER 1: PANORAMIC OUTPOST HERO BANNER WITH CURRENT CONDITIONS HUD         */}
+      {/* ========================================================================= */}
+      <div className="relative w-full rounded-3xl overflow-hidden border border-white/[0.07] shadow-[0_12px_40px_rgba(0,0,0,0.8)] min-h-[460px] flex items-center bg-[#07090E]/60 backdrop-blur-sm">
+        
+        {/* Background Image: High-res Martian Basecamp at Sunset */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/mars_base_sunset.jpg" 
+            alt="Mars Outpost Basecamp at Sunset" 
+            className="w-full h-full object-cover object-center scale-[1.01]"
+          />
+          {/* Subtle Dark Vignette & Atmospheric Contrast Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#07090E]/95 via-[#07090E]/80 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#07090E] via-transparent to-black/30 pointer-events-none" />
+        </div>
+
+        {/* Content Overlay */}
+        <div className="relative z-10 w-full p-6 sm:p-10 lg:p-12 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+          
+          {/* Left Text & Call To Action */}
+          <div className="max-w-xl">
+            {/* Small Monospace Category Header */}
+            <div className="flex items-center gap-2 mb-3.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#F16938] shadow-[0_0_8px_rgba(241,105,56,0.8)]" />
+              <span className="text-[#F16938] font-mono text-[10px] sm:text-[11px] tracking-[0.28em] font-semibold uppercase">
+                EXPLORE / SURVIVE / THRIVE
+              </span>
+            </div>
+
+            {/* Display Headline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-[3.85rem] font-display font-black tracking-tight leading-[1.05] mb-5 drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-stone-50 via-stone-100 to-stone-300">Your Guide to</span><br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-stone-50 via-stone-100 to-stone-300">Life on </span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#FF7A50] via-[#F16938] to-[#E05220] drop-shadow-[0_0_20px_rgba(241,105,56,0.4)]">Mars</span>
+            </h1>
+
+            {/* Subtitle Description */}
+            <p className="text-stone-300/95 font-sans text-sm sm:text-[15px] leading-relaxed mb-8 max-w-lg drop-shadow font-normal">
+              Real data. Critical insights. A survival guide for the harshest planet in our solar system. Explore Mars, find safe zones, track conditions, and plan your journey.
+            </p>
+
+            {/* Primary Pill Button CTA (Professional Frosted Glass & Darker Amber Styling) */}
+            <button
+              onClick={() => {
+                marsAudio.playQuindarTone(true);
+                scrollTo('section-map');
+              }}
+              className="group inline-flex items-center gap-3 px-6 py-3.5 rounded-full bg-[#0A0D14]/85 hover:bg-[#121724]/95 text-stone-200 hover:text-white font-mono text-xs uppercase tracking-[0.14em] font-semibold border border-[#F16938]/40 hover:border-[#F16938]/90 shadow-[0_4px_24px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.12)] backdrop-blur-2xl active:scale-95 transition-all duration-300 cursor-pointer"
+            >
+              <div className="w-6 h-6 rounded-full bg-[#F16938]/20 border border-[#F16938]/50 flex items-center justify-center text-[#F16938] group-hover:scale-110 transition-transform shadow-[0_0_8px_rgba(241,105,56,0.3)]">
+                <Compass className="w-3.5 h-3.5" />
+              </div>
+              <span>Explore the Map</span>
+              <ArrowRight className="w-3.5 h-3.5 text-stone-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
+            </button>
+          </div>
+
+          {/* Right Floating Glass Card: CURRENT CONDITIONS */}
+          <div className="w-full sm:w-80 bg-[#07090F]/80 border border-white/[0.08] rounded-2xl p-5 shadow-[0_8px_32px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-2xl shrink-0 self-start lg:self-center">
+            
+            {/* Header: Title with Orange Pulse */}
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/[0.06]">
+              <span className="w-2 h-2 rounded-full bg-[#F16938] animate-pulse shadow-[0_0_8px_#F16938]" />
+              <span className="text-xs font-display font-bold tracking-[0.18em] text-stone-200 uppercase">
+                CURRENT CONDITIONS
+              </span>
+            </div>
+
+            {/* Key-Value Telemetry Rows */}
+            <div className="flex flex-col gap-3 font-mono text-xs">
+              <div className="flex items-center justify-between text-stone-300">
+                <div className="flex items-center gap-2 text-stone-400">
+                  <MapPin className="w-3.5 h-3.5 text-[#F16938]" />
+                  <span className="text-[11px] uppercase tracking-wider text-stone-400 font-medium">Sector</span>
+                </div>
+                <span className="font-bold text-stone-100 tracking-tight">Sector 07</span>
+              </div>
+
+              <div className="flex items-center justify-between text-stone-300">
+                <div className="flex items-center gap-2 text-stone-400">
+                  <Thermometer className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className="text-[11px] uppercase tracking-wider text-stone-400 font-medium">Temperature</span>
+                </div>
+                <span className="font-bold text-cyan-300 tabular-nums">{weather?.temperature?.avg || -63}°C</span>
+              </div>
+
+              <div className="flex items-center justify-between text-stone-300">
+                <div className="flex items-center gap-2 text-stone-400">
+                  <RadioTower className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-[11px] uppercase tracking-wider text-stone-400 font-medium">Radiation</span>
+                </div>
+                <span className="font-bold text-amber-300 tracking-tight uppercase text-[11px]">Moderate</span>
+              </div>
+
+              <div className="flex items-center justify-between text-stone-300">
+                <div className="flex items-center gap-2 text-stone-400">
+                  <Wind className="w-3.5 h-3.5 text-stone-300" />
+                  <span className="text-[11px] uppercase tracking-wider text-stone-400 font-medium">Wind Speed</span>
+                </div>
+                <span className="font-bold text-stone-100 tabular-nums">12 km/h</span>
+              </div>
+
+              <div className="flex items-center justify-between text-stone-300">
+                <div className="flex items-center gap-2 text-stone-400">
+                  <Eye className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-[11px] uppercase tracking-wider text-stone-400 font-medium">Visibility</span>
+                </div>
+                <span className="font-bold text-emerald-400 tabular-nums">94%</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
 
-      {/* TOP: Strategic Header & Live Mars Telemetry Ticker */}
-      <div className="relative z-10 w-full max-w-6xl flex flex-col items-center text-center mt-6 mb-8">
+      {/* ========================================================================= */}
+      {/* TIER 2: 4-PILL QUICK NAVIGATION BAR                                       */}
+      {/* ========================================================================= */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {QUICK_NAV_ITEMS.map((item, idx) => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={idx}
+              onClick={() => {
+                marsAudio.playUiClick();
+                if (item.is3d) {
+                  setViewMode('3d');
+                }
+                scrollTo(item.target);
+              }}
+              className="group bg-[#070A10]/60 hover:bg-[#0D121C]/85 border border-white/[0.06] hover:border-[#F16938]/30 rounded-2xl p-4 transition-all duration-300 text-left flex items-center gap-3.5 backdrop-blur-2xl shadow-[0_4px_20px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.03)] cursor-pointer"
+            >
+              <div className="w-10 h-10 rounded-full bg-white/[0.03] border border-white/[0.06] group-hover:border-[#F16938]/30 group-hover:bg-[#F16938]/10 flex items-center justify-center shrink-0 transition-colors">
+                <Icon className="w-4 h-4 text-[#F16938]/90 group-hover:text-[#F16938] group-hover:scale-110 transition-transform" />
+              </div>
+              <div className="overflow-hidden">
+                <div className="font-display font-bold text-xs text-stone-200 tracking-[0.14em] group-hover:text-white uppercase truncate">
+                  {item.title}
+                </div>
+                <div className="text-[11px] font-sans text-stone-400 group-hover:text-stone-300 transition-colors truncate">
+                  {item.subtitle}
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ========================================================================= */}
+      {/* TIER 3: LOWER BENTO GRID (3 COLUMNS)                                      */}
+      {/* ========================================================================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
         
-        {/* Mission Identification Pill */}
-        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#0B0C10]/90 border border-mars-400/30 shadow-[0_0_20px_rgba(244,112,80,0.2)] mb-6 backdrop-blur-xl">
-          <span className="w-2 h-2 rounded-full bg-mars-400 animate-ping" />
-          <span className="text-[11px] font-mono tracking-[0.2em] text-mars-300 uppercase font-semibold">
-            NASA Space Apps Challenge 2026 • Interplanetary Expedition
-          </span>
-        </div>
-
-        {/* Main Headline */}
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-display font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-stone-200 to-mars-300 drop-shadow-[0_4px_30px_rgba(0,0,0,0.9)] max-w-4xl leading-[1.08] mb-5">
-          SURVIVE & EXPLORE THE RED PLANET
-        </h1>
-
-        {/* Subtitle */}
-        <p className="text-base sm:text-lg md:text-xl text-stone-300 max-w-2xl font-sans font-light leading-relaxed mb-8 drop-shadow-md">
-          Tactical surface cartography, autonomous rover traverse routing, and life-support safety simulation calibrated for the next generation of human Martian explorers.
-        </p>
-
-        {/* Live Mars Telemetry Pill Bar */}
-        <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-6 bg-[#0B0C10]/85 border border-white/[0.08] backdrop-blur-2xl px-5 py-3 rounded-2xl shadow-hud-glass font-mono text-xs mb-8">
-          <div className="flex items-center gap-2">
-            <span className="text-space-400">MARTIAN DATE:</span>
-            <span className="text-amber-400 font-bold">{marsDate.formatted}</span>
+        {/* ----------------------------------------------------------------------- */}
+        {/* COLUMN 1 (5 COLS): INTERACTIVE TACTICAL MAP PREVIEW CARD                */}
+        {/* ----------------------------------------------------------------------- */}
+        <div className="lg:col-span-5 bg-[#070A10]/75 border border-white/[0.07] rounded-3xl p-5 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.04)] flex flex-col justify-between">
+          
+          {/* Top Layer Filter Tabs (Transparent Frosted Glass Style) */}
+          <div className="flex items-center justify-between gap-1 mb-3.5 overflow-x-auto pb-1 custom-scrollbar">
+            <div className="flex items-center gap-1.5">
+              {MAP_LAYERS.map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => {
+                    setActiveLayerTab(tab);
+                    marsAudio.playUiClick();
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-wider font-semibold transition-all cursor-pointer whitespace-nowrap border ${
+                    activeLayerTab === tab
+                      ? 'bg-[#F16938]/20 border-[#F16938]/60 text-stone-100 shadow-[0_0_12px_rgba(241,105,56,0.18)] backdrop-blur-md'
+                      : 'bg-white/[0.02] border-white/[0.05] text-stone-400 hover:text-stone-200 hover:border-white/10 hover:bg-white/[0.05] backdrop-blur-sm'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+            <button className="px-2.5 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-wider text-stone-400 hover:text-stone-200 bg-white/[0.02] border border-white/[0.05] hover:border-white/10 flex items-center gap-1 shrink-0 backdrop-blur-sm cursor-pointer">
+              <span>More</span>
+              <ChevronDown className="w-3 h-3" />
+            </button>
           </div>
-          <div className="hidden sm:block w-[1px] h-3.5 bg-white/10" />
-          <div className="flex items-center gap-2">
-            <span className="text-space-400">MTC TIME:</span>
-            <span className="text-cyan-400 font-bold">{marsDate.timeFormatted}</span>
-          </div>
-          <div className="hidden sm:block w-[1px] h-3.5 bg-white/10" />
-          <div className="flex items-center gap-2">
-            <Thermometer className="w-3.5 h-3.5 text-mars-400" />
-            <span className="text-space-400">SURFACE TEMP:</span>
-            <span className="text-white font-bold">{weather?.temperature?.avg || -63}°C</span>
-          </div>
-          <div className="hidden sm:block w-[1px] h-3.5 bg-white/10" />
-          <div className="flex items-center gap-2">
-            <Wind className="w-3.5 h-3.5 text-cyber-cyan" />
-            <span className="text-space-400">PRESSURE:</span>
-            <span className="text-white font-bold">{weather?.pressure?.value || 636} Pa</span>
-          </div>
-        </div>
 
-        {/* Primary Call to Actions */}
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <button
+          {/* Interactive Map Surface Canvas Viewport */}
+          <div 
             onClick={() => {
               marsAudio.playQuindarTone(true);
               scrollTo('section-map');
             }}
-            className="px-7 py-3.5 rounded-xl bg-gradient-to-r from-mars-600 via-mars-500 to-amber-600 hover:from-mars-500 hover:to-amber-500 text-white font-display font-bold text-sm tracking-wider uppercase transition-all shadow-[0_0_30px_rgba(249,115,22,0.5)] hover:shadow-[0_0_45px_rgba(249,115,22,0.8)] hover:scale-[1.03] active:scale-[0.98] flex items-center gap-2.5 cursor-pointer border border-white/20"
+            className="relative w-full h-64 sm:h-72 rounded-2xl overflow-hidden border border-white/[0.06] bg-space-950 group cursor-pointer"
           >
-            <Compass className="w-4 h-4 text-white animate-spin-slow" />
-            <span>Launch Mission Control (Map)</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
+            {/* Mars Surface Texture Image */}
+            <img 
+              src="/mars_texture.jpg" 
+              alt="Martian Surface Map Preview" 
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out opacity-80"
+            />
+            
+            {/* Subtle Grid Reticle Overlay */}
+            <div className="absolute inset-0 bg-[radial-gradient(#ffffff08_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#070A10] via-transparent to-transparent pointer-events-none" />
 
-          <button
-            onClick={() => {
-              setViewMode('3d');
-              marsAudio.playQuindarTone(false);
-              scrollTo('section-map');
-            }}
-            className="px-6 py-3.5 rounded-xl bg-space-900/90 hover:bg-space-800 text-stone-200 hover:text-white font-mono text-xs tracking-wider uppercase transition-all border border-white/10 hover:border-cyber-cyan/50 hover:shadow-[0_0_20px_rgba(0,255,204,0.3)] flex items-center gap-2 cursor-pointer backdrop-blur-md"
-          >
-            <Globe className="w-4 h-4 text-cyber-cyan" />
-            <span>3D Planetary Globe</span>
-          </button>
-
-          <button
-            onClick={() => {
-              marsAudio.playQuindarTone(false);
-              scrollTo('section-sky');
-            }}
-            className="px-6 py-3.5 rounded-xl bg-space-900/90 hover:bg-space-800 text-stone-200 hover:text-white font-mono text-xs tracking-wider uppercase transition-all border border-white/10 hover:border-amber-500/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.3)] flex items-center gap-2 cursor-pointer backdrop-blur-md"
-          >
-            <Sparkles className="w-4 h-4 text-amber-400" />
-            <span>Celestial Ephemeris & Eclipse</span>
-          </button>
-        </div>
-      </div>
-
-      {/* MIDDLE: Interactive Destination Showcase Cards */}
-      <div className="relative z-10 w-full max-w-6xl my-6">
-        <div className="flex items-center justify-between mb-4 px-1">
-          <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-mars-400" />
-            <h2 className="text-xs font-mono tracking-[0.18em] uppercase text-stone-300 font-bold">
-              Prime Exploration Landing Sites & Geological Wonders
-            </h2>
-          </div>
-          <span className="text-[11px] font-mono text-space-400 hidden sm:inline">
-            Click any site to fly directly to it on the interactive map
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
-          {DESTINATIONS.map((dest, idx) => (
-            <div
-              key={dest.id}
-              onClick={() => handleFlyTo(dest)}
-              className="group relative bg-[#0B0C10]/85 hover:bg-[#11131a] border border-white/[0.08] hover:border-mars-400/50 rounded-2xl overflow-hidden shadow-hud-glass transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col"
-            >
-              {/* Image Preview with Aspect Ratio */}
-              <div className="relative w-full h-32 overflow-hidden bg-space-950">
-                <img 
-                  src={dest.image} 
-                  alt={dest.name} 
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0B0C10] via-black/30 to-transparent" />
-                
-                {/* Elevation & Highlight Tag */}
-                <div className="absolute top-2.5 left-2.5">
-                  <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border backdrop-blur-md ${dest.badgeColor}`}>
-                    {dest.highlight}
-                  </span>
-                </div>
+            {/* Zoom Controls Overlay (Top-Left) */}
+            <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 pointer-events-none">
+              <div className="w-6 h-6 rounded-lg bg-[#070A10]/80 border border-white/[0.08] flex items-center justify-center text-xs font-mono font-bold text-stone-300 backdrop-blur-md">
+                +
               </div>
+              <div className="w-6 h-6 rounded-lg bg-[#070A10]/80 border border-white/[0.08] flex items-center justify-center text-xs font-mono font-bold text-stone-300 backdrop-blur-md">
+                −
+              </div>
+            </div>
 
-              {/* Card Body */}
-              <div className="p-3.5 flex-1 flex flex-col justify-between">
+            {/* Stylized Rover Traverse Route Graphic */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none">
+              <path 
+                d="M 120 70 Q 180 120 230 140 T 320 200" 
+                fill="none" 
+                stroke="#F16938" 
+                strokeWidth="2.5" 
+                strokeDasharray="4 4"
+                className="animate-pulse"
+              />
+            </svg>
+
+            {/* Waypoint 1: Basecamp Alpha */}
+            <div className="absolute top-[60px] left-[105px] flex items-center gap-1.5 z-10 pointer-events-none">
+              <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 ring-4 ring-cyan-500/20 animate-ping" />
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-black/80 border border-cyan-400/40 text-cyan-300 backdrop-blur-md">
+                Basecamp Alpha
+              </span>
+            </div>
+
+            {/* Waypoint 2: Sector 07 */}
+            <div className="absolute top-[130px] left-[220px] flex items-center gap-1.5 z-10 pointer-events-none">
+              <div className="w-2 h-2 rounded-full bg-amber-400 ring-4 ring-amber-500/20" />
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-black/80 border border-amber-400/40 text-amber-300 backdrop-blur-md">
+                Sector 07
+              </span>
+            </div>
+
+            {/* Waypoint 3: Crater Zeta */}
+            <div className="absolute bottom-[45px] left-[260px] flex items-center gap-1.5 z-10 pointer-events-none">
+              <div className="w-2 h-2 rounded-full bg-[#F16938] ring-4 ring-red-500/20" />
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-black/80 border border-[#F16938]/40 text-[#F16938] backdrop-blur-md">
+                Crater Zeta
+              </span>
+            </div>
+
+            {/* Bottom Scale & Coordinates Telemetry */}
+            <div className="absolute bottom-3 left-3 flex items-center gap-2.5 font-mono text-[10px] text-stone-400 z-10 pointer-events-none">
+              <span className="px-2 py-0.5 rounded-md bg-black/75 border border-white/10 text-stone-300 backdrop-blur-sm tabular-nums font-semibold">
+                10 km
+              </span>
+              <span className="px-2 py-0.5 rounded-md bg-black/75 border border-white/10 text-stone-300 backdrop-blur-sm tabular-nums font-medium">
+                4.5895° S &nbsp; 137.4417° E
+              </span>
+            </div>
+
+            {/* Floating Mini Mars Globe Button (Bottom-Right) */}
+            <div 
+              onClick={(e) => {
+                e.stopPropagation();
+                setViewMode('3d');
+                marsAudio.playQuindarTone(false);
+                scrollTo('section-map');
+              }}
+              className="absolute bottom-3 right-3 z-20 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#070A10]/85 hover:bg-[#0E131E]/95 border border-white/15 hover:border-cyan-400/50 text-stone-300 hover:text-white font-mono text-[11px] shadow-lg backdrop-blur-xl transition-all group-hover:scale-105 cursor-pointer"
+            >
+              <Globe className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="font-semibold uppercase tracking-wider text-[10px]">Mars 3D</span>
+              <ArrowRight className="w-3 h-3 text-stone-400" />
+            </div>
+
+            {/* Hover overlay hint */}
+            <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/70 border border-white/10 text-[10px] font-mono text-stone-300 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
+              Click to Open Mission Map ↗
+            </div>
+          </div>
+
+          <div className="mt-3 pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] font-mono text-stone-400">
+            <span className="tracking-wider uppercase">NASA Trek Equirectangular Projection</span>
+            <span className="text-[#F16938] font-semibold tracking-wider uppercase flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#F16938] animate-pulse" />
+              Active Sector Feed
+            </span>
+          </div>
+        </div>
+
+        {/* ----------------------------------------------------------------------- */}
+        {/* COLUMN 2 (4 COLS): FEATURED DESTINATIONS 2x2 GRID                       */}
+        {/* ----------------------------------------------------------------------- */}
+        <div className="lg:col-span-4 bg-[#070A10]/75 border border-white/[0.07] rounded-3xl p-5 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.04)] flex flex-col justify-between">
+          
+          {/* Header */}
+          <div className="flex items-center justify-between mb-3.5">
+            <h3 className="font-display font-bold text-xs tracking-[0.16em] text-stone-200 uppercase">
+              FEATURED DESTINATIONS
+            </h3>
+            <button 
+              onClick={() => scrollTo('section-map')}
+              className="px-2.5 py-1 rounded-full bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.05] hover:border-white/10 text-[10px] font-mono uppercase tracking-wider text-stone-400 hover:text-stone-200 flex items-center gap-1 cursor-pointer transition-all backdrop-blur-sm"
+            >
+              <span>View All</span>
+              <ArrowRight className="w-2.5 h-2.5" />
+            </button>
+          </div>
+
+          {/* 2x2 Cards Grid */}
+          <div className="grid grid-cols-2 gap-3 flex-1">
+            {FEATURED_DESTINATIONS.map((dest) => (
+              <div
+                key={dest.id}
+                onClick={() => handleFlyTo(dest)}
+                className="group relative bg-[#0A0D14]/50 hover:bg-[#0F1420]/80 border border-white/[0.05] hover:border-white/15 rounded-2xl overflow-hidden p-2.5 transition-all duration-300 cursor-pointer flex flex-col justify-between backdrop-blur-xl"
+              >
+                {/* Image Thumbnail */}
+                <div className="w-full h-20 rounded-xl overflow-hidden mb-2 relative bg-space-950">
+                  <img 
+                    src={dest.image} 
+                    alt={dest.name} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+                </div>
+
+                {/* Details */}
                 <div>
-                  <h3 className="font-display font-bold text-sm text-white group-hover:text-mars-300 transition-colors leading-snug mb-1">
-                    {dest.name}
-                  </h3>
-                  <div className="text-[10px] font-mono text-stone-400 flex items-center justify-between mb-2">
-                    <span className="truncate">{dest.rover}</span>
-                    <span className="text-amber-400 font-bold shrink-0">{dest.elevation}</span>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className={`w-1.5 h-1.5 rounded-full ${dest.dotColor}`} />
+                    <span className="font-display font-bold text-xs text-stone-200 group-hover:text-white transition-colors truncate tracking-wide">
+                      {dest.name}
+                    </span>
                   </div>
-                  <p className="text-[11px] text-stone-400/90 font-sans line-clamp-2 leading-relaxed mb-3">
+                  <p className="text-[10px] text-stone-400/90 font-sans line-clamp-2 leading-relaxed mb-2 font-normal">
                     {dest.description}
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-[11px] font-mono text-mars-400 group-hover:text-mars-300">
-                  <span className="font-semibold">Fly to Site</span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                {/* Explore Link (Refined Ghost Pill) */}
+                <div className="pt-2 border-t border-white/[0.05] flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-[#F16938] font-bold tracking-widest uppercase group-hover:text-[#FF8A65] flex items-center gap-1">
+                    Explore
+                    <ArrowRight className="w-2.5 h-2.5 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+
+        {/* ----------------------------------------------------------------------- */}
+        {/* COLUMN 3 (3 COLS): TELEMETRY, QUICK FACTS & MISSION DISPATCHES         */}
+        {/* ----------------------------------------------------------------------- */}
+        <div className="lg:col-span-3 flex flex-col gap-3.5 justify-between">
+          
+          {/* Card A: MARS QUICK FACTS */}
+          <div className="bg-[#070A10]/75 border border-white/[0.07] rounded-2xl p-4 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.04)]">
+            <h4 className="font-display font-bold text-xs tracking-[0.16em] text-stone-200 uppercase mb-3">
+              MARS QUICK FACTS
+            </h4>
+
+            <div className="flex flex-col gap-2.5 font-mono text-xs text-stone-300">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-stone-400 text-[11px]">
+                  <Thermometer className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className="text-[10px] uppercase tracking-wider text-stone-400 font-medium">Avg Temperature</span>
+                </div>
+                <span className="font-bold text-stone-100 text-[11px] tabular-nums">-63°C</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-stone-400 text-[11px]">
+                  <Clock className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-[10px] uppercase tracking-wider text-stone-400 font-medium">Day Length (Sol)</span>
+                </div>
+                <span className="font-bold text-stone-100 text-[11px] tabular-nums">24h 39m</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-stone-400 text-[11px]">
+                  <Compass className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-[10px] uppercase tracking-wider text-stone-400 font-medium">Surface Gravity</span>
+                </div>
+                <span className="font-bold text-stone-100 text-[11px] tabular-nums">0.38 g</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-stone-400 text-[11px]">
+                  <Wind className="w-3.5 h-3.5 text-[#F16938]" />
+                  <span className="text-[10px] uppercase tracking-wider text-stone-400 font-medium">Atmosphere</span>
+                </div>
+                <span className="font-bold text-stone-100 text-[11px] tabular-nums">95% CO₂</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card B: LATEST UPDATES FEED */}
+          <div className="bg-[#070A10]/75 border border-white/[0.07] rounded-2xl p-4 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.04)] flex-1">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-display font-bold text-xs tracking-[0.16em] text-stone-200 uppercase">
+                LATEST UPDATES
+              </h4>
+              <button 
+                onClick={() => scrollTo('section-science')}
+                className="px-2 py-0.5 rounded-full bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.05] text-[10px] font-mono uppercase tracking-wider text-stone-400 hover:text-stone-200 flex items-center gap-0.5 cursor-pointer backdrop-blur-sm transition-all"
+              >
+                <span>View All</span>
+                <ArrowRight className="w-2.5 h-2.5" />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <div className="flex items-start gap-2.5 p-2 rounded-xl bg-white/[0.02] border border-white/[0.03]">
+                <div className="p-1 rounded bg-cyan-950/40 border border-cyan-500/30 text-cyan-400 shrink-0 mt-0.5">
+                  <CheckCircle2 className="w-3 h-3" />
+                </div>
+                <div className="overflow-hidden">
+                  <div className="font-display font-bold text-xs text-stone-200 tracking-wide truncate">System Check Complete</div>
+                  <div className="text-[10px] font-mono text-stone-400 tracking-wider">Basecamp Alpha • 2h ago</div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 p-2 rounded-xl bg-white/[0.02] border border-white/[0.03]">
+                <div className="p-1 rounded bg-amber-950/40 border border-amber-500/30 text-amber-400 shrink-0 mt-0.5">
+                  <AlertTriangle className="w-3 h-3" />
+                </div>
+                <div className="overflow-hidden">
+                  <div className="font-display font-bold text-xs text-stone-200 tracking-wide truncate">Dust Storm Alert</div>
+                  <div className="text-[10px] font-mono text-stone-400 tracking-wider">Sector 12 • 5h ago</div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 p-2 rounded-xl bg-white/[0.02] border border-white/[0.03]">
+                <div className="p-1 rounded bg-purple-950/40 border border-purple-500/30 text-purple-400 shrink-0 mt-0.5">
+                  <Cpu className="w-3 h-3" />
+                </div>
+                <div className="overflow-hidden">
+                  <div className="font-display font-bold text-xs text-stone-200 tracking-wide truncate">New Research Data Available</div>
+                  <div className="text-[10px] font-mono text-stone-400 tracking-wider">Crater Zeta • 8h ago</div>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      {/* BOTTOM: 4 Mission Architectural Pillars */}
-      <div className="relative z-10 w-full max-w-6xl mt-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-          {CAPABILITIES.map((cap, i) => {
-            const Icon = cap.icon;
-            return (
-              <div
-                key={i}
-                className="bg-[#0B0C10]/75 border border-white/[0.06] rounded-2xl p-4 backdrop-blur-xl transition-all hover:border-white/20 hover:bg-[#0D0F15]"
-              >
-                <div className="flex items-center gap-3 mb-2.5">
-                  <div className={`p-2 rounded-xl bg-white/[0.04] border ${cap.border}`}>
-                    <Icon className={`w-4 h-4 ${cap.color}`} />
-                  </div>
-                  <h4 className="font-display font-bold text-xs text-stone-200">
-                    {cap.title}
-                  </h4>
-                </div>
-                <p className="text-[11px] text-stone-400 font-sans leading-relaxed">
-                  {cap.description}
-                </p>
+          {/* Card C: THE NEXT STEP IS YOURS PROMPT CARD */}
+          <div 
+            onClick={() => {
+              marsAudio.playQuindarTone(true);
+              scrollTo('section-map');
+            }}
+            className="group relative bg-gradient-to-r from-[#070A10]/85 via-[#0C0F16]/80 to-[#120F0C]/75 border border-white/[0.07] hover:border-[#F16938]/30 rounded-2xl p-4 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.6)] cursor-pointer flex items-center justify-between transition-all"
+          >
+            <div>
+              <div className="font-display font-bold text-xs text-stone-200 tracking-wide group-hover:text-[#F16938] transition-colors">
+                The next step is yours.
               </div>
-            );
-          })}
+              <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-stone-400">
+                Plan. Explore. Survive.
+              </div>
+            </div>
+
+            {/* Glowing Action Button Circle */}
+            <div className="w-9 h-9 rounded-full bg-white/[0.04] hover:bg-[#F16938]/20 border border-white/[0.08] hover:border-[#F16938]/50 flex items-center justify-center text-stone-400 hover:text-[#F16938] transition-all shadow-sm">
+              <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* ========================================================================= */}
+      {/* TIER 4: NASA FOOTER BRANDING STRIP                                        */}
+      {/* ========================================================================= */}
+      <div className="pt-6 pb-2 border-t border-white/[0.05] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono text-stone-400">
+        <div className="flex items-center gap-3">
+          {/* NASA Meatball Logo */}
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded bg-blue-900/40 border border-blue-500/25 text-white font-display font-black tracking-[0.2em] text-[10px]">
+              NASA
+            </span>
+            <span className="text-[11px] font-sans text-stone-400">
+              In collaboration with NASA Space Apps Challenge 2026
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 text-[10px] font-mono tracking-[0.22em] uppercase text-stone-400/80">
+          <span>REAL DATA</span>
+          <span>•</span>
+          <span>REAL LOCATIONS</span>
+          <span>•</span>
+          <span className="text-stone-300 font-semibold">A SAFER TOMORROW</span>
         </div>
       </div>
 
-      {/* Subtle Scroll Indicator */}
-      <div 
-        onClick={() => scrollTo('section-map')}
-        className="relative z-10 mt-10 flex flex-col items-center gap-1.5 cursor-pointer opacity-70 hover:opacity-100 transition-opacity group"
-      >
-        <span className="text-[10px] font-mono tracking-widest uppercase text-stone-400 group-hover:text-mars-300">
-          Scroll Down to Interactive Map
-        </span>
-        <ChevronDown className="w-4 h-4 text-mars-400 animate-bounce" />
-      </div>
     </div>
   );
 }

@@ -1,12 +1,14 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { 
-  Menu, Hexagon, Maximize, Minimize, Settings, ShieldAlert,
+  Menu, Hexagon, Maximize, Minimize, ShieldAlert,
   Play, X, Radar, Map as MapIcon, Image as ImageIcon, Sparkles,
-  Volume2, VolumeX, FileText, Compass
+  Volume2, VolumeX, FileText, Compass, ArrowRight
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import useMapStore from '../store/useMapStore';
+import { marsAudio } from '../utils/audioSynthesizer';
 
-export default function TopBar() {
+export default function TopBar({ isMapActive = false, activeSection = 'home' }) {
   const { 
     viewMode, 
     setViewMode,
@@ -36,6 +38,7 @@ export default function TopBar() {
   };
 
   const scrollToSection = (id) => {
+    marsAudio.playUiClick?.();
     const el = document.getElementById(id);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
@@ -43,152 +46,186 @@ export default function TopBar() {
   };
 
   const viewModes = [
-    { id: '2d', icon: Hexagon, label: '2D MAP' },
-    { id: '3d', icon: Hexagon, label: '3D GLOBE' },
+    { id: '2d', icon: Hexagon, label: '2D' },
+    { id: '3d', icon: Hexagon, label: '3D' },
     { id: 'split', icon: Menu, label: 'SPLIT' }
+  ];
+
+  const navItems = [
+    { id: 'section-home', key: 'home', label: 'Mission Overview', shortLabel: 'Overview', icon: Compass, accent: 'text-cyan-400' },
+    { id: 'section-map', key: 'map', label: 'Telemetry & Map', shortLabel: 'Map', icon: MapIcon, accent: 'text-[#F16938]' },
+    { id: 'section-imagery', key: 'imagery', label: 'Science & Imagery', shortLabel: 'Science', icon: ImageIcon, accent: 'text-purple-400' },
+    { id: 'section-sky', key: 'sky', label: 'Deep Space & Sky', shortLabel: 'Sky', icon: Sparkles, accent: 'text-amber-400' },
   ];
 
   return (
     <header className="relative z-50 pointer-events-none w-full">
-      <div className="mt-4 mx-4 h-14 w-[calc(100%-2rem)] rounded-2xl border border-white/[0.06] flex items-center justify-between px-3.5 z-50 shrink-0 bg-[#0B0C10]/70 backdrop-blur-3xl relative shadow-hud-glass gap-3 transition-all hover:bg-[#0B0C10]/80 pointer-events-auto">
+      <div className="mt-3.5 mx-auto max-w-[1400px] h-14 w-[calc(100%-2rem)] rounded-2xl border border-white/[0.08] flex items-center justify-between px-3.5 z-50 shrink-0 bg-[#07090E]/85 backdrop-blur-2xl relative shadow-[0_8px_32px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.06)] gap-3 transition-all hover:bg-[#07090E]/95 pointer-events-auto">
         
         {/* Left: Brand Identity */}
         <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => scrollToSection('section-home')} title="Return to Mission Overview">
-            <img src="/mars-logo.svg" alt="NASA" className="h-6 w-auto drop-shadow-[0_0_8px_rgba(244,112,80,0.8)]" />
+          <div 
+            className="flex items-center gap-2.5 cursor-pointer group" 
+            onClick={() => {
+              marsAudio.playQuindarTone?.(false);
+              scrollToSection('section-home');
+            }} 
+            title="Return to Mission Overview"
+          >
+            <img src="/mars-logo.svg" alt="NASA" className="h-6 w-auto drop-shadow-[0_0_8px_rgba(244,112,80,0.8)] group-hover:scale-105 transition-transform" />
             <div className="flex flex-col hidden sm:flex">
-              <h1 className="text-white font-display font-bold text-[13px] leading-tight tracking-[0.15em] uppercase">MarsWalk</h1>
-              <span className="text-mars-400 font-mono text-[9px] tracking-widest">Explorer</span>
+              <h1 className="text-stone-100 font-display font-black text-sm leading-tight tracking-[0.18em] uppercase group-hover:text-white transition-colors">
+                MarsWalk
+              </h1>
+              <span className="text-[#F16938] font-mono font-semibold text-[9px] tracking-[0.25em] uppercase">
+                Explorer
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Center: Main Navigation (Scrolls to Sections) */}
-        <div className="flex-1 flex justify-center items-center gap-2 overflow-x-auto custom-scrollbar-x px-2">
-          <button
-            onClick={() => scrollToSection('section-home')}
-            className="px-3 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all bg-space-900/80 hover:bg-space-800 text-space-200 hover:text-white border border-white/5 hover:border-cyber-cyan/40"
-          >
-            <Compass className="w-3.5 h-3.5 text-cyber-cyan" />
-            <span className="hidden md:inline">Mission Overview</span>
-          </button>
-
-          <button
-            onClick={() => scrollToSection('section-map')}
-            className="px-3 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all bg-space-900/80 hover:bg-space-800 text-space-200 hover:text-white border border-white/5 hover:border-mars-500/40"
-          >
-            <MapIcon className="w-3.5 h-3.5 text-mars-400" />
-            <span className="hidden md:inline">Telemetry & Map</span>
-          </button>
-          
-          <button
-            onClick={() => scrollToSection('section-imagery')}
-            className="px-3 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all bg-space-900/80 hover:bg-space-800 text-space-200 hover:text-white border border-white/5 hover:border-purple-500/40"
-          >
-            <ImageIcon className="w-3.5 h-3.5 text-purple-400" />
-            <span className="hidden md:inline">Science & Imagery</span>
-          </button>
-
-          <button
-            onClick={() => scrollToSection('section-sky')}
-            className="px-3 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all bg-space-900/80 hover:bg-space-800 text-space-200 hover:text-white border border-white/5 hover:border-amber-500/40"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden md:inline">Deep Space & Sky</span>
-          </button>
+        {/* Center: Main Section Navigation (Clean, single-line, active-highlighted) */}
+        <div className="flex-1 flex justify-center items-center gap-1.5 sm:gap-2 px-1 overflow-hidden">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeSection === item.key;
+            return (
+              <button
+                key={item.id}
+                onClick={() => scrollToSection(item.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-mono uppercase tracking-[0.08em] flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 border cursor-pointer ${
+                  isActive
+                    ? 'bg-[#F16938]/20 text-stone-100 border-[#F16938]/60 shadow-[0_0_12px_rgba(241,105,56,0.25)] font-bold'
+                    : 'bg-white/[0.02] hover:bg-[#101522]/80 text-stone-400 hover:text-white border-white/[0.05] hover:border-white/15 font-medium'
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#F16938]' : item.accent}`} />
+                <span className="hidden md:inline">{item.label}</span>
+                <span className="inline md:hidden">{item.shortLabel}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Right: Quick Tools & Toggles */}
+        {/* Right: Contextual Tools (Map-only tools hidden when outside map) */}
         <div className="flex items-center gap-2 shrink-0">
           
-          {/* Ambient Audio Synthesizer */}
+          {/* Universal Ambient Audio Toggle */}
           <button
             onClick={toggleAudio}
-            className={`px-2 py-1.5 border rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all shadow-sm ${
+            className={`px-2.5 py-1.5 border rounded-xl text-xs font-mono font-medium uppercase tracking-wider flex items-center gap-1.5 transition-all backdrop-blur-md cursor-pointer ${
               isAudioActive
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-neon-amber'
-                : 'bg-space-900/80 hover:bg-space-850 border-white/[0.08] text-space-400 hover:text-white'
+                ? 'bg-amber-950/40 text-amber-300 border-amber-500/40 shadow-[0_0_12px_rgba(245,166,35,0.2)] font-semibold'
+                : 'bg-white/[0.02] hover:bg-[#101522]/85 border-white/[0.06] hover:border-white/15 text-stone-400 hover:text-stone-200'
             }`}
             title={isAudioActive ? 'Mute Martian Soundscape' : 'Enable Ambient Martian Soundscape'}
           >
             {isAudioActive ? <Volume2 className="w-3.5 h-3.5 text-amber-400 animate-pulse" /> : <VolumeX className="w-3.5 h-3.5" />}
-            <span className="hidden 2xl:inline">{isAudioActive ? 'Audio ON' : 'Audio'}</span>
+            <span className="hidden lg:inline">{isAudioActive ? 'Sound ON' : 'Sound'}</span>
           </button>
 
-          {/* NASA Flight Plan Briefing */}
-          <button
-            onClick={() => setFlightPlanOpen(true)}
-            className="px-2 py-1.5 border rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all shadow-sm bg-space-900/80 hover:bg-space-850 border-white/[0.08] hover:border-cyan-500/40 text-space-200"
-            title="Open NASA Astronaut Flight Plan & Briefing Package"
-          >
-            <FileText className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden xl:inline">Briefing</span>
-          </button>
+          {/* OUTSIDE MAP: Sleek Direct "Launch Map" CTA */}
+          {!isMapActive && (
+            <button
+              onClick={() => {
+                marsAudio.playQuindarTone?.(true);
+                scrollToSection('section-map');
+              }}
+              className="group px-3.5 py-1.5 rounded-xl bg-[#F16938]/15 hover:bg-[#F16938]/30 border border-[#F16938]/40 hover:border-[#F16938]/80 text-stone-100 font-mono text-xs font-semibold uppercase tracking-[0.1em] flex items-center gap-1.5 shadow-[0_0_12px_rgba(241,105,56,0.18)] transition-all cursor-pointer backdrop-blur-md"
+            >
+              <Compass className="w-3.5 h-3.5 text-[#F16938] group-hover:rotate-45 transition-transform" />
+              <span className="hidden sm:inline">Launch Map</span>
+              <ArrowRight className="w-3.5 h-3.5 text-stone-400 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
+            </button>
+          )}
 
-          {/* Contingency Simulator */}
-          <button
-            onClick={() => setContingencyModalOpen(true)}
-            className={`px-2.5 py-1.5 border rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all shadow-sm ${
-              activeContingency
-                ? 'bg-rose-600 text-white border-rose-400 shadow-[0_0_16px_rgba(244,63,94,0.6)] animate-pulse'
-                : 'bg-space-900/80 hover:bg-space-850 border-white/[0.08] hover:border-rose-500/40 text-space-200'
-            }`}
-            title="NASA What-If Contingency Simulator"
-          >
-            <ShieldAlert className={`w-3.5 h-3.5 ${activeContingency ? 'text-white' : 'text-rose-400'}`} />
-            <span className="hidden xl:inline">{activeContingency ? 'ALERT ACTIVE' : 'Contingency'}</span>
-          </button>
-
-          {/* HUD Telemetry Feed Toggle */}
-          <button
-            onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
-            className={`px-2.5 py-1.5 border rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all shadow-sm ${
-              rightSidebarOpen
-                ? 'bg-cyber-cyan/15 text-cyber-cyan border-cyber-cyan/40 shadow-neon-cyan'
-                : 'bg-space-900/80 hover:bg-space-850 border-white/[0.08] hover:border-cyber-cyan/40 text-space-200'
-            }`}
-            title="Toggle Right HUD Telemetry"
-          >
-            <Radar className="w-3.5 h-3.5 text-cyber-cyan" />
-            <span className="hidden lg:inline">HUD Feed</span>
-          </button>
-
-          {/* EVA HUD */}
-          <button
-            onClick={() => setEVASimulating(!isEVASimulating)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-display font-bold uppercase tracking-widest flex items-center gap-1.5 transition-all shadow-lg border ${
-              isEVASimulating
-                ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-neon-mars border-rose-400/50 animate-pulse'
-                : 'bg-gradient-to-r from-mars-400 to-mars-500 hover:brightness-110 text-white shadow-neon-mars border-white/15'
-            }`}
-          >
-            {isEVASimulating ? <X className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-white" />}
-            <span className="hidden sm:inline">EVA HUD</span>
-          </button>
-
-          {/* Viewport Segmented Switcher (2D / 3D / Split) */}
-          <div className="hidden lg:flex items-center bg-space-900/90 rounded-lg p-0.5 border border-white/[0.08] shadow-inner shrink-0 whitespace-nowrap">
-            {viewModes.map(({ id, icon: Icon, label }) => (
-              <button
-                key={id}
-                onClick={() => setViewMode(id)}
-                className={`px-2 py-1 rounded-md flex items-center gap-1 transition-all text-xs font-mono font-medium shrink-0 ${
-                  viewMode === id
-                    ? 'bg-gradient-to-r from-mars-500/25 to-mars-600/20 text-mars-300 border border-mars-500/40 shadow-[0_0_8px_rgba(244,112,80,0.25)]'
-                    : 'text-space-400 hover:text-white hover:bg-space-800/40 border border-transparent'
-                }`}
-                title={label}
+          {/* INSIDE MAP: Contextual Map & Flight Operations Tools */}
+          <AnimatePresence>
+            {isMapActive && (
+              <motion.div
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                transition={{ duration: 0.2 }}
+                className="flex items-center gap-1.5 sm:gap-2"
               >
-                <Icon className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline">{label}</span>
-              </button>
-            ))}
-          </div>
+                {/* NASA Flight Plan Briefing */}
+                <button
+                  onClick={() => setFlightPlanOpen(true)}
+                  className="px-2.5 py-1.5 border rounded-xl text-xs font-mono font-medium uppercase tracking-wider flex items-center gap-1.5 transition-all bg-white/[0.02] hover:bg-[#101522]/85 border-white/[0.06] hover:border-cyan-500/40 text-stone-300 hover:text-white backdrop-blur-md cursor-pointer whitespace-nowrap"
+                  title="Open NASA Astronaut Flight Plan & Briefing Package"
+                >
+                  <FileText className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className="hidden xl:inline">Briefing</span>
+                </button>
 
-          {/* Fullscreen */}
+                {/* Contingency Simulator */}
+                <button
+                  onClick={() => setContingencyModalOpen(true)}
+                  className={`px-2.5 py-1.5 border rounded-xl text-xs font-mono font-medium uppercase tracking-wider flex items-center gap-1.5 transition-all backdrop-blur-md cursor-pointer whitespace-nowrap ${
+                    activeContingency
+                      ? 'bg-rose-950/60 text-rose-200 border-rose-500/60 shadow-[0_0_16px_rgba(244,63,94,0.4)] animate-pulse font-semibold'
+                      : 'bg-white/[0.02] hover:bg-[#101522]/85 border-white/[0.06] hover:border-rose-500/40 text-stone-300 hover:text-white'
+                  }`}
+                  title="NASA What-If Contingency Simulator"
+                >
+                  <ShieldAlert className={`w-3.5 h-3.5 ${activeContingency ? 'text-rose-200' : 'text-rose-400'}`} />
+                  <span className="hidden xl:inline">{activeContingency ? 'ALERT ACTIVE' : 'Contingency'}</span>
+                </button>
+
+                {/* HUD Telemetry Feed Toggle */}
+                <button
+                  onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+                  className={`px-2.5 py-1.5 border rounded-xl text-xs font-mono font-medium uppercase tracking-wider flex items-center gap-1.5 transition-all backdrop-blur-md cursor-pointer whitespace-nowrap ${
+                    rightSidebarOpen
+                      ? 'bg-cyan-950/40 text-cyan-300 border-cyan-500/40 shadow-[0_0_12px_rgba(0,255,204,0.2)] font-semibold'
+                      : 'bg-white/[0.02] hover:bg-[#101522]/85 border-white/[0.06] hover:border-cyan-500/40 text-stone-300 hover:text-white'
+                  }`}
+                  title="Toggle Right HUD Telemetry"
+                >
+                  <Radar className="w-3.5 h-3.5 text-cyber-cyan" />
+                  <span className="hidden lg:inline">HUD Feed</span>
+                </button>
+
+                {/* EVA HUD */}
+                <button
+                  onClick={() => setEVASimulating(!isEVASimulating)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-display font-bold uppercase tracking-[0.14em] flex items-center gap-1.5 transition-all backdrop-blur-md border cursor-pointer whitespace-nowrap ${
+                    isEVASimulating
+                      ? 'bg-rose-950/70 hover:bg-rose-900/80 text-white shadow-[0_0_16px_rgba(244,63,94,0.4)] border-rose-500/60 animate-pulse'
+                      : 'bg-[#F16938]/20 hover:bg-[#F16938]/35 text-stone-100 border-[#F16938]/50 hover:border-[#F16938]/80 shadow-[0_0_12px_rgba(241,105,56,0.18)]'
+                  }`}
+                >
+                  {isEVASimulating ? <X className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current text-[#F16938]" />}
+                  <span className="hidden sm:inline">EVA HUD</span>
+                </button>
+
+                {/* Viewport Segmented Switcher (2D / 3D / Split) */}
+                <div className="hidden lg:flex items-center bg-[#0B0E17]/80 rounded-xl p-0.5 border border-white/[0.06] shrink-0 whitespace-nowrap backdrop-blur-md">
+                  {viewModes.map(({ id, icon: Icon, label }) => (
+                    <button
+                      key={id}
+                      onClick={() => setViewMode(id)}
+                      className={`px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all text-[11px] font-mono uppercase tracking-wider font-semibold shrink-0 border cursor-pointer ${
+                        viewMode === id
+                          ? 'bg-[#F16938]/20 text-stone-100 border-[#F16938]/50 shadow-[0_0_8px_rgba(241,105,56,0.2)]'
+                          : 'text-stone-400 hover:text-white hover:bg-white/[0.03] border-transparent'
+                      }`}
+                      title={label}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{label}</span>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Universal Fullscreen Toggle */}
           <button
             onClick={toggleFullscreen}
-            className="w-8 h-8 rounded-lg flex items-center justify-center bg-space-900/80 hover:bg-space-800 text-space-400 hover:text-white transition-colors border border-white/5"
+            className="w-8 h-8 rounded-xl flex items-center justify-center bg-white/[0.02] hover:bg-[#101522]/85 text-stone-400 hover:text-white transition-colors border border-white/[0.06] hover:border-white/15 backdrop-blur-md shrink-0 cursor-pointer"
             title="Toggle Fullscreen"
           >
             {isFullscreen ? <Minimize className="w-3.5 h-3.5" /> : <Maximize className="w-3.5 h-3.5" />}
