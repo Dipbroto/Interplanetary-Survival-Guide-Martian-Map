@@ -121,7 +121,7 @@ function App() {
       {/* SECTION 2: Mars Explore Segment (mars2.png) */}
       <section 
         id="section-imagery"
-        className="min-h-screen w-full relative flex flex-col items-center py-24"
+        className="min-h-screen w-full relative flex flex-col items-center py-24 scroll-mt-14"
         style={{ backgroundImage: "url('/mars2.png')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
         {/* Very light edge gradient just for seamless transition, no blur */}
@@ -144,12 +144,12 @@ function App() {
       {/* SECTION 3: Deep Space Segment (mars3.png) */}
       <section 
         id="section-sky"
-        className="min-h-screen w-full relative flex flex-col items-center py-24"
+        className="min-h-screen w-full relative flex flex-col items-center py-24 scroll-mt-14"
         style={{ backgroundImage: "url('/mars3.png')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-[#050608] via-transparent to-[#050608] opacity-80 pointer-events-none"></div>
         
-        <div className="relative z-10 w-full max-w-[1000px] flex flex-col gap-12 px-6">
+        <div className="relative z-10 w-full max-w-[1400px] flex flex-col gap-12 px-6">
           <ErrorBoundary>
             <MartianSkyEphemeris />
           </ErrorBoundary>
