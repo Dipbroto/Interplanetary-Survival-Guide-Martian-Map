@@ -96,19 +96,21 @@ function App() {
             </div>
           </div>
 
-          {/* Bottom Floating Panel */}
-          <div className="pointer-events-auto w-full px-4 pb-4">
-            <ErrorBoundary>
-              <BottomPanel />
-            </ErrorBoundary>
-          </div>
         </div>
-
         {/* Version Badge */}
         <div className="absolute bottom-1 right-1 text-[9px] text-space-600 font-mono pointer-events-none select-none z-10">
           MarsWalk Explorer v2.5 • NASA Space Apps Challenge 2026
         </div>
       </section>
+
+      {/* FIXED BOTTOM PANEL (Always visible on scroll) */}
+      <div className="fixed bottom-0 left-0 right-0 pointer-events-none z-50 w-full px-4 pb-4">
+        <div className="pointer-events-auto">
+          <ErrorBoundary>
+            <BottomPanel />
+          </ErrorBoundary>
+        </div>
+      </div>
 
       {/* SECTION 2: Mars Explore Segment (mars2.png) */}
       <section 
