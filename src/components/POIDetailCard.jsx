@@ -46,6 +46,7 @@ const POIDetailCard = () => {
     setSelectedPOI(poi);
     const lon = poi.lon !== undefined ? poi.lon : (poi.lng !== undefined ? poi.lng : 0);
     flyToCoordinate(poi.lat, lon, 5);
+    document.getElementById('section-map')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleNavigate = () => {

@@ -99,6 +99,7 @@ export default function RoutePlanner() {
       setRoverDriving(false);
       setRoverProgress(0);
       marsAudio.playQuindarTone(true);
+    document.getElementById('section-map')?.scrollIntoView({ behavior: 'smooth' });
       return;
     }
 
@@ -183,6 +184,7 @@ export default function RoutePlanner() {
         setMapZoom(targetZoom);
       }
       marsAudio.playQuindarTone(true);
+    document.getElementById('section-map')?.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -199,6 +201,7 @@ export default function RoutePlanner() {
       setMapZoom(7);
     }
     marsAudio.playQuindarTone(true);
+    document.getElementById('section-map')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
@@ -358,6 +361,7 @@ export default function RoutePlanner() {
                         setMapCenter([wp.lat, displayLon]);
                         setMapZoom(8);
                         marsAudio.playQuindarTone(true);
+    document.getElementById('section-map')?.scrollIntoView({ behavior: 'smooth' });
                       }}
                       className={`flex flex-col gap-1 p-2 rounded-lg group transition-all cursor-pointer border ${
                         selectedWaypointId === wp.id
@@ -400,6 +404,7 @@ export default function RoutePlanner() {
                             onClick={(e) => {
                               e.stopPropagation();
                               handleSimulateToWaypoint(wp, index);
+                                document.getElementById('section-map')?.scrollIntoView({ behavior: 'smooth' });
                             }}
                             className={`p-1.5 rounded-md transition-all shrink-0 cursor-pointer ${
                               isRoverDriving && driveTargetWaypointId === wp.id
@@ -442,6 +447,7 @@ export default function RoutePlanner() {
                             onClick={(e) => {
                               e.stopPropagation();
                               handleSimulateToWaypoint(wp, index);
+                                document.getElementById('section-map')?.scrollIntoView({ behavior: 'smooth' });
                             }}
                             className={`py-1.5 px-3 rounded-lg font-mono text-[10px] font-bold flex items-center gap-1.5 transition-all shadow-md cursor-pointer ${
                               isRoverDriving && driveTargetWaypointId === wp.id
@@ -681,8 +687,10 @@ export default function RoutePlanner() {
                         }
                         setSelectedWaypoint(wp.id);
                         setMapCenter([wp.lat, wp.lon]);
+                        document.getElementById('section-map')?.scrollIntoView({ behavior: 'smooth' });
                         setMapZoom(9);
                         marsAudio.playQuindarTone(true);
+    document.getElementById('section-map')?.scrollIntoView({ behavior: 'smooth' });
                       }}
                       className={`p-2 rounded-lg border transition-all cursor-pointer flex flex-col gap-1 ${
                         isSelected
@@ -717,6 +725,7 @@ export default function RoutePlanner() {
                                   }
                                 }
                                 handleSimulateToWaypoint(wp, idx, generatedRouteResult?.waypoints);
+                                document.getElementById('section-map')?.scrollIntoView({ behavior: 'smooth' });
                               }}
                               className={`p-1 rounded transition-all cursor-pointer ${
                                 isRoverDriving && driveTargetWaypointId === wp.id
@@ -771,6 +780,7 @@ export default function RoutePlanner() {
                                 }
                               }
                               handleSimulateToWaypoint(wp, idx, generatedRouteResult?.waypoints);
+                                document.getElementById('section-map')?.scrollIntoView({ behavior: 'smooth' });
                             }}
                             className={`py-1.5 px-3 rounded-lg font-mono text-[10px] font-bold flex items-center gap-1.5 transition-all shadow-md cursor-pointer ${
                               isRoverDriving && driveTargetWaypointId === wp.id

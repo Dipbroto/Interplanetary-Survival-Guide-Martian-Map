@@ -44,7 +44,7 @@ export default function MarsImageryModal() {
   const handleFlyTo = (img) => {
     marsAudio.playQuindarTone?.(true);
     flyToCoordinate(img.lat, img.lon, 6);
-    setImageryModalOpen(false);
+    document.getElementById('section-map')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleInspectScience = (img) => {
