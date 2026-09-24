@@ -612,19 +612,32 @@ const CameraDirector = ({ targetPos }) => {
   const { camera } = useThree();
   const lastTarget = useRef(targetPos);
   const flyActive = useRef(true);
+  const lastDist = useRef(9999);
 
   useEffect(() => {
     if (targetPos && targetPos !== lastTarget.current) {
       lastTarget.current = targetPos;
       flyActive.current = true;
+      lastDist.current = 9999;
     }
   }, [targetPos]);
 
   useFrame(() => {
     if (flyActive.current && lastTarget.current) {
+      const dist = camera.position.distanceTo(lastTarget.current);
+      
+      // Abort fly-to if user manually zooms out or drags
+      if (dist > lastDist.current + 0.05) {
+        flyActive.current = false;
+        return;
+      }
+      lastDist.current = dist;
+
       camera.position.lerp(lastTarget.current, 0.025);
       camera.lookAt(0, 0, 0);
-      if (camera.position.distanceTo(lastTarget.current) < 0.1) {
+      
+      // Stop animating when close enough
+      if (dist < 0.8) {
         flyActive.current = false;
       }
     }
@@ -1052,7 +1065,12 @@ export default function Mars3DViewer() {
 
       {/* Cinematic Landmark Fly-To Bar (Horizontal Scrollable Menu Bar) */}
       <div 
-        className="absolute left-4 top-1/2 -translate-y-1/2 animate-[fadeIn_2s_ease-out_2s_forwards] opacity-0 z-10 flex flex-col gap-2 bg-[#0B0C10]/90 p-2.5 rounded-2xl border border-white/[0.08] shadow-hud-glass backdrop-blur-2xl max-h-[60vh] overflow-y-auto overflow-x-hidden custom-scrollbar-y pointer-events-auto"
+        onWheel={(e) => {
+          if (e.deltaY !== 0 && e.deltaX === 0) {
+            e.currentTarget.scrollLeft += e.deltaY;
+          }
+        }}
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-[fadeIn_2s_ease-out_2s_forwards] opacity-0 z-10 flex items-center gap-1.5 bg-[#0B0C10]/90 p-2 rounded-2xl border border-white/[0.08] shadow-hud-glass backdrop-blur-2xl max-w-[95vw] overflow-x-auto overflow-y-hidden custom-scrollbar-x whitespace-nowrap pointer-events-auto"
       >
         <span className="text-[10px] font-mono text-cyber-cyan font-bold px-2 uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
           <Compass className="w-3.5 h-3.5 text-cyber-cyan animate-spin-slow" />
