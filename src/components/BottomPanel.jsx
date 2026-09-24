@@ -63,7 +63,7 @@ export default function BottomPanel() {
       initial={false}
       animate={{ height: bottomPanelOpen ? 295 : 40 }}
       transition={{ duration: 0.25, ease: 'easeInOut' }}
-      className="relative z-30 shrink-0 flex flex-col border-t border-white/[0.06] bg-[#0B0C10]/98 backdrop-blur-2xl overflow-hidden shadow-hud-glass"
+      className="relative z-30 shrink-0 flex flex-col rounded-2xl border border-white/[0.08] bg-[#0B0C10]/70 backdrop-blur-3xl overflow-hidden shadow-hud-glass transition-all hover:bg-[#0B0C10]/80"
     >
       {/* Tab Bar Header (Horizontal Scrollable Menu Bar) */}
       <div className="flex items-center justify-between h-10 px-3 bg-space-900/80 border-b border-white/[0.06] shrink-0 font-mono">

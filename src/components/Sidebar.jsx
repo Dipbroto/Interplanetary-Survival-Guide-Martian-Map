@@ -55,7 +55,7 @@ export default function Sidebar() {
       initial={false}
       animate={{ width: sidebarOpen ? 396 : 54 }}
       transition={{ duration: 0.25, ease: 'easeInOut' }}
-      className="relative z-30 flex flex-col h-full border-r border-white/[0.05] bg-[#0B0C10]/96 backdrop-blur-2xl shrink-0 overflow-hidden shadow-hud-glass"
+      className="relative z-30 flex flex-col max-h-[calc(100vh-10rem)] rounded-2xl border border-white/[0.08] bg-[#0B0C10]/70 backdrop-blur-3xl shrink-0 overflow-hidden shadow-hud-glass transition-all hover:bg-[#0B0C10]/80"
     >
       {/* Tab Navigation Bar (Horizontal when open, Vertical when collapsed) */}
       <div className="shrink-0 border-b border-white/[0.05] bg-space-900/40 p-1.5">

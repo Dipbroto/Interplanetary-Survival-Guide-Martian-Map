@@ -69,10 +69,10 @@ export default function TopBar() {
           e.currentTarget.scrollLeft += e.deltaY;
         }
       }}
-      className="h-14 w-full border-b border-white/[0.06] flex items-center justify-between px-3.5 z-50 shrink-0 bg-[#0B0C10]/95 backdrop-blur-2xl relative shadow-hud-glass overflow-x-auto overflow-y-hidden custom-scrollbar-x gap-3"
+      className="mt-4 mx-4 h-14 w-[calc(100%-2rem)] rounded-2xl border border-white/[0.06] flex items-center justify-between px-3.5 z-50 shrink-0 bg-[#0B0C10]/70 backdrop-blur-3xl relative shadow-hud-glass overflow-x-auto overflow-y-hidden custom-scrollbar-x gap-3 transition-all hover:bg-[#0B0C10]/80"
     >
       {/* Subtle top edge laser line */}
-      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-mars-500/40 to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-mars-500/40 to-transparent pointer-events-none" />
 
       {/* Left: Brand Identity & Audio Control */}
       <div className="flex items-center gap-3 shrink-0">

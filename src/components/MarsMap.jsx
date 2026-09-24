@@ -123,7 +123,7 @@ const MapEvents = () => {
   return null;
 };
 
-// Controls camera view smoothly when mapCenter or mapZoom changes in store
+// Controls camera view smoothly when mapCenter or mapZoom changes in store, and handles resizing
 const MapViewController = () => {
   const map = useMap();
   const mapCenter = useMapStore((s) => s.mapCenter);
@@ -135,6 +135,14 @@ const MapViewController = () => {
       map.flyTo(mapCenter, targetZoom, { duration: 1.2 });
     }
   }, [mapCenter, mapZoom, map]);
+
+  useEffect(() => {
+    const observer = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
+  }, [map]);
 
   return null;
 };
@@ -403,7 +411,7 @@ const RoverSimulator = ({ waypoints }) => {
       )}
 
       <Marker position={currentCoord} icon={createRoverIcon(currentHeading, isRoverDriving, currentSpeed)}>
-        <Popup>
+        <Popup autoPanPadding={[50, 50]}>
           <div className="font-mono text-xs p-1 min-w-[200px] text-white">
             <div className="font-bold text-amber-400 border-b border-white/10 pb-1.5 mb-1.5 flex items-center justify-between">
               <span className="flex items-center gap-1.5">🚜 PER-01 ROVER</span>
@@ -521,10 +529,9 @@ const MarsMap = () => {
         minZoom={0}
         maxZoom={12}
         crs={L.CRS.EPSG4326}
-        style={{ height: '100%', width: '100%', background: '#090b14' }}
-        maxBounds={[[-90, -180], [90, 180]]}
-        maxBoundsViscosity={0.6}
+        style={{ height: '100%', width: '100%', background: 'transparent' }}
         worldCopyJump={false}
+        maxBoundsViscosity={0.6}
       >
         <MapEvents />
         <MapViewController />
@@ -558,7 +565,7 @@ const MarsMap = () => {
                 dashArray: '4, 4'
               }}
             >
-              <Popup>
+              <Popup autoPanPadding={[50, 50]}>
                 <div className="font-mono text-xs">
                   <strong>NASA 2.0 km Walkback Zone</strong>
                   <p>Safe astronaut return radius on primary suit O₂ reserves.</p>
@@ -577,7 +584,7 @@ const MarsMap = () => {
                 dashArray: '6, 6'
               }}
             >
-              <Popup>
+              <Popup autoPanPadding={[50, 50]}>
                 <div className="font-mono text-xs">
                   <strong>{activeContingency === 'o2_leak' ? '⚠️ CONTRACTED 1.8 km Walkback Boundary' : 'NASA 5.0 km Hard Walkback Boundary'}</strong>
                   <p>{activeContingency === 'o2_leak' ? 'Secondary O2 Anomaly: Usable return perimeter contracted by 60%.' : 'Maximum authorized traverse perimeter from pressurized base.'}</p>
@@ -644,7 +651,7 @@ const MarsMap = () => {
               },
             }}
           >
-            <Popup>
+            <Popup autoPanPadding={[50, 50]}>
               <div className="min-w-[190px] font-mono text-xs text-white">
                 <div className="flex items-center justify-between border-b border-white/10 pb-1.5 mb-1.5">
                   <h4 className="font-bold text-sm text-mars-300 font-sans">{wp.name}</h4>

@@ -81,15 +81,15 @@ export default function RightSidebar() {
   return (
     <motion.div
       initial={false}
-      animate={{ width: isOpen ? 320 : 0 }}
+      animate={{ width: isOpen ? 320 : 0, opacity: isOpen ? 1 : 0 }}
       transition={{ duration: 0.25, ease: 'easeInOut' }}
-      className={`relative z-20 flex flex-col h-full bg-[#0B0C10]/98 backdrop-blur-2xl shrink-0 overflow-hidden shadow-hud-glass select-none ${
-        isOpen ? 'border-l border-white/[0.08]' : 'border-l-0'
+      className={`relative z-20 flex flex-col max-h-[calc(100vh-10rem)] rounded-2xl bg-black/20 backdrop-blur-md shrink-0 overflow-hidden shadow-hud-glass select-none transition-all hover:bg-black/30 ${
+        isOpen ? 'border border-cyber-cyan/30' : 'border-none'
       }`}
     >
       <div className="w-[320px] h-full flex flex-col overflow-hidden">
         {/* Header Bar */}
-        <div className="shrink-0 h-11 border-b border-white/[0.05] bg-space-900/50 px-3 flex items-center justify-between">
+        <div className="shrink-0 h-11 border-b border-cyber-cyan/20 bg-transparent px-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="p-1 rounded-md bg-cyber-cyan/10 border border-cyber-cyan/30 text-cyber-cyan shadow-neon-cyan">
               <Radar className="w-3.5 h-3.5" />
@@ -120,17 +120,17 @@ export default function RightSidebar() {
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-3.5 custom-scrollbar-y">
           
           {/* MARTIAN RADAR SCANNER (Bento Box) */}
-          <div className="bento-card p-3 relative border border-white/[0.06] bg-space-900/90 overflow-hidden">
+          <div className="p-3 relative border border-cyber-cyan/20 bg-transparent shadow-[0_0_15px_rgba(0,255,204,0.1)] rounded-xl overflow-hidden">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-sans font-bold tracking-wider text-space-200 uppercase flex items-center gap-1.5">
+              <span className="text-[11px] font-sans font-bold tracking-wider text-cyber-cyan uppercase flex items-center gap-1.5">
                 <Radio className="w-3.5 h-3.5 text-cyber-cyan animate-pulse" />
                 <span>Surface Proximity Radar</span>
               </span>
-              <span className="text-[9px] font-mono text-space-400">RANGE: 50 KM</span>
+              <span className="text-[9px] font-mono text-cyber-cyan/70">RANGE: 50 KM</span>
             </div>
 
             {/* Radar Scope */}
-            <div className="relative w-full aspect-square max-w-[240px] mx-auto rounded-full bg-[#060810] border-2 border-cyber-cyan/30 shadow-[0_0_20px_rgba(0,255,204,0.15),inset_0_0_25px_rgba(0,0,0,0.9)] overflow-hidden">
+            <div className="relative w-full aspect-square max-w-[240px] mx-auto rounded-full bg-[#00FFCC]/5 border border-cyber-cyan/30 shadow-[0_0_30px_rgba(0,255,204,0.2)] overflow-hidden">
               {/* Concentric Range Rings */}
               <div className="absolute inset-4 rounded-full border border-cyber-cyan/15 pointer-events-none" />
               <div className="absolute inset-10 rounded-full border border-cyber-cyan/20 pointer-events-none" />
@@ -216,7 +216,7 @@ export default function RightSidebar() {
           </div>
 
           {/* ATMOSPHERIC TELEMETRY GRAPHS (Bento Box) */}
-          <div className="bento-card p-3 border border-white/[0.06] bg-space-900/90">
+          <div className="p-3 border border-white/[0.06] bg-transparent rounded-xl">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[11px] font-sans font-bold tracking-wider text-space-200 uppercase flex items-center gap-1.5">
                 <Gauge className="w-3.5 h-3.5 text-mars-400" />
@@ -226,7 +226,7 @@ export default function RightSidebar() {
             </div>
 
             {/* Surface Pressure Area Graph */}
-            <div className="p-2.5 rounded-xl bg-space-950/70 border border-white/[0.04] mb-2">
+            <div className="p-2.5 rounded-xl bg-space-950/40 border border-white/[0.04] mb-2 backdrop-blur-sm">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[10px] font-sans font-semibold text-space-300">Atmospheric Pressure</span>
                 <span className="text-xs font-mono font-bold text-cyber-cyan">612.4 <span className="text-[9px] text-space-400 font-normal">Pa</span></span>
@@ -239,7 +239,7 @@ export default function RightSidebar() {
             </div>
 
             {/* Ambient Temperature Graph */}
-            <div className="p-2.5 rounded-xl bg-space-950/70 border border-white/[0.04]">
+            <div className="p-2.5 rounded-xl bg-space-950/40 border border-white/[0.04] backdrop-blur-sm">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[10px] font-sans font-semibold text-space-300">Surface Temperature</span>
                 <span className="text-xs font-mono font-bold text-mars-400">-28.5 <span className="text-[9px] text-space-400 font-normal">°C</span></span>
@@ -254,7 +254,7 @@ export default function RightSidebar() {
 
           {/* DUST & RADIATION METRICS (Bento Row) */}
           <div className="grid grid-cols-2 gap-2">
-            <div className="bento-card p-2.5 border border-white/[0.05] bg-space-900/90">
+            <div className="p-2.5 border border-white/[0.05] bg-transparent rounded-xl">
               <div className="flex items-center gap-1.5 text-mars-400 mb-1">
                 <Wind className="w-3.5 h-3.5" />
                 <span className="text-[10px] font-sans font-bold text-space-200">DUST TAU (τ)</span>
@@ -265,7 +265,7 @@ export default function RightSidebar() {
               <span className="text-[9px] font-mono text-cyber-cyan">Nominal Clearness</span>
             </div>
 
-            <div className="bento-card p-2.5 border border-white/[0.05] bg-space-900/90">
+            <div className="p-2.5 border border-white/[0.05] bg-transparent rounded-xl">
               <div className="flex items-center gap-1.5 text-cyber-amber mb-1">
                 <Sun className="w-3.5 h-3.5" />
                 <span className="text-[10px] font-sans font-bold text-space-200">SOLAR FLUX</span>
@@ -278,7 +278,7 @@ export default function RightSidebar() {
           </div>
 
           {/* LIVE TELEMETRY LOG STREAM (Ticker) */}
-          <div className="bento-card p-2.5 border border-white/[0.05] bg-space-950/80 font-mono text-[10px]">
+          <div className="p-2.5 border border-white/[0.05] bg-transparent font-mono text-[10px] rounded-xl">
             <div className="text-[9px] font-bold text-space-400 mb-1.5 flex items-center justify-between uppercase tracking-wider">
               <span>Telemetry Teleprinter</span>
               <span className="text-cyber-cyan">COMM DSN: OK</span>

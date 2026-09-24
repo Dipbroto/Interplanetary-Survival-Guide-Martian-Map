@@ -328,10 +328,10 @@ const useMapStore = create((set, get) => ({
   // ========================
   // UI STATE & OVERLAY CONTROLS
   // ========================
-  sidebarOpen: true,
+  sidebarOpen: false,
   sidebarTab: 'guide', // 'guide' | 'layers' | 'route' | 'poi' | 'mission'
   rightSidebarOpen: true,
-  bottomPanelOpen: true,
+  bottomPanelOpen: false,
   bottomPanelTab: 'elevation', // 'elevation' | 'weather' | 'radiation' | 'dust'
   showLoadingScreen: true,
   
