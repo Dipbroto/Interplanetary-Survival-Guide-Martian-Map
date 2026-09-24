@@ -34,6 +34,7 @@ function App() {
     <div className="w-screen h-screen overflow-y-auto overflow-x-hidden bg-[#050608] selection:bg-mars-400/40 selection:text-white scroll-smooth custom-scrollbar">
       {/* SECTION 1: The Mars Interactive HUD (Hero) */}
       <section 
+        id="section-map"
         className="h-screen w-full flex flex-col relative overflow-hidden"
         style={{ backgroundImage: "url('/background.png')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
@@ -119,6 +120,7 @@ function App() {
 
       {/* SECTION 2: Mars Explore Segment (mars2.png) */}
       <section 
+        id="section-imagery"
         className="h-screen w-full relative flex items-center justify-center"
         style={{ backgroundImage: "url('/mars2.png')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
@@ -128,6 +130,7 @@ function App() {
 
       {/* SECTION 3: Deep Space Segment (mars3.png) */}
       <section 
+        id="section-sky"
         className="h-screen w-full relative flex items-center justify-center"
         style={{ backgroundImage: "url('/mars3.png')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
