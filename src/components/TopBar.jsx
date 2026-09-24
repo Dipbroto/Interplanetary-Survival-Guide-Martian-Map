@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { 
   Menu, Hexagon, Maximize, Minimize, Settings, ShieldAlert,
   Play, X, Radar, Map as MapIcon, Image as ImageIcon, Sparkles,
-  Volume2, VolumeX, FileText
+  Volume2, VolumeX, FileText, Compass
 } from 'lucide-react';
 import useMapStore from '../store/useMapStore';
 
@@ -54,7 +54,7 @@ export default function TopBar() {
         
         {/* Left: Brand Identity */}
         <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => scrollToSection('section-map')}>
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => scrollToSection('section-home')} title="Return to Mission Overview">
             <img src="/mars-logo.svg" alt="NASA" className="h-6 w-auto drop-shadow-[0_0_8px_rgba(244,112,80,0.8)]" />
             <div className="flex flex-col hidden sm:flex">
               <h1 className="text-white font-display font-bold text-[13px] leading-tight tracking-[0.15em] uppercase">MarsWalk</h1>
@@ -65,6 +65,14 @@ export default function TopBar() {
 
         {/* Center: Main Navigation (Scrolls to Sections) */}
         <div className="flex-1 flex justify-center items-center gap-2 overflow-x-auto custom-scrollbar-x px-2">
+          <button
+            onClick={() => scrollToSection('section-home')}
+            className="px-3 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all bg-space-900/80 hover:bg-space-800 text-space-200 hover:text-white border border-white/5 hover:border-cyber-cyan/40"
+          >
+            <Compass className="w-3.5 h-3.5 text-cyber-cyan" />
+            <span className="hidden md:inline">Mission Overview</span>
+          </button>
+
           <button
             onClick={() => scrollToSection('section-map')}
             className="px-3 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all bg-space-900/80 hover:bg-space-800 text-space-200 hover:text-white border border-white/5 hover:border-mars-500/40"

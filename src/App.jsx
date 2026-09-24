@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import useMapStore from './store/useMapStore';
 import TopBar from './components/TopBar';
 import Sidebar from './components/Sidebar';
@@ -16,12 +16,14 @@ import ErrorBoundary from './components/ErrorBoundary';
 import SpaceAtmosphere from './components/SpaceAtmosphere';
 import RightSidebar from './components/RightSidebar';
 import MarsImageryModal from './components/MarsImageryModal';
+import HomeHero from './components/HomeHero';
 
 import { Radar, ChevronLeft } from 'lucide-react';
 
 function App() {
   const { viewMode, showLoadingScreen, rightSidebarOpen, setRightSidebarOpen } = useMapStore();
-  const [isScrolledPastHero, setIsScrolledPastHero] = React.useState(false);
+  const [isMapSectionActive, setIsMapSectionActive] = useState(false);
+  const mapSectionRef = useRef(null);
 
   // Update weather data periodically
   useEffect(() => {
@@ -31,29 +33,54 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleScroll = (e) => {
-    const scrollY = e.currentTarget.scrollTop;
-    if (scrollY > 300) {
-      if (!isScrolledPastHero) setIsScrolledPastHero(true);
-    } else {
-      if (isScrolledPastHero) setIsScrolledPastHero(false);
-    }
-  };
+  // Monitor when the user is scrolled into the interactive Map section
+  useEffect(() => {
+    const target = mapSectionRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Show map sidebars/panels when at least 35% of the map viewport is visible
+        setIsMapSectionActive(entry.isIntersecting && entry.intersectionRatio >= 0.35);
+      },
+      { threshold: [0, 0.2, 0.35, 0.5, 0.8] }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div onScroll={handleScroll} className="w-screen h-screen overflow-y-auto overflow-x-hidden bg-[#050608] selection:bg-mars-400/40 selection:text-white scroll-smooth custom-scrollbar">
-      {/* SECTION 1: The Mars Interactive HUD (Hero) */}
+    <div className="w-screen h-screen overflow-y-auto overflow-x-hidden bg-[#050608] selection:bg-mars-400/40 selection:text-white scroll-smooth custom-scrollbar">
+      {/* GLOBAL ATMOSPHERE & LOADING SCREEN */}
+      <SpaceAtmosphere />
+      {showLoadingScreen && <LoadingScreen />}
+
+      {/* TOP NAVIGATION BAR (Fixed globally across all sections) */}
+      <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
+        <TopBar />
+      </div>
+
+      {/* ======================================================== */}
+      {/* SECTION 1: MISSION OVERVIEW HOMEPAGE (#section-home)    */}
+      {/* ======================================================== */}
+      <section 
+        id="section-home"
+        className="min-h-screen w-full relative flex flex-col items-center justify-between"
+        style={{ backgroundImage: "url('/background.png')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
+      >
+        <HomeHero />
+      </section>
+
+      {/* ======================================================== */}
+      {/* SECTION 2: THE INTERACTIVE MARS MAP & 3D GLOBE (#section-map) */}
+      {/* ======================================================== */}
       <section 
         id="section-map"
+        ref={mapSectionRef}
         className="h-screen w-full flex flex-col relative overflow-hidden"
         style={{ backgroundImage: "url('/background.png')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
-        {/* Dynamic Cosmic Background Atmosphere */}
-        <SpaceAtmosphere />
-
-        {/* Loading Screen */}
-        {showLoadingScreen && <LoadingScreen />}
-
         {/* Full-Bleed Edge-to-Edge Mars 3D Globe & Map Viewport */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <ErrorBoundary>
@@ -72,13 +99,8 @@ function App() {
           </ErrorBoundary>
         </div>
 
-        {/* Floating UI Layer */}
-        <div className="relative z-10 flex flex-col h-full w-full pointer-events-none">
-          {/* Top Navigation */}
-          <div className="pointer-events-auto">
-            <TopBar />
-          </div>
-
+        {/* Floating UI Layer for Map Section */}
+        <div className="relative z-10 flex flex-col h-full w-full pointer-events-none pt-20">
           <div className="flex-1 flex overflow-hidden justify-end p-4 gap-4">
             {/* Right Floating Sidebar */}
             <div className="pointer-events-auto h-full flex flex-col items-end">
@@ -99,17 +121,17 @@ function App() {
               )}
             </div>
           </div>
-
         </div>
+
         {/* Version Badge */}
         <div className="absolute bottom-1 right-1 text-[9px] text-space-600 font-mono pointer-events-none select-none z-10">
           MarsWalk Explorer v2.5 • NASA Space Apps Challenge 2026
         </div>
       </section>
 
-      {/* FIXED LEFT SIDEBAR (Smoothly hides when scrolling into Sections 2 & 3 for full-width immersion) */}
+      {/* FIXED LEFT SIDEBAR (Only visible when viewing #section-map) */}
       <div className={`fixed left-4 top-1/2 -translate-y-1/2 z-[400] pointer-events-none transition-all duration-500 ${
-        isScrolledPastHero ? 'opacity-0 -translate-x-6 pointer-events-none' : 'opacity-100 translate-x-0'
+        isMapSectionActive ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8 pointer-events-none'
       }`}>
         <div className="pointer-events-auto flex flex-col">
           <ErrorBoundary>
@@ -118,9 +140,9 @@ function App() {
         </div>
       </div>
 
-      {/* FIXED BOTTOM PANEL (Smoothly hides when scrolling into Sections 2 & 3) */}
+      {/* FIXED BOTTOM PANEL (Only visible when viewing #section-map) */}
       <div className={`fixed bottom-0 left-0 right-0 pointer-events-none z-50 w-full px-4 pb-3 flex justify-center transition-all duration-500 ${
-        isScrolledPastHero ? 'opacity-0 translate-y-6 pointer-events-none' : 'opacity-100 translate-y-0'
+        isMapSectionActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'
       }`}>
         <div className="pointer-events-auto w-full max-w-2xl flex justify-center">
           <ErrorBoundary>
@@ -129,14 +151,15 @@ function App() {
         </div>
       </div>
 
-      {/* SECTION 2: Mars Explore Segment (mars2.png) */}
+      {/* ======================================================== */}
+      {/* SECTION 3: SCIENCE & HIGH-RES IMAGERY (#section-imagery) */}
+      {/* ======================================================== */}
       <section 
         id="section-imagery"
         className="min-h-screen w-full relative flex flex-col items-center py-24 scroll-mt-14"
         style={{ backgroundImage: "url('/mars2.png')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
-        {/* Very light edge gradient just for seamless transition, no blur */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050608] via-transparent to-[#050608] opacity-80 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050608] via-transparent to-[#050608] opacity-80 pointer-events-none" />
         
         <div className="relative z-10 w-full max-w-[1400px] flex flex-col gap-16 px-6">
           <div className="w-full">
@@ -152,13 +175,15 @@ function App() {
         </div>
       </section>
 
-      {/* SECTION 3: Deep Space Segment (mars3.png) */}
+      {/* ======================================================== */}
+      {/* SECTION 4: DEEP SPACE & CELESTIAL EPHEMERIS (#section-sky) */}
+      {/* ======================================================== */}
       <section 
         id="section-sky"
         className="min-h-screen w-full relative flex flex-col items-center py-24 scroll-mt-14"
         style={{ backgroundImage: "url('/mars3.png')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050608] via-transparent to-[#050608] opacity-80 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050608] via-transparent to-[#050608] opacity-80 pointer-events-none" />
         
         <div className="relative z-10 w-full max-w-[1400px] flex flex-col gap-12 px-6">
           <ErrorBoundary>
@@ -167,7 +192,7 @@ function App() {
         </div>
       </section>
 
-      {/* GLOBAL MODALS (These should be fixed to screen, so they can live at root level) */}
+      {/* GLOBAL MODALS (Fixed overlays) */}
       <ErrorBoundary>
         <EVAHelmetHUD />
       </ErrorBoundary>

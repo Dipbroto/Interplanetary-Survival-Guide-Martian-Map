@@ -5,15 +5,26 @@ import { getElevation } from '../utils/elevationService';
 import ProvenanceBadge from './ProvenanceBadge';
 
 const formatCoord = (val, isLat) => {
-  if (val === undefined || val === null) return '0.0000°';
-  const dir = isLat ? (val >= 0 ? 'N' : 'S') : (val >= 0 ? 'E' : 'W');
-  return `${Math.abs(val).toFixed(4)}°${dir}`;
+  if (val === undefined || val === null || isNaN(val)) return '0.0000°';
+  if (isLat) {
+    const clamped = Math.max(-90, Math.min(90, val));
+    const dir = clamped >= 0 ? 'N' : 'S';
+    return `${Math.abs(clamped).toFixed(4)}°${dir}`;
+  } else {
+    // Normalize longitude to [-180, 180]
+    let norm = ((val + 180) % 360);
+    if (norm < 0) norm += 360;
+    norm = norm - 180;
+    const dir = norm >= 0 ? 'E' : 'W';
+    return `${Math.abs(norm).toFixed(4)}°${dir}`;
+  }
 };
 
 const CoordinateDisplay = () => {
   const cursorPosition = useMapStore(state => state.cursorPosition) || { lat: 0, lon: 0 };
   const isPlacingWaypoint = useMapStore(state => state.isPlacingWaypoint);
   const rightSidebarOpen = useMapStore(state => state.rightSidebarOpen);
+  const bottomPanelOpen = useMapStore(state => state.bottomPanelOpen);
   
   // Real MOLA terrain elevation
   const elevation = getElevation(cursorPosition.lat, cursorPosition.lon);
@@ -22,12 +33,13 @@ const CoordinateDisplay = () => {
     <div 
       style={{
         position: 'absolute',
-        bottom: 14,
+        bottom: bottomPanelOpen ? 310 : 54,
         left: '50%',
         transform: 'translateX(-50%)',
-        zIndex: 400
+        zIndex: 400,
+        transition: 'bottom 0.25s ease-out'
       }}
-      className="hud-bracket bg-[#0B0C10]/95 backdrop-blur-2xl rounded-2xl px-3.5 py-1.5 flex items-center gap-3 border border-white/[0.06] shadow-hud-glass pointer-events-none font-mono text-xs"
+      className="hud-bracket bg-[#0B0C10]/95 backdrop-blur-2xl rounded-2xl px-3.5 py-1.5 flex items-center gap-3 border border-white/[0.08] shadow-hud-glass pointer-events-none font-mono text-xs"
     >
       {/* Tactical Crosshair Icon */}
       <div className="relative flex items-center justify-center text-mars-400">

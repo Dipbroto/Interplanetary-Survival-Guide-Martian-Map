@@ -9,7 +9,7 @@ import { marsDistance, calculateSlope } from '../utils/marsUtils';
 import CoordinateDisplay from './CoordinateDisplay';
 import POIMarkers from './POIMarkers';
 import { marsAudio } from '../utils/audioSynthesizer';
-import { Shield, Play, Pause, Square, Ruler, AlertTriangle, Battery, Gauge, Compass, Globe, Crosshair, RotateCcw, Video, VideoOff } from 'lucide-react';
+import { Shield, Play, Pause, Square, Ruler, AlertTriangle, Battery, Gauge, Compass, Globe, Crosshair, RotateCcw, Video, VideoOff, Grid } from 'lucide-react';
 
 // Custom Directional High-Visibility Rover Div Icon with Expanding Radar Pulse Rings & Floating HUD
 const createRoverIcon = (heading = 0, isDriving = false, speed = 14.5) => {
@@ -102,11 +102,17 @@ const MapEvents = () => {
 
   useMapEvents({
     mousemove(e) {
-      setCursorPosition({ lat: e.latlng.lat, lon: e.latlng.lng });
+      const lat = Math.max(-90, Math.min(90, e.latlng.lat));
+      let lon = ((e.latlng.lng + 180) % 360);
+      if (lon < 0) lon += 360;
+      lon = lon - 180;
+      setCursorPosition({ lat, lon });
     },
     click(e) {
-      const lat = e.latlng.lat;
-      const lon = e.latlng.lng;
+      const lat = Math.max(-90, Math.min(90, e.latlng.lat));
+      let lon = ((e.latlng.lng + 180) % 360);
+      if (lon < 0) lon += 360;
+      lon = lon - 180;
       const elevation = getElevation(lat, lon);
 
       if (isPlacingWaypoint) {
@@ -137,11 +143,23 @@ const MapViewController = () => {
   }, [mapCenter, mapZoom, map]);
 
   useEffect(() => {
+    // Force Leaflet to recalculate 100% container dimensions immediately and after layout stabilization
+    map.invalidateSize();
+    const t1 = setTimeout(() => map.invalidateSize(), 80);
+    const t2 = setTimeout(() => map.invalidateSize(), 250);
+    const t3 = setTimeout(() => map.invalidateSize(), 600);
+
     const observer = new ResizeObserver(() => {
       map.invalidateSize();
     });
     observer.observe(map.getContainer());
-    return () => observer.disconnect();
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      observer.disconnect();
+    };
   }, [map]);
 
   return null;
@@ -433,6 +451,25 @@ const RoverSimulator = ({ waypoints }) => {
   );
 };
 
+// Mars Graticule Definitions (Parallels & Meridians)
+const MARS_LAT_GRID = [
+  { lat: 80, label: '80°N - North Polar Cap', color: '#06b6d4', dash: '3, 6', weight: 1.2 },
+  { lat: 60, label: '60°N - Vastitas Borealis', color: '#38bdf8', dash: '4, 4', weight: 1 },
+  { lat: 30, label: '30°N - Northern Plains', color: '#94a3b8', dash: '4, 4', weight: 1 },
+  { lat: 0, label: '0° EQUATOR', color: '#f59e0b', dash: '', weight: 2 },
+  { lat: -30, label: '30°S - Southern Highlands', color: '#94a3b8', dash: '4, 4', weight: 1 },
+  { lat: -60, label: '60°S - Hellas / Argyre', color: '#38bdf8', dash: '4, 4', weight: 1 },
+  { lat: -80, label: '80°S - South Polar Cap', color: '#06b6d4', dash: '3, 6', weight: 1.2 },
+];
+
+const MARS_LON_GRID = [
+  { lon: -120, label: '120°W', color: '#94a3b8', dash: '3, 6', weight: 1 },
+  { lon: -60, label: '60°W', color: '#64748b', dash: '3, 6', weight: 1 },
+  { lon: 0, label: '0° PRIME MERIDIAN', color: '#f59e0b', dash: '', weight: 2 },
+  { lon: 60, label: '60°E', color: '#64748b', dash: '3, 6', weight: 1 },
+  { lon: 120, label: '120°E', color: '#94a3b8', dash: '3, 6', weight: 1 },
+];
+
 const MarsMap = () => {
   const activeLayers = useMapStore((s) => s.activeLayers);
   const layerOpacity = useMapStore((s) => s.layerOpacity);
@@ -444,6 +481,8 @@ const MarsMap = () => {
   // New interactive states
   const showWalkbackLimits = useMapStore((s) => s.showWalkbackLimits);
   const toggleWalkbackLimits = useMapStore((s) => s.toggleWalkbackLimits);
+  const showGraticule = useMapStore((s) => s.showGraticule);
+  const toggleGraticule = useMapStore((s) => s.toggleGraticule);
   const isRoverDriving = useMapStore((s) => s.isRoverDriving);
   const setRoverDriving = useMapStore((s) => s.setRoverDriving);
   const roverProgress = useMapStore((s) => s.roverProgress);
@@ -525,14 +564,18 @@ const MarsMap = () => {
     <div className={`w-full h-full relative ${isPlacingWaypoint || isRulerActive ? 'crosshair-cursor' : ''}`}>
       <MapContainer
         center={[0, 0]}
-        zoom={2}
+        zoom={1}
         minZoom={0}
         maxZoom={12}
         crs={L.CRS.EPSG4326}
-        style={{ height: '100%', width: '100%', background: 'transparent' }}
+        style={{ height: '100%', width: '100%', background: '#050608' }}
         worldCopyJump={false}
-        maxBoundsViscosity={0.6}
+        maxBounds={[[-90, -180], [90, 180]]}
+        maxBoundsViscosity={0.8}
         zoomControl={false}
+        whenReady={(e) => {
+          e.target.invalidateSize();
+        }}
       >
         <ZoomControl position="bottomright" />
         <MapEvents />
@@ -552,6 +595,71 @@ const MarsMap = () => {
             maxZoom={12}
           />
         ))}
+
+        {/* Martian Planetary Graticule (Latitude & Longitude Grid) */}
+        {showGraticule && (
+          <>
+            {MARS_LAT_GRID.map((item) => (
+              <React.Fragment key={`lat-${item.lat}`}>
+                <Polyline
+                  positions={[[item.lat, -180], [item.lat, 180]]}
+                  pathOptions={{
+                    color: item.color,
+                    weight: item.weight,
+                    dashArray: item.dash || undefined,
+                    opacity: 0.55,
+                    interactive: false,
+                  }}
+                />
+                <Marker
+                  position={[item.lat, -170]}
+                  interactive={false}
+                  icon={L.divIcon({
+                    className: 'graticule-label',
+                    html: `<div style="font-family: monospace; font-size: 9px; font-weight: 700; color: ${item.color}; background: rgba(5,6,8,0.88); padding: 1px 5px; border-radius: 3px; border: 1px solid ${item.color}50; white-space: nowrap; pointer-events: none; transform: translateY(-50%);">${item.label}</div>`,
+                    iconSize: [0, 0],
+                    iconAnchor: [0, 0]
+                  })}
+                />
+                <Marker
+                  position={[item.lat, 170]}
+                  interactive={false}
+                  icon={L.divIcon({
+                    className: 'graticule-label',
+                    html: `<div style="font-family: monospace; font-size: 9px; font-weight: 700; color: ${item.color}; background: rgba(5,6,8,0.88); padding: 1px 5px; border-radius: 3px; border: 1px solid ${item.color}50; white-space: nowrap; pointer-events: none; transform: translate(-100%, -50%);">${item.label}</div>`,
+                    iconSize: [0, 0],
+                    iconAnchor: [0, 0]
+                  })}
+                />
+              </React.Fragment>
+            ))}
+
+            {MARS_LON_GRID.map((item) => (
+              <React.Fragment key={`lon-${item.lon}`}>
+                <Polyline
+                  positions={[[-85, item.lon], [85, item.lon]]}
+                  pathOptions={{
+                    color: item.color,
+                    weight: item.weight,
+                    dashArray: item.dash || undefined,
+                    opacity: 0.45,
+                    interactive: false,
+                  }}
+                />
+                <Marker
+                  position={[-2.5, item.lon]}
+                  interactive={false}
+                  icon={L.divIcon({
+                    className: 'graticule-label',
+                    html: `<div style="font-family: monospace; font-size: 9px; font-weight: 700; color: ${item.color}; background: rgba(5,6,8,0.9); padding: 1px 5px; border-radius: 3px; border: 1px solid ${item.color}50; white-space: nowrap; pointer-events: none; transform: translate(-50%, 4px);">${item.label}</div>`,
+                    iconSize: [0, 0],
+                    iconAnchor: [0, 0]
+                  })}
+                />
+              </React.Fragment>
+            ))}
+          </>
+        )}
 
         {/* NASA Walkback Limit Circles (2 km Safe / 5 km Abort) */}
         {showWalkbackLimits && baseWP && (
@@ -743,8 +851,8 @@ const MarsMap = () => {
         <RoverSimulator waypoints={waypoints} />
       </MapContainer>
 
-      {/* FLOATING MAP TOOLBAR (Top Left) */}
-      <div className="absolute top-3.5 left-3.5 z-[400] flex flex-wrap items-center gap-1.5 bg-[#0B0C10]/95 backdrop-blur-2xl p-1.5 rounded-2xl border border-white/[0.06] shadow-hud-glass font-mono text-xs">
+      {/* FLOATING MAP TOOLBAR (Positioned below TopBar with breathing room) */}
+      <div className="absolute top-20 left-6 z-[400] flex flex-wrap items-center gap-1.5 bg-[#0B0C10]/95 backdrop-blur-2xl p-1.5 rounded-2xl border border-white/[0.08] shadow-hud-glass font-mono text-xs">
         {/* Quick Global Mars / Jezero Views */}
         <button
           onClick={() => {
@@ -752,10 +860,10 @@ const MarsMap = () => {
             setMapZoom(1);
           }}
           className="px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-all border bg-space-900/80 text-space-300 hover:text-white hover:bg-space-850 border-white/[0.06] hover:border-mars-400/40"
-          title="Fit whole Mars planet in view (Global Scale)"
+          title="Fit whole Mars planet in view (100% Global Scale)"
         >
           <Globe className="w-3.5 h-3.5 text-mars-400" />
-          <span className="hidden sm:inline">GLOBAL MARS</span>
+          <span className="hidden sm:inline">GLOBAL MARS (100%)</span>
         </button>
 
         <button
@@ -768,6 +876,23 @@ const MarsMap = () => {
         >
           <Crosshair className="w-3.5 h-3.5 text-cyber-cyan" />
           <span className="hidden sm:inline">JEZERO</span>
+        </button>
+
+        {/* Toggle Graticule / Lat-Lon Grid */}
+        <button
+          onClick={() => {
+            toggleGraticule();
+            marsAudio.playQuindarTone(false);
+          }}
+          className={`px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-all border ${
+            showGraticule
+              ? 'bg-cyan-950/80 text-cyber-cyan border-cyan-500/40 shadow-sm'
+              : 'bg-space-900/80 text-space-400 border-white/[0.06] hover:text-white'
+          }`}
+          title="Toggle Latitude & Longitude Martian Grid Lines"
+        >
+          <Grid className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">GRID: {showGraticule ? 'ON' : 'OFF'}</span>
         </button>
 
         {/* Undo Last Point Button (active when waypoints or ruler points exist) */}

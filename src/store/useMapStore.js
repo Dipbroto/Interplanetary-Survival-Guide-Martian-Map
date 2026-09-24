@@ -10,7 +10,7 @@ const useMapStore = create((set, get) => ({
   // MAP STATE
   // ========================
   mapCenter: [0, 0], // Global Mars Equator & Prime Meridian
-  mapZoom: 2,
+  mapZoom: 1,
   cursorPosition: null, // {lat, lon}
   viewMode: '2d', // '2d' | '3d' | 'split'
   
@@ -124,10 +124,12 @@ const useMapStore = create((set, get) => ({
   toggleCamFollow: () => set((state) => ({ camFollow: !state.camFollow })),
 
   // ========================
-  // MAP TOOLS (WALKBACK & RULER)
+  // MAP TOOLS (WALKBACK & RULER & GRATICULE)
   // ========================
   showWalkbackLimits: true,
   toggleWalkbackLimits: () => set((state) => ({ showWalkbackLimits: !state.showWalkbackLimits })),
+  showGraticule: true,
+  toggleGraticule: () => set((state) => ({ showGraticule: !state.showGraticule })),
   
   isRulerActive: false,
   rulerPoints: [], // max 2 points [{lat, lon, elevation}]

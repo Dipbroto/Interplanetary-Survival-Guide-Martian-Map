@@ -17,7 +17,7 @@ const ELEVATION_REFS = [
   { lat: 18.44, lon: 77.45, elev: -2600, name: 'Jezero Crater' },
   { lat: 4.50, lon: 135.62, elev: -2613, name: 'Elysium Planitia' },
   { lat: 22.27, lon: -49.97, elev: -3627, name: 'Chryse Planitia' },
-  { lat: -1.95, lon: 354.47, elev: -1440, name: 'Meridiani Planum' },
+  { lat: -1.95, lon: -5.53, elev: -1440, name: 'Meridiani Planum' },
   { lat: 47.67, lon: 134.04, elev: -4505, name: 'Utopia Planitia' },
   { lat: 87.0, lon: 0.0, elev: -5000, name: 'North Pole' },
   { lat: -87.0, lon: 0.0, elev: 1500, name: 'South Pole' },

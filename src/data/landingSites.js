@@ -56,7 +56,7 @@ export const landingSites = [
     name: 'Opportunity Rover',
     location: 'Meridiani Planum',
     lat: -1.9462,
-    lon: 354.4734,
+    lon: -5.5266,
     landingDate: '2004-01-25',
     status: 'End of Mission (2018)',
     mission: 'Mars Exploration Rover',
