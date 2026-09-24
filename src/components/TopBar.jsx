@@ -130,6 +130,25 @@ export default function TopBar() {
             <span className="hidden sm:inline">EVA HUD</span>
           </button>
 
+          {/* Viewport Segmented Switcher (2D / 3D / Split) */}
+          <div className="hidden lg:flex items-center bg-space-900/90 rounded-lg p-0.5 border border-white/[0.08] shadow-inner shrink-0 whitespace-nowrap">
+            {viewModes.map(({ id, icon: Icon, label }) => (
+              <button
+                key={id}
+                onClick={() => setViewMode(id)}
+                className={`px-2 py-1 rounded-md flex items-center gap-1 transition-all text-xs font-mono font-medium shrink-0 ${
+                  viewMode === id
+                    ? 'bg-gradient-to-r from-mars-500/25 to-mars-600/20 text-mars-300 border border-mars-500/40 shadow-[0_0_8px_rgba(244,112,80,0.25)]'
+                    : 'text-space-400 hover:text-white hover:bg-space-800/40 border border-transparent'
+                }`}
+                title={label}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span className="hidden xl:inline">{label}</span>
+              </button>
+            ))}
+          </div>
+
           {/* Fullscreen */}
           <button
             onClick={toggleFullscreen}
