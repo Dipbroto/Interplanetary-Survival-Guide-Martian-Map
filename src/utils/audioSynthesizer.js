@@ -335,6 +335,67 @@ class MarsAudioSynthesizer {
     } catch (e) {}
   }
 
+  playLaserZap() {
+    if (!this.ctx) this.init();
+    if (!this.ctx || this.isMuted) return;
+    try {
+      const now = this.ctx.currentTime;
+      // Laser tonal sweep
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(3200, now);
+      osc.frequency.exponentialRampToValueAtTime(180, now + 0.12);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start(now);
+      osc.stop(now + 0.12);
+
+      // Plasma ionization noise pop
+      const bufferSize = Math.floor(this.ctx.sampleRate * 0.05);
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.2));
+      }
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      const noiseGain = this.ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.05, now + 0.02);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+      noise.connect(noiseGain);
+      noiseGain.connect(this.masterGain);
+      noise.start(now + 0.02);
+    } catch (e) {}
+  }
+
+  playSampleSeal() {
+    if (!this.ctx) this.init();
+    if (!this.ctx || this.isMuted) return;
+    try {
+      const now = this.ctx.currentTime;
+      // Mechanical servo purge sound
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(120, now);
+      osc.frequency.linearRampToValueAtTime(340, now + 0.15);
+      gain.gain.setValueAtTime(0.06, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start(now);
+      osc.stop(now + 0.22);
+
+      // Hermetic seal click
+      setTimeout(() => {
+        this.playSuccessChime();
+      }, 160);
+    } catch (e) {}
+  }
+
   getFrequencyData(array) {
     if (this.analyser) {
       this.analyser.getByteFrequencyData(array);
@@ -348,3 +409,5 @@ export const playUiClick = () => marsAudio.playUiClick();
 export const playUiHover = () => marsAudio.playUiHover();
 export const playUiSwoosh = () => marsAudio.playUiSwoosh();
 export const playSuccessChime = () => marsAudio.playSuccessChime();
+export const playLaserZap = () => marsAudio.playLaserZap();
+export const playSampleSeal = () => marsAudio.playSampleSeal();
