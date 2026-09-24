@@ -124,8 +124,8 @@ function App() {
         className="min-h-screen w-full relative flex flex-col items-center py-24"
         style={{ backgroundImage: "url('/mars2.png')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
-        {/* Dark gradient overlay so content pops out */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050608] via-black/70 to-[#050608] opacity-90 backdrop-blur-[4px]"></div>
+        {/* Very light edge gradient just for seamless transition, no blur */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050608] via-transparent to-[#050608] opacity-80 pointer-events-none"></div>
         
         <div className="relative z-10 w-full max-w-[1400px] flex flex-col gap-16 px-6">
           <div className="w-full">
@@ -147,7 +147,7 @@ function App() {
         className="min-h-screen w-full relative flex flex-col items-center py-24"
         style={{ backgroundImage: "url('/mars3.png')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050608] via-black/70 to-[#050608] opacity-90 backdrop-blur-[4px]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050608] via-transparent to-[#050608] opacity-80 pointer-events-none"></div>
         
         <div className="relative z-10 w-full max-w-[1000px] flex flex-col gap-12 px-6">
           <ErrorBoundary>
