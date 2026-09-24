@@ -22,8 +22,9 @@ const CoordinateDisplay = () => {
     <div 
       style={{
         position: 'absolute',
-        top: 14,
-        right: 14,
+        bottom: 14,
+        left: '50%',
+        transform: 'translateX(-50%)',
         zIndex: 400
       }}
       className="hud-bracket bg-[#0B0C10]/95 backdrop-blur-2xl rounded-2xl px-3.5 py-1.5 flex items-center gap-3 border border-white/[0.06] shadow-hud-glass pointer-events-none font-mono text-xs"
