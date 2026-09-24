@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, Layers, Route, MapPin, Rocket, ChevronLeft, ChevronRight } from 'lucide-react';
 import useMapStore from '../store/useMapStore';
@@ -13,6 +13,13 @@ import MissionReport from './MissionReport';
 
 export default function Sidebar() {
   const { sidebarOpen, setSidebarOpen, sidebarTab, setSidebarTab } = useMapStore();
+
+  // Auto-scroll to top (map portion) when the sidebar is opened
+  useEffect(() => {
+    if (sidebarOpen) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [sidebarOpen]);
 
   const tabs = [
     { id: 'guide', label: 'The Guide', icon: ShieldCheck },
@@ -55,7 +62,7 @@ export default function Sidebar() {
       initial={false}
       animate={{ width: sidebarOpen ? 396 : 54 }}
       transition={{ duration: 0.25, ease: 'easeInOut' }}
-      className="relative z-30 flex flex-col max-h-[calc(100vh-10rem)] rounded-2xl border border-white/[0.08] bg-[#0B0C10]/70 backdrop-blur-3xl shrink-0 overflow-hidden shadow-hud-glass transition-all hover:bg-[#0B0C10]/80"
+      className="relative z-30 flex flex-col h-full rounded-2xl border border-white/[0.08] bg-[#0B0C10]/70 backdrop-blur-3xl shrink-0 overflow-hidden shadow-hud-glass transition-all hover:bg-[#0B0C10]/80"
     >
       {/* Tab Navigation Bar (Horizontal when open, Vertical when collapsed) */}
       <div className="shrink-0 border-b border-white/[0.05] bg-space-900/40 p-1.5">

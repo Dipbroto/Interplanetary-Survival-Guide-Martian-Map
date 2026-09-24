@@ -43,8 +43,11 @@ function App() {
         {/* Loading Screen */}
         {showLoadingScreen && <LoadingScreen />}
 
-        {/* Center Box Map / 3D Viewport */}
-        <div className="absolute top-[10%] bottom-[10%] left-[25%] right-[25%] z-0 rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.7)] border border-white/10">
+        {/* Center Box Map / 3D Viewport (Prevents overlap with max() calculations) */}
+        <div 
+          className="absolute top-[10%] bottom-[10%] z-0 rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.7)] border border-white/10 transition-all duration-300"
+          style={{ left: 'max(25%, 430px)', right: 'max(25%, 340px)' }}
+        >
           <ErrorBoundary>
             {viewMode === '2d' && <MarsMap />}
             {viewMode === '3d' && <Mars3DViewer />}
@@ -68,14 +71,7 @@ function App() {
             <TopBar />
           </div>
 
-          <div className="flex-1 flex overflow-hidden justify-between p-4 gap-4">
-            {/* Left Floating Sidebar */}
-            <div className="pointer-events-auto h-full flex flex-col">
-              <ErrorBoundary>
-                <Sidebar />
-              </ErrorBoundary>
-            </div>
-
+          <div className="flex-1 flex overflow-hidden justify-end p-4 gap-4">
             {/* Right Floating Sidebar */}
             <div className="pointer-events-auto h-full flex flex-col items-end">
               <ErrorBoundary>
@@ -102,6 +98,15 @@ function App() {
           MarsWalk Explorer v2.5 • NASA Space Apps Challenge 2026
         </div>
       </section>
+
+      {/* FIXED LEFT SIDEBAR (Always visible on scroll) */}
+      <div className="fixed left-4 top-[5.5rem] bottom-24 z-[400] pointer-events-none">
+        <div className="pointer-events-auto h-full flex flex-col">
+          <ErrorBoundary>
+            <Sidebar />
+          </ErrorBoundary>
+        </div>
+      </div>
 
       {/* FIXED BOTTOM PANEL (Always visible on scroll) */}
       <div className="fixed bottom-0 left-0 right-0 pointer-events-none z-50 w-full px-4 pb-4">
