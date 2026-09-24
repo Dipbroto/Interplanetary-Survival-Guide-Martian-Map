@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useEffect, useState, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Stars, Html, Line, useTexture } from '@react-three/drei';
+import { OrbitControls, Stars, Html, Line, useGLTF, Resize } from '@react-three/drei';
 import * as THREE from 'three';
 import useMapStore from '../store/useMapStore';
 import { landingSites } from '../data/landingSites';
@@ -636,8 +636,7 @@ const MarsGlobe = ({
   const radius = 2.0;
   const setSelectedPOI = useMapStore(s => s.setSelectedPOI);
 
-  const marsTexture = useTexture('/mars_texture.jpg');
-  const marsBumpMap = marsTexture;
+  const { scene: marsNasaModel } = useGLTF('/mars_nasa.glb');
 
   // Compute 3D positions for Waypoints
   const waypointPositions = useMemo(() => {
@@ -714,17 +713,10 @@ const MarsGlobe = ({
   return (
     <group ref={globeRef}>
       {/* Photorealistic Mars Sphere with Color Map & 3D Bump Relief */}
-      <mesh receiveShadow castShadow>
-        <sphereGeometry args={[radius, 64, 64]} />
-        <meshStandardMaterial 
-          map={marsTexture}
-          bumpMap={marsBumpMap}
-          bumpScale={0.065}
-          roughness={0.82}
-          metalness={0.06}
-        />
-      </mesh>
-
+      {/* Photorealistic NASA GLTF Mars Model */}
+      <Resize scale={radius * 2}>
+        <primitive object={marsNasaModel} />
+      </Resize>
       {/* Atmospheric Inner Dust Haze Shell (Warm terracotta glow) */}
       <mesh>
         <sphereGeometry args={[radius * 1.018, 64, 64]} />
@@ -1083,3 +1075,4 @@ export default function Mars3DViewer() {
     </div>
   );
 }
+useGLTF.preload('/mars_nasa.glb');
