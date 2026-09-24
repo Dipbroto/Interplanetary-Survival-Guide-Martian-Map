@@ -112,7 +112,7 @@ function App() {
 
       {/* SECTION 2: Mars Explore Segment (mars2.png) */}
       <section 
-        className="h-screen w-full relative flex items-center justify-center border-t border-white/[0.05]"
+        className="h-screen w-full relative flex items-center justify-center"
         style={{ backgroundImage: "url('/mars2.png')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
         {/* Optional: Add gradient overlay so image pops out but isn't blinding */}
@@ -121,7 +121,7 @@ function App() {
 
       {/* SECTION 3: Deep Space Segment (mars3.png) */}
       <section 
-        className="h-screen w-full relative flex items-center justify-center border-t border-white/[0.05]"
+        className="h-screen w-full relative flex items-center justify-center"
         style={{ backgroundImage: "url('/mars3.png')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-[#050608] via-transparent to-[#050608] opacity-60"></div>
