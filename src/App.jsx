@@ -127,13 +127,13 @@ function App() {
         {/* Dark gradient overlay so content pops out */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#050608] via-black/70 to-[#050608] opacity-90 backdrop-blur-[4px]"></div>
         
-        <div className="relative z-10 w-full max-w-[1400px] flex flex-col xl:flex-row gap-8 px-6">
-          <div className="flex-1 xl:w-1/2">
+        <div className="relative z-10 w-full max-w-[1400px] flex flex-col gap-16 px-6">
+          <div className="w-full">
             <ErrorBoundary>
               <ScienceLabModal />
             </ErrorBoundary>
           </div>
-          <div className="flex-1 xl:w-1/2">
+          <div className="w-full">
             <ErrorBoundary>
               <MarsImageryModal />
             </ErrorBoundary>

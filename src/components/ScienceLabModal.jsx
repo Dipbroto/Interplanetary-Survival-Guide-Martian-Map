@@ -162,7 +162,7 @@ export default function ScienceLabModal() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="glass-panel-solid w-full max-w-5xl h-[90vh] rounded-2xl flex flex-col overflow-hidden border-2 border-mars-500/60 shadow-2xl bg-space-950 relative z-10"
+        className="w-full h-auto min-h-[70vh] rounded-3xl flex flex-col overflow-hidden border border-white/10 shadow-2xl bg-black/30 backdrop-blur-md relative z-10"
       >
         {/* Modal Header (Horizontal Scrollable Menu Bar) */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-space-800 bg-space-900/60 shrink-0 overflow-x-auto overflow-y-hidden custom-scrollbar-x gap-3">

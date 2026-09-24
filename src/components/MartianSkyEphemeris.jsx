@@ -88,7 +88,7 @@ export default function MartianSkyEphemeris() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="glass-panel-solid w-full max-w-4xl max-h-[92vh] overflow-y-auto overflow-x-hidden custom-scrollbar-y rounded-2xl border-2 border-amber-500/60 p-6 bg-space-950 shadow-2xl flex flex-col gap-5 text-primary relative z-10"
+        className="w-full h-auto min-h-[70vh] overflow-y-auto overflow-x-hidden custom-scrollbar-y rounded-3xl border border-white/10 p-6 bg-black/30 backdrop-blur-md shadow-2xl flex flex-col gap-5 text-primary relative z-10"
       >
         {/* Header with prominent Back button (Horizontal Scrollable Menu Bar) */}
         <div className="flex items-center justify-between pb-3 border-b border-space-800 shrink-0 overflow-x-auto overflow-y-hidden custom-scrollbar-x gap-3">
