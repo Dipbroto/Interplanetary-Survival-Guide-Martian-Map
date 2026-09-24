@@ -82,7 +82,6 @@ export default function MarsImageryModal() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
           </div>
 
           {/* Search & Category Filter Toolbar */}
