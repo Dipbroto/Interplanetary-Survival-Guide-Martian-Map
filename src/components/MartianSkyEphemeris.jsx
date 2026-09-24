@@ -109,14 +109,6 @@ export default function MartianSkyEphemeris() {
             </div>
           </div>
           
-          <button
-            onClick={() => setSkyEphemerisOpen(false)}
-            className="px-3.5 py-1.5 bg-rose-500/25 hover:bg-rose-500/40 text-rose-200 font-bold rounded-xl flex items-center gap-1.5 shadow-neon-mars transition-all hover:scale-105 active:scale-95 border border-rose-400/60 cursor-pointer backdrop-blur-md shrink-0 whitespace-nowrap"
-            title="Close Ephemeris (ESC)"
-          >
-            <X className="w-4 h-4" />
-            <span>← BACK TO MAP (ESC)</span>
-          </button>
         </div>
 
         {/* Content Body: Sky Dome + Solar Eclipse Simulator */}

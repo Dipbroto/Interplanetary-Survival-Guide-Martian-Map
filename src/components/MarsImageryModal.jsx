@@ -83,17 +83,6 @@ export default function MarsImageryModal() {
             </div>
 
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => {
-                  marsAudio.playUiClick?.();
-                  setImageryModalOpen(false);
-                }}
-                className="w-9 h-9 rounded-xl bg-space-900 hover:bg-space-800 border border-white/10 hover:border-white/20 text-space-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
-                title="Close Gallery"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
           </div>
 
           {/* Search & Category Filter Toolbar */}
