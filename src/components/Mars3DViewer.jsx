@@ -863,7 +863,7 @@ const MarsGlobe = ({
 
 // Main 3D Planetary Cartography Viewer
 export default function Mars3DViewer() {
-  const { waypoints } = useMapStore();
+  const { waypoints, bottomPanelOpen } = useMapStore();
   const [hasWebGL, setHasWebGL] = useState(true);
   
   // Interactive 3D Control States
@@ -1072,7 +1072,7 @@ export default function Mars3DViewer() {
             e.currentTarget.scrollLeft += e.deltaY;
           }
         }}
-        className="absolute bottom-6 left-4 right-4 animate-[fadeIn_2s_ease-out_2s_forwards] opacity-0 z-10 flex items-center gap-2 bg-[#0B0C10]/90 p-2 rounded-2xl border border-white/[0.08] shadow-hud-glass backdrop-blur-2xl overflow-x-auto overflow-y-hidden custom-scrollbar-x pointer-events-auto"
+        className={`absolute ${bottomPanelOpen ? 'bottom-[310px] opacity-75' : 'bottom-14 opacity-100'} left-4 right-4 max-w-2xl mx-auto z-10 flex items-center gap-2 bg-[#0B0C10]/85 p-2 rounded-2xl border border-white/[0.1] shadow-hud-glass backdrop-blur-2xl overflow-x-auto overflow-y-hidden custom-scrollbar-x pointer-events-auto transition-all duration-300`}
       >
         <span className="text-[10px] font-mono text-cyber-cyan font-bold px-2 uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
           <Compass className="w-3.5 h-3.5 text-cyber-cyan animate-spin-slow" />

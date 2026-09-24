@@ -21,6 +21,7 @@ import { Radar, ChevronLeft } from 'lucide-react';
 
 function App() {
   const { viewMode, showLoadingScreen, rightSidebarOpen, setRightSidebarOpen } = useMapStore();
+  const [isScrolledPastHero, setIsScrolledPastHero] = React.useState(false);
 
   // Update weather data periodically
   useEffect(() => {
@@ -30,8 +31,17 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
+  const handleScroll = (e) => {
+    const scrollY = e.currentTarget.scrollTop;
+    if (scrollY > 300) {
+      if (!isScrolledPastHero) setIsScrolledPastHero(true);
+    } else {
+      if (isScrolledPastHero) setIsScrolledPastHero(false);
+    }
+  };
+
   return (
-    <div className="w-screen h-screen overflow-y-auto overflow-x-hidden bg-[#050608] selection:bg-mars-400/40 selection:text-white scroll-smooth custom-scrollbar">
+    <div onScroll={handleScroll} className="w-screen h-screen overflow-y-auto overflow-x-hidden bg-[#050608] selection:bg-mars-400/40 selection:text-white scroll-smooth custom-scrollbar">
       {/* SECTION 1: The Mars Interactive HUD (Hero) */}
       <section 
         id="section-map"
@@ -44,11 +54,8 @@ function App() {
         {/* Loading Screen */}
         {showLoadingScreen && <LoadingScreen />}
 
-        {/* Center Box Map / 3D Viewport (Prevents overlap with max() calculations) */}
-        <div 
-          className="absolute top-[10%] bottom-[10%] z-0 rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.7)] border border-white/10 transition-all duration-300"
-          style={{ left: 'max(25%, 430px)', right: 'max(25%, 340px)' }}
-        >
+        {/* Full-Bleed Edge-to-Edge Mars 3D Globe & Map Viewport */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
           <ErrorBoundary>
             {viewMode === '2d' && <MarsMap />}
             {viewMode === '3d' && <Mars3DViewer />}
@@ -100,8 +107,10 @@ function App() {
         </div>
       </section>
 
-      {/* FIXED LEFT SIDEBAR (Always visible on scroll) */}
-      <div className="fixed left-4 top-1/2 -translate-y-1/2 z-[400] pointer-events-none">
+      {/* FIXED LEFT SIDEBAR (Smoothly hides when scrolling into Sections 2 & 3 for full-width immersion) */}
+      <div className={`fixed left-4 top-1/2 -translate-y-1/2 z-[400] pointer-events-none transition-all duration-500 ${
+        isScrolledPastHero ? 'opacity-0 -translate-x-6 pointer-events-none' : 'opacity-100 translate-x-0'
+      }`}>
         <div className="pointer-events-auto flex flex-col">
           <ErrorBoundary>
             <Sidebar />
@@ -109,9 +118,11 @@ function App() {
         </div>
       </div>
 
-      {/* FIXED BOTTOM PANEL (Always visible on scroll) */}
-      <div className="fixed bottom-0 left-0 right-0 pointer-events-none z-50 w-full px-4 pb-4">
-        <div className="pointer-events-auto">
+      {/* FIXED BOTTOM PANEL (Smoothly hides when scrolling into Sections 2 & 3) */}
+      <div className={`fixed bottom-0 left-0 right-0 pointer-events-none z-50 w-full px-4 pb-3 flex justify-center transition-all duration-500 ${
+        isScrolledPastHero ? 'opacity-0 translate-y-6 pointer-events-none' : 'opacity-100 translate-y-0'
+      }`}>
+        <div className="pointer-events-auto w-full max-w-2xl flex justify-center">
           <ErrorBoundary>
             <BottomPanel />
           </ErrorBoundary>

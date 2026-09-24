@@ -330,7 +330,7 @@ const useMapStore = create((set, get) => ({
   // ========================
   sidebarOpen: false,
   sidebarTab: 'guide', // 'guide' | 'layers' | 'route' | 'poi' | 'mission'
-  rightSidebarOpen: true,
+  rightSidebarOpen: false,
   bottomPanelOpen: false,
   bottomPanelTab: 'elevation', // 'elevation' | 'weather' | 'radiation' | 'dust'
   showLoadingScreen: true,

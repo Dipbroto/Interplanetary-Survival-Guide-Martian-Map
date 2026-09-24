@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
 import { 
   Menu, Hexagon, Maximize, Minimize, Settings, ShieldAlert,
-  Play, X, Radar, Map as MapIcon, Image as ImageIcon, Sparkles
+  Play, X, Radar, Map as MapIcon, Image as ImageIcon, Sparkles,
+  Volume2, VolumeX, FileText
 } from 'lucide-react';
 import useMapStore from '../store/useMapStore';
 
@@ -14,7 +15,10 @@ export default function TopBar() {
     activeContingency,
     setContingencyModalOpen,
     rightSidebarOpen,
-    setRightSidebarOpen
+    setRightSidebarOpen,
+    isAudioActive,
+    toggleAudio,
+    setFlightPlanOpen
   } = useMapStore();
 
   const [isFullscreen, setIsFullscreen] = React.useState(false);
@@ -89,6 +93,30 @@ export default function TopBar() {
         {/* Right: Quick Tools & Toggles */}
         <div className="flex items-center gap-2 shrink-0">
           
+          {/* Ambient Audio Synthesizer */}
+          <button
+            onClick={toggleAudio}
+            className={`px-2 py-1.5 border rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all shadow-sm ${
+              isAudioActive
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-neon-amber'
+                : 'bg-space-900/80 hover:bg-space-850 border-white/[0.08] text-space-400 hover:text-white'
+            }`}
+            title={isAudioActive ? 'Mute Martian Soundscape' : 'Enable Ambient Martian Soundscape'}
+          >
+            {isAudioActive ? <Volume2 className="w-3.5 h-3.5 text-amber-400 animate-pulse" /> : <VolumeX className="w-3.5 h-3.5" />}
+            <span className="hidden 2xl:inline">{isAudioActive ? 'Audio ON' : 'Audio'}</span>
+          </button>
+
+          {/* NASA Flight Plan Briefing */}
+          <button
+            onClick={() => setFlightPlanOpen(true)}
+            className="px-2 py-1.5 border rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all shadow-sm bg-space-900/80 hover:bg-space-850 border-white/[0.08] hover:border-cyan-500/40 text-space-200"
+            title="Open NASA Astronaut Flight Plan & Briefing Package"
+          >
+            <FileText className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="hidden xl:inline">Briefing</span>
+          </button>
+
           {/* Contingency Simulator */}
           <button
             onClick={() => setContingencyModalOpen(true)}

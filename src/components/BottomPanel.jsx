@@ -58,15 +58,48 @@ export default function BottomPanel() {
     }
   };
 
+  // Minimized state: Aerodynamic, floating aerospace telemetry capsule
+  if (!bottomPanelOpen) {
+    return (
+      <div 
+        onClick={() => setBottomPanelOpen(true)}
+        className="cursor-pointer group flex items-center justify-between gap-3 px-4 py-2 rounded-full bg-[#0B0C10]/85 border border-white/10 shadow-hud-glass backdrop-blur-2xl hover:bg-[#0B0C10]/95 hover:border-mars-500/40 transition-all font-mono text-xs text-space-300 hover:text-white"
+        title="Click to Open Environmental & Elevation Telemetry Deck"
+      >
+        <div className="flex items-center gap-1.5 text-amber-300">
+          <Cloud className="w-3.5 h-3.5 text-amber-400" />
+          <span>{weather?.temperature?.avg !== undefined ? `${Math.round(weather.temperature.avg)}°C` : '-62°C'}</span>
+        </div>
+        <span className="text-white/20">|</span>
+        <div className="flex items-center gap-1.5 text-purple-300">
+          <Zap className="w-3.5 h-3.5 text-purple-400" />
+          <span>0.06 mSv/h</span>
+        </div>
+        <span className="text-white/20">|</span>
+        <div className="flex items-center gap-1.5 text-cyan-300">
+          <BarChart3 className="w-3.5 h-3.5 text-cyan-400" />
+          <span>{waypoints && waypoints.length > 1 ? `${waypoints.length} Waypoints` : 'Elevation'}</span>
+        </div>
+        <span className="text-white/20">|</span>
+        <div className="flex items-center gap-1 text-mars-400 group-hover:text-mars-300 font-bold text-[10px] uppercase tracking-wider">
+          <span>Telemetry Deck</span>
+          <ChevronUp className="w-3.5 h-3.5 group-hover:-translate-y-0.5 transition-transform" />
+        </div>
+      </div>
+    );
+  }
+
+  // Expanded state: Full multi-tab telemetry deck
   return (
     <motion.div
-      initial={false}
-      animate={{ height: bottomPanelOpen ? 295 : 40 }}
-      transition={{ duration: 0.25, ease: 'easeInOut' }}
-      className="relative z-30 shrink-0 flex flex-col rounded-2xl border border-white/[0.08] bg-[#0B0C10]/70 backdrop-blur-3xl overflow-hidden shadow-hud-glass transition-all hover:bg-[#0B0C10]/80"
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 15 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+      className="relative z-30 shrink-0 flex flex-col rounded-2xl border border-white/[0.12] bg-[#0B0C10]/90 backdrop-blur-3xl overflow-hidden shadow-2xl h-[295px] w-full"
     >
-      {/* Tab Bar Header (Horizontal Scrollable Menu Bar) */}
-      <div className="flex items-center justify-between h-10 px-3 bg-space-900/80 border-b border-white/[0.06] shrink-0 font-mono">
+      {/* Tab Bar Header */}
+      <div className="flex items-center justify-between h-10 px-3 bg-space-900/90 border-b border-white/[0.08] shrink-0 font-mono">
         <div 
           onWheel={(e) => {
             if (e.deltaY !== 0 && e.deltaX === 0) {
@@ -81,17 +114,13 @@ export default function BottomPanel() {
             return (
               <button
                 key={tab.id}
-                onClick={() => {
-                  setBottomPanelTab(tab.id);
-                  if (!bottomPanelOpen) setBottomPanelOpen(true);
-                }}
+                onClick={() => setBottomPanelTab(tab.id)}
                 className={`relative shrink-0 flex items-center gap-2 px-3 h-full transition-all text-xs font-semibold ${
                   isActive
                     ? 'text-mars-300 bg-mars-500/10'
                     : 'text-space-300 hover:text-white hover:bg-space-850/50'
                 }`}
               >
-                {/* Active Top Laser Indicator */}
                 {isActive && (
                   <span className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-mars-500 via-mars-400 to-amber-400 shadow-[0_0_8px_#f47050]" />
                 )}
@@ -107,29 +136,28 @@ export default function BottomPanel() {
           })}
         </div>
         <button
-          onClick={() => setBottomPanelOpen(!bottomPanelOpen)}
-          className="p-1 text-space-400 hover:text-mars-400 transition-colors rounded hover:bg-space-800 shrink-0 ml-2"
-          title={bottomPanelOpen ? "Minimize Telemetry Deck" : "Expand Telemetry Deck"}
+          onClick={() => setBottomPanelOpen(false)}
+          className="flex items-center gap-1 px-2.5 py-1 text-space-400 hover:text-mars-400 transition-colors rounded hover:bg-space-800 shrink-0 ml-2 text-[10px] font-mono uppercase"
+          title="Minimize Telemetry Deck"
         >
-          {bottomPanelOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+          <span>Minimize</span>
+          <ChevronDown className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      {/* Content Area (Vertical Scrollable) */}
+      {/* Content Area */}
       <div className="flex-1 relative overflow-hidden">
         <AnimatePresence mode="wait">
-          {bottomPanelOpen && (
-            <motion.div
-              key={bottomPanelTab}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.15 }}
-              className="absolute inset-0 p-3 overflow-y-auto overflow-x-hidden custom-scrollbar-y"
-            >
-              {renderContent()}
-            </motion.div>
-          )}
+          <motion.div
+            key={bottomPanelTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.15 }}
+            className="absolute inset-0 p-3 overflow-y-auto overflow-x-hidden custom-scrollbar-y"
+          >
+            {renderContent()}
+          </motion.div>
         </AnimatePresence>
       </div>
     </motion.div>
