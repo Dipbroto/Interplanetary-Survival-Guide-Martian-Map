@@ -610,10 +610,23 @@ const MarsExpressSatellite = ({ radius = 2.0 }) => {
 
 const CameraDirector = ({ targetPos }) => {
   const { camera } = useThree();
+  const lastTarget = useRef(targetPos);
+  const flyActive = useRef(true);
+
+  useEffect(() => {
+    if (targetPos && targetPos !== lastTarget.current) {
+      lastTarget.current = targetPos;
+      flyActive.current = true;
+    }
+  }, [targetPos]);
+
   useFrame(() => {
-    if (targetPos) {
-      camera.position.lerp(targetPos, 0.015);
+    if (flyActive.current && lastTarget.current) {
+      camera.position.lerp(lastTarget.current, 0.025);
       camera.lookAt(0, 0, 0);
+      if (camera.position.distanceTo(lastTarget.current) < 0.1) {
+        flyActive.current = false;
+      }
     }
   });
   return null;
@@ -932,7 +945,7 @@ export default function Mars3DViewer() {
             e.currentTarget.scrollLeft += e.deltaY;
           }
         }}
-        className="absolute top-3 left-4 animate-[fadeIn_2s_ease-out_1.5s_forwards] opacity-0 right-4 flex items-center justify-between pointer-events-none z-10 gap-2 max-w-[calc(100%-2rem)] overflow-x-auto overflow-y-hidden custom-scrollbar-x py-1"
+        className="absolute top-3 left-4 animate-[fadeIn_2s_ease-out_1.5s_forwards] opacity-0 right-4 flex items-center pointer-events-auto z-10 gap-3 max-w-[calc(100%-2rem)] overflow-x-auto overflow-y-hidden custom-scrollbar-x py-2 px-1"
       >
         <div className="pointer-events-auto flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0B0C10]/90 border border-cyber-cyan/30 shadow-neon-cyan backdrop-blur-xl shrink-0">
           <div className="w-2 h-2 rounded-full bg-cyber-cyan animate-pulse" />
