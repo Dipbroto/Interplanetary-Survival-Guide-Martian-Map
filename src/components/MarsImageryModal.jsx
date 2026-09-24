@@ -39,7 +39,7 @@ export default function MarsImageryModal() {
     });
   }, [activeCategory, searchQuery]);
 
-  if (!isImageryModalOpen) return null;
+  
 
   const handleFlyTo = (img) => {
     marsAudio.playQuindarTone?.(true);
@@ -55,7 +55,7 @@ export default function MarsImageryModal() {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[1500] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-xl select-none">
+      <div className="w-full h-full flex items-center justify-center p-3 sm:p-6 select-none">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}

@@ -121,20 +121,39 @@ function App() {
       {/* SECTION 2: Mars Explore Segment (mars2.png) */}
       <section 
         id="section-imagery"
-        className="h-screen w-full relative flex items-center justify-center"
+        className="min-h-screen w-full relative flex flex-col items-center py-24"
         style={{ backgroundImage: "url('/mars2.png')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
-        {/* Optional: Add gradient overlay so image pops out but isn't blinding */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050608] via-transparent to-[#050608] opacity-60"></div>
+        {/* Dark gradient overlay so content pops out */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050608] via-black/70 to-[#050608] opacity-90 backdrop-blur-[4px]"></div>
+        
+        <div className="relative z-10 w-full max-w-[1400px] flex flex-col xl:flex-row gap-8 px-6">
+          <div className="flex-1 xl:w-1/2">
+            <ErrorBoundary>
+              <ScienceLabModal />
+            </ErrorBoundary>
+          </div>
+          <div className="flex-1 xl:w-1/2">
+            <ErrorBoundary>
+              <MarsImageryModal />
+            </ErrorBoundary>
+          </div>
+        </div>
       </section>
 
       {/* SECTION 3: Deep Space Segment (mars3.png) */}
       <section 
         id="section-sky"
-        className="h-screen w-full relative flex items-center justify-center"
+        className="min-h-screen w-full relative flex flex-col items-center py-24"
         style={{ backgroundImage: "url('/mars3.png')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050608] via-transparent to-[#050608] opacity-60"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050608] via-black/70 to-[#050608] opacity-90 backdrop-blur-[4px]"></div>
+        
+        <div className="relative z-10 w-full max-w-[1000px] flex flex-col gap-12 px-6">
+          <ErrorBoundary>
+            <MartianSkyEphemeris />
+          </ErrorBoundary>
+        </div>
       </section>
 
       {/* GLOBAL MODALS (These should be fixed to screen, so they can live at root level) */}
@@ -142,22 +161,13 @@ function App() {
         <EVAHelmetHUD />
       </ErrorBoundary>
       <ErrorBoundary>
-        <ScienceLabModal />
-      </ErrorBoundary>
-      <ErrorBoundary>
         <FlightPlanModal />
-      </ErrorBoundary>
-      <ErrorBoundary>
-        <MartianSkyEphemeris />
       </ErrorBoundary>
       <ErrorBoundary>
         <AudioSynthesizerRack />
       </ErrorBoundary>
       <ErrorBoundary>
         <ContingencySimulator />
-      </ErrorBoundary>
-      <ErrorBoundary>
-        <MarsImageryModal />
       </ErrorBoundary>
     </div>
   );

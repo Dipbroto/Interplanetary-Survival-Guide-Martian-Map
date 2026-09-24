@@ -121,7 +121,7 @@ export default function ScienceLabModal() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isScienceLabOpen, setScienceLabOpen]);
 
-  if (!isScienceLabOpen) return null;
+  
 
   const target = selectedTarget || ROCK_TARGETS[0];
   const safeSamples = Array.isArray(collectedSamples) ? collectedSamples : [];
@@ -156,7 +156,7 @@ export default function ScienceLabModal() {
       onClick={(e) => {
         if (e.target === e.currentTarget) setScienceLabOpen(false);
       }}
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+      className="w-full h-full flex items-center justify-center"
     >
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}

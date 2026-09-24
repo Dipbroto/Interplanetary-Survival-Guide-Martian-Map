@@ -53,7 +53,7 @@ export default function MartianSkyEphemeris() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isSkyEphemerisOpen, setSkyEphemerisOpen]);
 
-  if (!isSkyEphemerisOpen) return null;
+  
 
   // Orbital positions on celestial dome
   // Phobos moves very quickly (7.65 hr period)
@@ -82,7 +82,7 @@ export default function MartianSkyEphemeris() {
       onClick={(e) => {
         if (e.target === e.currentTarget) setSkyEphemerisOpen(false);
       }}
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md font-mono text-xs"
+      className="w-full h-full flex items-center justify-center p-4 font-mono text-xs"
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
