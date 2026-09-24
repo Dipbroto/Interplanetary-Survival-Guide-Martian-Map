@@ -612,7 +612,7 @@ const CameraDirector = ({ targetPos }) => {
   const { camera } = useThree();
   useFrame(() => {
     if (targetPos) {
-      camera.position.lerp(targetPos, 0.045);
+      camera.position.lerp(targetPos, 0.015);
       camera.lookAt(0, 0, 0);
     }
   });
@@ -900,7 +900,7 @@ export default function Mars3DViewer() {
   return (
     <div className="w-full h-full bg-[#0B0C10] relative overflow-hidden select-none">
       {/* Three.js Fiber Viewport */}
-      <Canvas camera={{ position: [0, 0, 4.8], fov: 45 }}>
+      <Canvas camera={{ position: [12, 6, 15], fov: 45 }}>
         <ambientLight intensity={0.25} />
         <directionalLight position={[6, 2, 4]} intensity={2.5} color="#fff1e6" castShadow />
         <directionalLight position={[-6, -2, -4]} intensity={0.16} color="#0B0C10" />
@@ -940,7 +940,7 @@ export default function Mars3DViewer() {
             e.currentTarget.scrollLeft += e.deltaY;
           }
         }}
-        className="absolute top-3 left-4 right-4 flex items-center justify-between pointer-events-none z-10 gap-2 max-w-[calc(100%-2rem)] overflow-x-auto overflow-y-hidden custom-scrollbar-x py-1"
+        className="absolute top-3 left-4 animate-[fadeIn_2s_ease-out_1.5s_forwards] opacity-0 right-4 flex items-center justify-between pointer-events-none z-10 gap-2 max-w-[calc(100%-2rem)] overflow-x-auto overflow-y-hidden custom-scrollbar-x py-1"
       >
         <div className="pointer-events-auto flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0B0C10]/90 border border-cyber-cyan/30 shadow-neon-cyan backdrop-blur-xl shrink-0">
           <div className="w-2 h-2 rounded-full bg-cyber-cyan animate-pulse" />
@@ -1052,7 +1052,7 @@ export default function Mars3DViewer() {
             e.currentTarget.scrollLeft += e.deltaY;
           }
         }}
-        className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 bg-[#0B0C10]/95 p-1.5 rounded-2xl border border-white/[0.08] shadow-hud-glass backdrop-blur-2xl max-w-[95vw] overflow-x-auto overflow-y-hidden custom-scrollbar-x whitespace-nowrap scroll-smooth"
+        className="absolute bottom-3 left-1/2 animate-[fadeIn_2s_ease-out_2s_forwards] opacity-0 -translate-x-1/2 z-10 flex items-center gap-1 bg-[#0B0C10]/95 p-1.5 rounded-2xl border border-white/[0.08] shadow-hud-glass backdrop-blur-2xl max-w-[95vw] overflow-x-auto overflow-y-hidden custom-scrollbar-x whitespace-nowrap scroll-smooth"
       >
         <span className="text-[10px] font-mono text-cyber-cyan font-bold px-2 uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
           <Compass className="w-3.5 h-3.5 text-cyber-cyan animate-spin-slow" />
