@@ -100,8 +100,8 @@ function App() {
       </section>
 
       {/* FIXED LEFT SIDEBAR (Always visible on scroll) */}
-      <div className="fixed left-4 top-[5.5rem] bottom-24 z-[400] pointer-events-none">
-        <div className="pointer-events-auto h-full flex flex-col">
+      <div className="fixed left-4 top-1/2 -translate-y-1/2 z-[400] pointer-events-none">
+        <div className="pointer-events-auto flex flex-col">
           <ErrorBoundary>
             <Sidebar />
           </ErrorBoundary>

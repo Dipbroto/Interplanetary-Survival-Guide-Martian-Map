@@ -62,10 +62,10 @@ export default function Sidebar() {
       initial={false}
       animate={{ width: sidebarOpen ? 396 : 54 }}
       transition={{ duration: 0.25, ease: 'easeInOut' }}
-      className="relative z-30 flex flex-col h-full rounded-2xl border border-white/[0.08] bg-[#0B0C10]/70 backdrop-blur-3xl shrink-0 overflow-hidden shadow-hud-glass transition-all hover:bg-[#0B0C10]/80"
+      className="relative z-30 flex flex-col h-max max-h-[85vh] rounded-2xl border border-white/[0.08] bg-[#0B0C10]/70 backdrop-blur-3xl shrink-0 shadow-hud-glass transition-all hover:bg-[#0B0C10]/80"
     >
       {/* Tab Navigation Bar (Horizontal when open, Vertical when collapsed) */}
-      <div className="shrink-0 border-b border-white/[0.05] bg-space-900/40 p-1.5">
+      <div className="shrink-0 border-b border-white/[0.05] bg-space-900/40 p-1.5 rounded-t-2xl">
         <div 
           onWheel={(e) => {
             if (sidebarOpen && e.deltaY !== 0 && e.deltaX === 0) {
@@ -112,7 +112,7 @@ export default function Sidebar() {
       </div>
 
       {/* Content Area (Vertical Scrollable) */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar-y">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar-y rounded-b-2xl">
         <AnimatePresence mode="wait">
           {sidebarOpen && (
             <motion.div
