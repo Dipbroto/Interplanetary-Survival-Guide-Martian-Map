@@ -532,6 +532,7 @@ const MarsMap = () => {
         style={{ height: '100%', width: '100%', background: 'transparent' }}
         worldCopyJump={false}
         maxBoundsViscosity={0.6}
+        zoomControl={false}
       >
         <MapEvents />
         <MapViewController />
