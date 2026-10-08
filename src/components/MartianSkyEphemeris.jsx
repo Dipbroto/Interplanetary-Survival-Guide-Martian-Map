@@ -165,19 +165,23 @@ export default function MartianSkyEphemeris() {
   }, [solTime]);
 
   // Sun Position on Sky Dome (Rises in East: x=240, sets in West: x=40)
-  // Solar Altitude peaks at local noon (~12.33 hrs)
+  // Solar Altitude peaks based on latitude
   const sunSkyCoords = useMemo(() => {
     const norm = (solTime - 6.0) / 12.0; // 0 at 6:00, 1 at 18:00
     const isAboveHorizon = solTime >= 5.5 && solTime <= 18.8;
-    // Map to circle radius ~100px from center (140, 140)
     const angle = Math.PI - norm * Math.PI; // East (right) to West (left)
     const radius = 95;
+    
+    // Latitude affects peak solar altitude
+    const peakAlt = 90 - Math.abs(selectedLocation.lat);
+    const yMultiplier = peakAlt / 90;
+    
     const x = 140 + Math.cos(angle) * radius;
-    const y = 140 - Math.sin(angle) * (radius * 0.85); // Altitude
-    const altitudeDeg = Math.round(Math.max(0, Math.sin(norm * Math.PI) * 68));
+    const y = 140 - Math.sin(angle) * (radius * 0.85 * yMultiplier); // Altitude
+    const altitudeDeg = Math.round(Math.max(0, Math.sin(norm * Math.PI) * peakAlt));
     const azimuthDeg = Math.round(((norm * 180 + 90) % 360));
     return { x, y, isAboveHorizon, altitudeDeg, azimuthDeg };
-  }, [solTime]);
+  }, [solTime, selectedLocation.lat]);
 
   // Phobos Celestial Ephemeris (Orbits every 7h 39m = 7.65 hrs -> 3.22 revolutions per Sol!)
   // Retrograde apparent motion: Rises in WEST (x=40), sets in EAST (x=240) twice a day!
@@ -185,14 +189,18 @@ export default function MartianSkyEphemeris() {
     if (!selectedLocation.phobosVisible) {
       return { visible: false, reason: 'Permanently occluded by Mars curvature (Lat > 70.4°N)' };
     }
-    const phobosPeriodSol = 7.65 / 24.65; // ~0.31 Sol
     const cycleProgress = (solTime / 7.65) % 1; // 0 to 1
     // Retrograde: West (left) to East (right)
     const angle = cycleProgress * Math.PI * 2;
     const altitudeFraction = Math.sin(angle);
     const isVisible = altitudeFraction > 0;
+    
+    // Phobos orbits precisely on the equator, so peak altitude is directly tied to latitude
+    const peakAlt = Math.max(0, 90 - Math.abs(selectedLocation.lat));
+    const yMultiplier = peakAlt / 90;
+    
     const x = 140 - Math.cos(angle) * 88;
-    const y = 140 - altitudeFraction * 80;
+    const y = 140 - altitudeFraction * 80 * yMultiplier;
     
     // Phase calculation: Angle relative to the Sun
     const sunAngle = ((solTime - 6.0) / 12.0) * Math.PI;
@@ -208,7 +216,7 @@ export default function MartianSkyEphemeris() {
     return {
       visible: isVisible,
       x, y,
-      altDeg: Math.round(Math.max(0, altitudeFraction * 74)),
+      altDeg: Math.round(Math.max(0, altitudeFraction * peakAlt)),
       azDeg: Math.round((angle * 180 / Math.PI + 270) % 360),
       illumination,
       phaseName,
@@ -224,17 +232,21 @@ export default function MartianSkyEphemeris() {
     const angle = Math.PI - cycleProgress * Math.PI * 2;
     const altitudeFraction = Math.sin(angle);
     const isVisible = altitudeFraction > -0.2;
+    
+    const peakAlt = Math.max(0, 90 - Math.abs(selectedLocation.lat));
+    const yMultiplier = peakAlt / 90;
+    
     const x = 140 + Math.cos(angle) * 115;
-    const y = 140 - Math.max(0, altitudeFraction) * 95;
+    const y = 140 - Math.max(0, altitudeFraction) * 95 * yMultiplier;
     return {
       visible: isVisible,
       x, y,
-      altDeg: Math.round(Math.max(0, altitudeFraction * 58)),
+      altDeg: Math.round(Math.max(0, altitudeFraction * peakAlt)),
       azDeg: Math.round((angle * 180 / Math.PI + 90) % 360),
       distKm: 20080,
       mag: -5.1
     };
-  }, [solTime]);
+  }, [solTime, selectedLocation.lat]);
 
   // Earth Ephemeris (Dazzling blue morning / evening star)
   const earthEphemeris = useMemo(() => {
@@ -342,6 +354,8 @@ export default function MartianSkyEphemeris() {
                 onClick={() => {
                   playUiClick();
                   setSelectedLocation(loc);
+                  useMapStore.getState().setMapCenter([loc.lat, loc.lon]);
+                  useMapStore.getState().setMapZoom(5);
                 }}
                 className={`p-2.5 rounded-xl border text-left transition-all flex flex-col gap-1 ${
                   selectedLocation.id === loc.id
