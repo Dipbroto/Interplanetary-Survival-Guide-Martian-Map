@@ -228,17 +228,17 @@ export default function RoutePlanner() {
       </div>
 
       {/* Mode Tabs: Manual vs Autonomous (Horizontal Scrollable Menu Bar) */}
-      <div className="flex bg-space-900/80 p-0.5 rounded-lg border border-space-800 shrink-0 overflow-x-auto overflow-y-hidden custom-scrollbar-x whitespace-nowrap">
+      <div className="flex bg-[#07090E]/80 backdrop-blur-md p-1 rounded-xl border border-white/[0.06] shrink-0 overflow-x-auto overflow-y-hidden custom-scrollbar-x whitespace-nowrap shadow-bento">
         <button
           onClick={() => setActiveTab('manual')}
-          className={`flex-1 py-1.5 px-2 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shrink-0 whitespace-nowrap ${
+          className={`flex-1 py-2 px-3 rounded-lg text-xs font-display font-semibold tracking-wide flex items-center justify-center gap-2 transition-all shrink-0 whitespace-nowrap ${
             activeTab === 'manual'
-              ? 'bg-space-800 text-white shadow-sm'
-              : 'text-space-400 hover:text-white'
+              ? 'bg-white/[0.08] text-white shadow-sm border border-white/10'
+              : 'text-stone-400 hover:text-white hover:bg-white/[0.02]'
           }`}
         >
-          <MapPin className="w-3.5 h-3.5 text-mars-400" />
-          <span>Manual Waypoints</span>
+          <MapPin className={`w-4 h-4 ${activeTab === 'manual' ? 'text-[#F16938]' : ''}`} />
+          <span>Manual Route</span>
         </button>
 
         <button
@@ -246,15 +246,15 @@ export default function RoutePlanner() {
             setActiveTab('auto');
             if (!generatedRouteResult) handleRunAutoRouter();
           }}
-          className={`flex-1 py-1.5 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+          className={`flex-1 py-2 px-3 rounded-lg text-xs font-display font-semibold tracking-wide flex items-center justify-center gap-2 transition-all ${
             activeTab === 'auto'
-              ? 'bg-mars-600 text-white shadow-sm shadow-mars-600/30'
-              : 'text-space-400 hover:text-mars-300'
+              ? 'bg-[#F16938]/15 text-white shadow-[0_0_15px_rgba(241,105,56,0.15)] border border-[#F16938]/30'
+              : 'text-stone-400 hover:text-white hover:bg-white/[0.02]'
           }`}
         >
-          <Cpu className="w-3.5 h-3.5 text-amber-400" />
-          <span>Autonomous Router</span>
-          <span className="text-[9px] bg-amber-400/20 text-amber-300 px-1 py-0.2 rounded font-mono">AI</span>
+          <Cpu className={`w-4 h-4 ${activeTab === 'auto' ? 'text-amber-400' : ''}`} />
+          <span>AI Router</span>
+          <span className="text-[9px] bg-amber-400/20 text-amber-300 px-1.5 py-0.5 rounded border border-amber-400/30 font-mono">BETA</span>
         </button>
       </div>
 

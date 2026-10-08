@@ -335,7 +335,7 @@ const useMapStore = create((set, get) => ({
   rightSidebarOpen: false,
   bottomPanelOpen: false,
   bottomPanelTab: 'elevation', // 'elevation' | 'weather' | 'radiation' | 'dust'
-  showLoadingScreen: true,
+  showLoadingScreen: false,
   
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
   setSidebarTab: (tab) => set({ sidebarTab: tab, sidebarOpen: true, isEVASimulating: false }),

@@ -75,7 +75,7 @@ const QUICK_NAV_ITEMS = [
     icon: Box,
     title: 'ACCESS RESOURCES',
     subtitle: 'Water, oxygen, energy & more',
-    target: 'section-science',
+    target: 'section-imagery',
     is3d: false,
   },
   {
@@ -297,7 +297,15 @@ export default function HomeHero() {
                 </button>
               ))}
             </div>
-            <button className="px-2.5 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-wider text-stone-400 hover:text-stone-200 bg-white/[0.02] border border-white/[0.05] hover:border-white/10 flex items-center gap-1 shrink-0 backdrop-blur-sm cursor-pointer">
+            <button 
+              onClick={() => {
+                marsAudio.playUiClick();
+                useMapStore.getState().setSidebarTab('layers');
+                useMapStore.getState().setSidebarOpen(true);
+                scrollTo('section-map');
+              }}
+              className="px-2.5 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-wider text-stone-400 hover:text-stone-200 bg-white/[0.02] border border-white/[0.05] hover:border-white/10 flex items-center gap-1 shrink-0 backdrop-blur-sm cursor-pointer transition-colors"
+            >
               <span>More</span>
               <ChevronDown className="w-3 h-3" />
             </button>
@@ -311,11 +319,16 @@ export default function HomeHero() {
             }}
             className="relative w-full h-64 sm:h-72 rounded-2xl overflow-hidden border border-white/[0.06] bg-space-950 group cursor-pointer"
           >
-            {/* Mars Surface Texture Image */}
+            {/* Mars Surface Texture Image (with dynamic layer filters) */}
             <img 
               src="/mars_texture.jpg" 
               alt="Martian Surface Map Preview" 
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out opacity-80"
+              className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out opacity-80 ${
+                activeLayerTab === 'Topography' ? 'grayscale contrast-125 brightness-110' :
+                activeLayerTab === 'Temperature' ? 'hue-rotate-180 saturate-200 contrast-110' :
+                activeLayerTab === 'Radiation' ? 'hue-rotate-[-90deg] saturate-[2.5] contrast-125' :
+                ''
+              }`}
             />
             
             {/* Subtle Grid Reticle Overlay */}
@@ -323,13 +336,27 @@ export default function HomeHero() {
             <div className="absolute inset-0 bg-gradient-to-t from-[#070A10] via-transparent to-transparent pointer-events-none" />
 
             {/* Zoom Controls Overlay (Top-Left) */}
-            <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 pointer-events-none">
-              <div className="w-6 h-6 rounded-lg bg-[#070A10]/80 border border-white/[0.08] flex items-center justify-center text-xs font-mono font-bold text-stone-300 backdrop-blur-md">
+            <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  marsAudio.playUiClick();
+                  scrollTo('section-map');
+                }}
+                className="w-7 h-7 rounded-lg bg-[#070A10]/80 hover:bg-[#070A10] border border-white/[0.08] hover:border-cyan-400/50 flex items-center justify-center text-sm font-mono font-bold text-stone-300 hover:text-white backdrop-blur-md transition-colors cursor-pointer shadow-lg"
+              >
                 +
-              </div>
-              <div className="w-6 h-6 rounded-lg bg-[#070A10]/80 border border-white/[0.08] flex items-center justify-center text-xs font-mono font-bold text-stone-300 backdrop-blur-md">
+              </button>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  marsAudio.playUiClick();
+                  scrollTo('section-map');
+                }}
+                className="w-7 h-7 rounded-lg bg-[#070A10]/80 hover:bg-[#070A10] border border-white/[0.08] hover:border-cyan-400/50 flex items-center justify-center text-sm font-mono font-bold text-stone-300 hover:text-white backdrop-blur-md transition-colors cursor-pointer shadow-lg"
+              >
                 −
-              </div>
+              </button>
             </div>
 
             {/* Stylized Rover Traverse Route Graphic */}
@@ -524,7 +551,7 @@ export default function HomeHero() {
                 LATEST UPDATES
               </h4>
               <button 
-                onClick={() => scrollTo('section-science')}
+                onClick={() => scrollTo('section-imagery')}
                 className="px-2 py-0.5 rounded-full bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.05] text-[10px] font-mono uppercase tracking-wider text-stone-400 hover:text-stone-200 flex items-center gap-0.5 cursor-pointer backdrop-blur-sm transition-all"
               >
                 <span>View All</span>
@@ -584,7 +611,7 @@ export default function HomeHero() {
 
             {/* Glowing Action Button Circle */}
             <div className="w-9 h-9 rounded-full bg-white/[0.04] hover:bg-[#F16938]/20 border border-white/[0.08] hover:border-[#F16938]/50 flex items-center justify-center text-stone-400 hover:text-[#F16938] transition-all shadow-sm">
-              <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </div>
           </div>
 

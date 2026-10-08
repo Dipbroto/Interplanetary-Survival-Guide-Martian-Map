@@ -15,22 +15,22 @@ const LayerItem = ({ layer, isActive, opacity, onToggle, onOpacityChange }) => {
   const [showInfo, setShowInfo] = useState(false);
 
   return (
-    <div className="mb-4">
-      <div className="flex items-center justify-between mb-2 gap-2">
+    <div className="mb-3">
+      <div className="flex items-center justify-between mb-2 gap-2 group">
         <button 
-          className={`flex items-center gap-2 flex-1 text-left min-w-0 ${isActive ? 'text-mars-400' : 'text-primary'}`}
+          className={`flex items-center gap-2 flex-1 text-left min-w-0 transition-colors ${isActive ? 'text-mars-400' : 'text-stone-300 hover:text-white'}`}
           onClick={() => onToggle(layer.id)}
         >
-          {isActive ? <Eye size={16} className="shrink-0" /> : <EyeOff size={16} className="text-space-600 shrink-0" />}
-          <span className="font-inter text-sm truncate">{layer.name}</span>
+          {isActive ? <Eye size={14} className="shrink-0 drop-shadow-[0_0_8px_rgba(241,105,56,0.6)]" /> : <EyeOff size={14} className="text-stone-500 shrink-0 group-hover:text-stone-400" />}
+          <span className="font-sans text-xs tracking-wide truncate">{layer.name}</span>
         </button>
         <ProvenanceBadge 
           type={layer.category === 'Derived' ? 'DERIVED' : 'OBSERVED'} 
           size="xs" 
           detail={layer.instrument} 
         />
-        <button onClick={() => setShowInfo(!showInfo)} className="text-space-500 hover:text-mars-400 transition-colors shrink-0">
-          <Info size={16} />
+        <button onClick={() => setShowInfo(!showInfo)} className="w-5 h-5 flex items-center justify-center rounded bg-white/[0.02] border border-transparent hover:border-white/10 text-stone-500 hover:text-cyan-400 transition-colors shrink-0">
+          <Info size={12} />
         </button>
       </div>
 
@@ -98,14 +98,18 @@ const LayerCategory = ({ categoryId, categoryName, layers }) => {
   const Icon = categoryIcons[categoryId] || Layers;
 
   return (
-    <div className="mb-6 border-b border-space-800/50 pb-4 last:border-0">
+    <div className="mb-4 border-b border-white/[0.04] pb-3 last:border-0">
       <button 
-        className="flex items-center gap-2 w-full text-left mb-4 hover:text-mars-400 transition-colors"
+        className="flex items-center justify-between w-full text-left mb-3 group hover:text-mars-400 transition-colors"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <Icon size={18} className="text-mars-500" />
-        <span className="font-orbitron font-medium tracking-wide flex-1">{categoryName}</span>
-        {isOpen ? <ChevronDown size={16} className="text-space-500" /> : <ChevronRight size={16} className="text-space-500" />}
+        <div className="flex items-center gap-2">
+          <Icon size={16} className="text-mars-500 group-hover:scale-110 transition-transform" />
+          <span className="font-display font-semibold tracking-[0.1em] text-xs uppercase text-stone-200 group-hover:text-white transition-colors">{categoryName}</span>
+        </div>
+        <div className="w-5 h-5 rounded-full bg-white/[0.02] border border-white/[0.05] group-hover:border-white/15 flex items-center justify-center transition-colors">
+          {isOpen ? <ChevronDown size={12} className="text-stone-400 group-hover:text-white" /> : <ChevronRight size={12} className="text-stone-400 group-hover:text-white" />}
+        </div>
       </button>
 
       <AnimatePresence>
@@ -114,7 +118,7 @@ const LayerCategory = ({ categoryId, categoryName, layers }) => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden pl-2"
+            className="overflow-hidden pl-2 border-l border-white/[0.04] ml-2"
           >
             {layers.map(layer => (
               <LayerItem 
@@ -157,11 +161,16 @@ const LayerPanel = () => {
   };
 
   return (
-    <div className="p-4 h-full overflow-y-auto overflow-x-hidden custom-scrollbar-y bg-space-950/80 rounded-xl">
-      <h2 className="font-orbitron text-xl text-primary mb-6 flex items-center gap-2">
-        <Layers className="text-mars-500" />
-        Map Layers
-      </h2>
+    <div className="p-4 h-full overflow-y-auto overflow-x-hidden custom-scrollbar-y bg-[#07090E]/80 backdrop-blur-2xl rounded-2xl border border-white/[0.06] shadow-hud-glass">
+      <div className="flex items-center gap-2.5 mb-6 pb-4 border-b border-white/[0.06]">
+        <div className="w-8 h-8 rounded-lg bg-[#F16938]/10 border border-[#F16938]/30 flex items-center justify-center shrink-0">
+          <Layers className="text-[#F16938] w-4 h-4" />
+        </div>
+        <div>
+          <h2 className="font-display font-bold text-sm text-stone-200 tracking-[0.15em] uppercase">Map Layers</h2>
+          <div className="text-[10px] font-mono text-stone-500 uppercase tracking-widest mt-0.5">NASA WMTS Integration</div>
+        </div>
+      </div>
       
       {LAYER_CATEGORIES.map(cat => {
         const catLayers = getLayersForCategory(cat.id);
