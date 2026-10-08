@@ -18,10 +18,10 @@ import RightSidebar from './components/RightSidebar';
 import MarsImageryModal from './components/MarsImageryModal';
 import HomeHero from './components/HomeHero';
 
-import { Radar, ChevronLeft } from 'lucide-react';
+import { Radar, ChevronLeft, Camera, FlaskConical, Sparkles, Image } from 'lucide-react';
 
 function App() {
-  const { viewMode, showLoadingScreen, rightSidebarOpen, setRightSidebarOpen } = useMapStore();
+  const { viewMode, showLoadingScreen, rightSidebarOpen, setRightSidebarOpen, setScienceLabOpen, setImageryModalOpen } = useMapStore();
   const [activeSection, setActiveSection] = useState('home');
   const [isMapSectionActive, setIsMapSectionActive] = useState(false);
   const mapSectionRef = useRef(null);
@@ -172,25 +172,63 @@ function App() {
       </div>
 
       {/* ======================================================== */}
-      {/* SECTION 3: SCIENCE & HIGH-RES IMAGERY (#section-imagery) */}
+      {/* SECTION 3: SCIENCE & HIGH-RES IMAGERY HUB (#section-imagery) */}
       {/* ======================================================== */}
       <section 
         id="section-imagery"
-        className="min-h-screen w-full relative flex flex-col items-center py-24 scroll-mt-14"
+        className="min-h-screen w-full relative flex flex-col items-center justify-center py-24 scroll-mt-14"
         style={{ backgroundImage: "url('/mars2.png')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050608] via-transparent to-[#050608] opacity-80 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050608] via-transparent to-[#050608] opacity-90 pointer-events-none" />
         
-        <div className="relative z-10 w-full max-w-[1400px] flex flex-col gap-16 px-6">
-          <div className="w-full">
-            <ErrorBoundary>
-              <ScienceLabModal />
-            </ErrorBoundary>
+        <div className="relative z-10 w-full max-w-5xl flex flex-col gap-12 px-6 items-center">
+          <div className="text-center mb-4">
+            <h2 className="text-3xl md:text-5xl font-display font-black text-white tracking-[0.15em] uppercase mb-4 shadow-black drop-shadow-2xl">
+              Scientific Exploration Hub
+            </h2>
+            <p className="text-space-300 font-mono text-sm max-w-2xl mx-auto leading-relaxed">
+              Access the In-Situ Planetary Science Laboratory and the High-Resolution Rover & Orbital Imagery Gallery. Authentic NASA PDS/JPL data.
+            </p>
           </div>
-          <div className="w-full">
-            <ErrorBoundary>
-              <MarsImageryModal />
-            </ErrorBoundary>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+            
+            {/* Launch Science Lab Button */}
+            <button
+              onClick={() => setScienceLabOpen(true)}
+              className="group relative h-72 rounded-3xl overflow-hidden border border-white/10 hover:border-[#F16938]/60 transition-all duration-500 flex flex-col items-center justify-center text-center p-8 bg-[#0B0C10]/60 backdrop-blur-md hover:shadow-[0_0_40px_rgba(241,105,56,0.15)]"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-[#F16938]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="w-20 h-20 rounded-2xl bg-[#F16938]/20 text-[#F16938] border border-[#F16938]/30 flex items-center justify-center mb-6 shadow-neon-mars group-hover:scale-110 transition-transform duration-500">
+                <FlaskConical className="w-10 h-10" />
+              </div>
+              <h3 className="text-2xl font-display font-bold text-white tracking-widest mb-2">SCIENCE LAB</h3>
+              <p className="text-stone-400 font-mono text-xs">SuperCam LIBS & SHERLOC Deep-UV</p>
+              
+              <div className="absolute bottom-6 flex items-center gap-2 text-[#F16938] opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
+                <Sparkles className="w-4 h-4" />
+                <span className="font-bold text-xs uppercase tracking-widest font-mono">Launch Module</span>
+              </div>
+            </button>
+
+            {/* Launch Imagery Gallery Button */}
+            <button
+              onClick={() => setImageryModalOpen(true)}
+              className="group relative h-72 rounded-3xl overflow-hidden border border-white/10 hover:border-cyber-cyan/60 transition-all duration-500 flex flex-col items-center justify-center text-center p-8 bg-[#0B0C10]/60 backdrop-blur-md hover:shadow-[0_0_40px_rgba(0,255,204,0.1)]"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-cyber-cyan/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="w-20 h-20 rounded-2xl bg-cyber-cyan/20 text-cyber-cyan border border-cyber-cyan/30 flex items-center justify-center mb-6 shadow-neon-cyan group-hover:scale-110 transition-transform duration-500">
+                <Camera className="w-10 h-10" />
+              </div>
+              <h3 className="text-2xl font-display font-bold text-white tracking-widest mb-2">IMAGERY GALLERY</h3>
+              <p className="text-stone-400 font-mono text-xs">HiRISE & Mastcam-Z Raw PDS Archives</p>
+              
+              <div className="absolute bottom-6 flex items-center gap-2 text-cyber-cyan opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
+                <Image className="w-4 h-4" />
+                <span className="font-bold text-xs uppercase tracking-widest font-mono">Launch Module</span>
+              </div>
+            </button>
+
           </div>
         </div>
       </section>
@@ -213,6 +251,12 @@ function App() {
       </section>
 
       {/* GLOBAL MODALS (Fixed overlays) */}
+      <ErrorBoundary>
+        <ScienceLabModal />
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <MarsImageryModal />
+      </ErrorBoundary>
       <ErrorBoundary>
         <EVAHelmetHUD />
       </ErrorBoundary>

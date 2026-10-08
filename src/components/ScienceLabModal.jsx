@@ -385,81 +385,113 @@ export default function ScienceLabModal() {
   const paleoDiagnosis = getPaleoEnvironment(paleoPh);
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="w-full rounded-3xl flex flex-col overflow-hidden border border-white/10 shadow-2xl bg-[#0B0C10]/95 backdrop-blur-2xl relative z-10 text-white font-sans">
-        
-        {/* HEADER: SuperCam & PIXL Rover Science Suite */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-space-900/60 shrink-0 gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-mars-500/20 text-[#F16938] border border-mars-500/30 shrink-0 shadow-[0_0_12px_rgba(241,105,56,0.25)]">
-              <FlaskConical className="w-5 h-5 animate-pulse" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2.5">
-                <h2 className="text-base sm:text-lg font-display font-black text-stone-100 tracking-[0.14em] uppercase">
-                  In-Situ Planetary Science Laboratory
-                </h2>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded-md border border-cyan-800 font-semibold">
-                  SuperCam • PIXL • SHERLOC Suite
-                </span>
+    <AnimatePresence>
+      {isScienceLabOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6">
+          {/* Dark Backdrop */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => {
+              marsAudio.playUiClick?.();
+              setScienceLabOpen(false);
+            }}
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          />
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            transition={{ duration: 0.25 }}
+            className="w-full max-w-7xl rounded-3xl flex flex-col overflow-hidden border border-white/10 shadow-2xl bg-[#0B0C10]/95 backdrop-blur-2xl relative z-10 text-white font-sans max-h-[95vh]"
+          >
+            {/* HEADER: SuperCam & PIXL Rover Science Suite */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-space-900/60 shrink-0 gap-4 flex-wrap">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-mars-500/20 text-[#F16938] border border-mars-500/30 shrink-0 shadow-[0_0_12px_rgba(241,105,56,0.25)]">
+                  <FlaskConical className="w-5 h-5 animate-pulse" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <h2 className="text-base sm:text-lg font-display font-black text-stone-100 tracking-[0.14em] uppercase">
+                      In-Situ Planetary Science Laboratory
+                    </h2>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded-md border border-cyan-800 font-semibold">
+                      SuperCam • PIXL • SHERLOC Suite
+                    </span>
+                  </div>
+                  <p className="text-xs text-stone-400 font-mono tracking-wide">
+                    Laser-Induced Breakdown Spectroscopy (LIBS) • Deep-UV Raman • Mars Sample Return
+                  </p>
+                </div>
               </div>
-              <p className="text-xs text-stone-400 font-mono tracking-wide">
-                Laser-Induced Breakdown Spectroscopy (LIBS) • Deep-UV Raman • Mars Sample Return
-              </p>
+
+              {/* Instrument Mode Selector Tabs & Close Button */}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5 bg-[#070A10]/75 p-1 rounded-2xl border border-white/[0.08] font-mono text-xs backdrop-blur-md">
+                  <button
+                    onClick={() => { setActiveInstrument('supercam'); playUiClick(); }}
+                    className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer uppercase tracking-wider text-xs border ${
+                      activeInstrument === 'supercam'
+                        ? 'bg-[#F16938]/20 border-[#F16938]/60 text-stone-100 shadow-[0_0_12px_rgba(241,105,56,0.2)] font-semibold'
+                        : 'text-stone-400 hover:text-white border-transparent hover:bg-white/[0.03]'
+                    }`}
+                  >
+                    <Zap className="w-3.5 h-3.5 text-[#F16938]" />
+                    <span className="hidden sm:inline">SuperCam LIBS</span>
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveInstrument('sherloc'); playUiClick(); }}
+                    className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer uppercase tracking-wider text-xs border ${
+                      activeInstrument === 'sherloc'
+                        ? 'bg-purple-950/40 border-purple-500/50 text-purple-200 shadow-[0_0_12px_rgba(168,85,247,0.2)] font-semibold'
+                        : 'text-stone-400 hover:text-white border-transparent hover:bg-white/[0.03]'
+                    }`}
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                    <span className="hidden sm:inline">SHERLOC</span>
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveInstrument('pixl'); playUiClick(); }}
+                    className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer uppercase tracking-wider text-xs border ${
+                      activeInstrument === 'pixl'
+                        ? 'bg-cyan-950/40 border-cyan-500/50 text-cyan-200 shadow-[0_0_12px_rgba(0,255,204,0.2)] font-semibold'
+                        : 'text-stone-400 hover:text-white border-transparent hover:bg-white/[0.03]'
+                    }`}
+                  >
+                    <Atom className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className="hidden sm:inline">PIXL</span>
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveInstrument('msr'); playUiClick(); }}
+                    className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer uppercase tracking-wider text-xs border ${
+                      activeInstrument === 'msr'
+                        ? 'bg-amber-950/40 border-amber-500/50 text-amber-200 shadow-[0_0_12px_rgba(245,166,35,0.2)] font-semibold'
+                        : 'text-stone-400 hover:text-white border-transparent hover:bg-white/[0.03]'
+                    }`}
+                  >
+                    <Database className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="hidden sm:inline">MSR Cache ({safeSamples.length})</span>
+                  </button>
+                </div>
+                
+                {/* Close Button */}
+                <button 
+                  onClick={() => {
+                    playUiClick?.();
+                    setScienceLabOpen(false);
+                  }}
+                  className="w-10 h-10 shrink-0 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-stone-400 hover:text-white border border-white/10 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+              </div>
             </div>
-          </div>
-
-          {/* Instrument Mode Selector Tabs */}
-          <div className="flex items-center gap-1.5 bg-[#070A10]/75 p-1 rounded-2xl border border-white/[0.08] font-mono text-xs backdrop-blur-md">
-            <button
-              onClick={() => { setActiveInstrument('supercam'); playUiClick(); }}
-              className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer uppercase tracking-wider text-xs border ${
-                activeInstrument === 'supercam'
-                  ? 'bg-[#F16938]/20 border-[#F16938]/60 text-stone-100 shadow-[0_0_12px_rgba(241,105,56,0.2)] font-semibold'
-                  : 'text-stone-400 hover:text-white border-transparent hover:bg-white/[0.03]'
-              }`}
-            >
-              <Zap className="w-3.5 h-3.5 text-[#F16938]" />
-              <span>SuperCam LIBS</span>
-            </button>
-
-            <button
-              onClick={() => { setActiveInstrument('sherloc'); playUiClick(); }}
-              className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer uppercase tracking-wider text-xs border ${
-                activeInstrument === 'sherloc'
-                  ? 'bg-purple-950/40 border-purple-500/50 text-purple-200 shadow-[0_0_12px_rgba(168,85,247,0.2)] font-semibold'
-                  : 'text-stone-400 hover:text-white border-transparent hover:bg-white/[0.03]'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-              <span>SHERLOC UV Raman</span>
-            </button>
-
-            <button
-              onClick={() => { setActiveInstrument('pixl'); playUiClick(); }}
-              className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer uppercase tracking-wider text-xs border ${
-                activeInstrument === 'pixl'
-                  ? 'bg-cyan-950/40 border-cyan-500/50 text-cyan-200 shadow-[0_0_12px_rgba(0,255,204,0.2)] font-semibold'
-                  : 'text-stone-400 hover:text-white border-transparent hover:bg-white/[0.03]'
-              }`}
-            >
-              <Atom className="w-3.5 h-3.5 text-cyan-400" />
-              <span>PIXL X-Ray</span>
-            </button>
-
-            <button
-              onClick={() => { setActiveInstrument('msr'); playUiClick(); }}
-              className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer uppercase tracking-wider text-xs border ${
-                activeInstrument === 'msr'
-                  ? 'bg-amber-950/40 border-amber-500/50 text-amber-200 shadow-[0_0_12px_rgba(245,166,35,0.2)] font-semibold'
-                  : 'text-stone-400 hover:text-white border-transparent hover:bg-white/[0.03]'
-              }`}
-            >
-              <Database className="w-3.5 h-3.5 text-amber-400" />
-              <span>MSR Tube Cache ({safeSamples.length})</span>
-            </button>
-          </div>
-        </div>
 
         {/* BODY CONTAINER */}
         <div className="flex flex-col lg:flex-row overflow-hidden min-h-[580px]">
@@ -1049,7 +1081,9 @@ export default function ScienceLabModal() {
 
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
+  )}
+</AnimatePresence>
   );
 }

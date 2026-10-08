@@ -49,39 +49,62 @@ export default function MarsImageryModal() {
 
   const handleInspectScience = (img) => {
     marsAudio.playUiClick?.();
-    document.getElementById('section-imagery')?.scrollIntoView({ behavior: 'smooth' });
+    setImageryModalOpen(false);
+    setScienceLabOpen(true);
   };
 
   return (
     <AnimatePresence>
-      <div className="w-full h-full flex items-center justify-center p-3 sm:p-6 select-none">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          transition={{ duration: 0.25 }}
-          className="w-full max-w-7xl h-[92vh] bg-[#0B0C10]/98 border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden relative"
-        >
-          {/* Header Bar */}
-          <div className="h-16 shrink-0 border-b border-white/[0.08] bg-space-950/90 px-6 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-mars-500 to-rose-600 flex items-center justify-center text-white shadow-neon-mars border border-white/20">
-                <Camera className="w-5 h-5 animate-pulse" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="font-display font-bold text-lg text-white tracking-wider">
-                    NASA HiRISE & ROVER RAW IMAGERY EXPLORER
-                  </h2>
-                  <ProvenanceBadge type="OBSERVED" size="sm" detail="PDS / JPL" />
-                </div>
-                <p className="text-[11px] font-mono text-space-400">
-                  Authentic Open-Source Planetary Reconnaissance • 25cm/px HiRISE Orbital & Rover Mastcam-Z
-                </p>
-              </div>
-            </div>
+      {isImageryModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 select-none">
+          {/* Dark Backdrop */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => {
+              marsAudio.playUiClick?.();
+              setImageryModalOpen(false);
+            }}
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          />
 
-          </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            transition={{ duration: 0.25 }}
+            className="w-full max-w-7xl h-[92vh] bg-[#0B0C10]/98 border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden relative z-10"
+          >
+            {/* Header Bar */}
+            <div className="h-16 shrink-0 border-b border-white/[0.08] bg-space-950/90 px-6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-mars-500 to-rose-600 flex items-center justify-center text-white shadow-neon-mars border border-white/20">
+                  <Camera className="w-5 h-5 animate-pulse" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-display font-bold text-lg text-white tracking-wider">
+                      NASA HiRISE & ROVER RAW IMAGERY EXPLORER
+                    </h2>
+                    <ProvenanceBadge type="OBSERVED" size="sm" detail="PDS / JPL" />
+                  </div>
+                  <p className="text-[11px] font-mono text-space-400">
+                    Authentic Open-Source Planetary Reconnaissance • 25cm/px HiRISE Orbital & Rover Mastcam-Z
+                  </p>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => {
+                  marsAudio.playUiClick?.();
+                  setImageryModalOpen(false);
+                }}
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-space-400 hover:text-white border border-white/10 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
           {/* Search & Category Filter Toolbar */}
           <div className="shrink-0 border-b border-white/[0.06] bg-space-900/60 px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
@@ -329,8 +352,9 @@ export default function MarsImageryModal() {
               </div>
             )}
           </div>
-        </motion.div>
-      </div>
+          </motion.div>
+        </div>
+      )}
     </AnimatePresence>
   );
 }
