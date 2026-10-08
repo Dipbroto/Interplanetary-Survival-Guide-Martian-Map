@@ -1,14 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Camera, Search, Filter, MapPin, ExternalLink, 
   Navigation, Eye, Sparkles, Layers, Compass, ZoomIn, 
-  Calendar, Info, Shield, Radio, Rocket, Download, Share2
+  Calendar, Info, Shield, Radio, Rocket, Download, Share2, Loader2
 } from 'lucide-react';
 import useMapStore from '../store/useMapStore';
-import { marsImages, MARS_IMAGE_CATEGORIES } from '../data/marsImages';
 import { marsAudio } from '../utils/audioSynthesizer';
 import ProvenanceBadge from './ProvenanceBadge';
+import { fetchMarsImagery } from '../services/nasaApiService';
 
 export default function MarsImageryModal() {
   const { 
@@ -22,22 +22,40 @@ export default function MarsImageryModal() {
   } = useMapStore();
 
   const [activeCategory, setActiveCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [inspectingImage, setInspectingImage] = useState(marsImages[0]);
+  const [searchQuery, setSearchQuery] = useState('Jezero Crater');
+  const [images, setImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [inspectingImage, setInspectingImage] = useState(null);
   const [zoomLevel, setZoomLevel] = useState(1);
 
-  const filteredImages = useMemo(() => {
-    return marsImages.filter((img) => {
-      const matchesCategory = activeCategory === 'all' || img.category === activeCategory;
-      const q = searchQuery.toLowerCase();
-      const matchesSearch = !q || 
-        img.title.toLowerCase().includes(q) ||
-        img.target.toLowerCase().includes(q) ||
-        img.mission.toLowerCase().includes(q) ||
-        img.tags.some(t => t.toLowerCase().includes(q));
-      return matchesCategory && matchesSearch;
-    });
-  }, [activeCategory, searchQuery]);
+  const MARS_IMAGE_CATEGORIES = [
+    { id: 'all', label: 'All Observations' },
+    { id: 'rover', label: 'Rover Mastcam-Z' },
+    { id: 'orbital', label: 'Orbital HiRISE' },
+    { id: 'panorama', label: 'Panoramas' }
+  ];
+
+  // Fetch images from NASA API whenever the modal opens or search query changes
+  useEffect(() => {
+    if (!isImageryModalOpen) return;
+    
+    // Debounce the search query
+    const timeoutId = setTimeout(() => {
+      setIsLoading(true);
+      const queryStr = `${activeCategory !== 'all' ? activeCategory : ''} ${searchQuery || 'Mars surface'}`.trim();
+      fetchMarsImagery(queryStr).then(data => {
+        setImages(data);
+        if (data.length > 0 && !inspectingImage) {
+          setInspectingImage(data[0]);
+        }
+        setIsLoading(false);
+      });
+    }, 600);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, activeCategory, isImageryModalOpen]);
+
+  const filteredImages = images; // We now let the API do the searching!
 
   
 
@@ -157,12 +175,22 @@ export default function MarsImageryModal() {
                 <span className="text-cyber-cyan">NASA PUBLIC DOMAIN</span>
               </div>
 
-              {filteredImages.map((img) => {
-                const isSelected = inspectingImage?.id === img.id;
-                return (
-                  <div
-                    key={img.id}
-                    onClick={() => {
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-20 text-space-400">
+                  <Loader2 className="w-8 h-8 animate-spin text-cyber-cyan mb-4" />
+                  <p className="font-mono text-sm tracking-wider uppercase animate-pulse">Syncing NASA PDS Archives...</p>
+                </div>
+              ) : filteredImages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-space-500 font-mono text-sm">
+                  No telemetry found for this query.
+                </div>
+              ) : (
+                filteredImages.map((img) => {
+                  const isSelected = inspectingImage?.id === img.id;
+                  return (
+                    <div
+                      key={img.id}
+                      onClick={() => {
                       marsAudio.playUiClick?.();
                       setInspectingImage(img);
                       setZoomLevel(1);
@@ -223,7 +251,7 @@ export default function MarsImageryModal() {
                     </div>
                   </div>
                 );
-              })}
+              }))}
             </div>
 
             {/* Right: High-Resolution Telemetry & Analytical Lightbox */}
@@ -236,7 +264,6 @@ export default function MarsImageryModal() {
                       src={inspectingImage.imageUrl} 
                       alt={inspectingImage.title}
                       referrerPolicy="no-referrer"
-                      crossOrigin="anonymous"
                       style={{ transform: `scale(${zoomLevel})`, transition: 'transform 0.2s ease-out' }}
                       className="max-h-[50vh] xl:max-h-[56vh] w-auto object-contain cursor-zoom-in"
                       onClick={() => setZoomLevel(prev => prev === 1 ? 1.5 : (prev === 1.5 ? 2.2 : 1))}
