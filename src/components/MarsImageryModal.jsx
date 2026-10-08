@@ -49,8 +49,7 @@ export default function MarsImageryModal() {
 
   const handleInspectScience = (img) => {
     marsAudio.playUiClick?.();
-    setImageryModalOpen(false);
-    setScienceLabOpen(true);
+    document.getElementById('section-imagery')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
