@@ -11,15 +11,13 @@ import ProvenanceBadge from './ProvenanceBadge';
 import { fetchMarsImagery } from '../services/nasaApiService';
 
 export default function MarsImageryModal() {
-  const { 
-    isImageryModalOpen, 
-    setImageryModalOpen,
-    flyToCoordinate,
-    setSelectedPOI,
-    setScienceLabOpen,
-    setViewMode,
-    viewMode
-  } = useMapStore();
+  const isImageryModalOpen = useMapStore(s => s.isImageryModalOpen);
+  const setImageryModalOpen = useMapStore(s => s.setImageryModalOpen);
+  const flyToCoordinate = useMapStore(s => s.flyToCoordinate);
+  const setSelectedPOI = useMapStore(s => s.setSelectedPOI);
+  const setScienceLabOpen = useMapStore(s => s.setScienceLabOpen);
+  const setViewMode = useMapStore(s => s.setViewMode);
+  const viewMode = useMapStore(s => s.viewMode);
 
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('Jezero Crater');
@@ -167,9 +165,9 @@ export default function MarsImageryModal() {
           </div>
 
           {/* Main Dual-Pane Workspace */}
-          <div className="flex-1 flex overflow-hidden">
+          <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
             {/* Left: Gallery Card Stream (Vertical Scrollable) */}
-            <div className="w-1/2 lg:w-5/12 border-r border-white/[0.06] overflow-y-auto overflow-x-hidden p-4 space-y-3.5 custom-scrollbar-y">
+            <div className="w-full h-[40vh] md:h-auto md:w-1/2 lg:w-5/12 md:border-r border-b md:border-b-0 border-white/[0.06] overflow-y-auto overflow-x-hidden p-4 space-y-3.5 custom-scrollbar-y shrink-0">
               <div className="flex items-center justify-between text-[11px] font-mono text-space-400 px-1">
                 <span>FOUND {filteredImages.length} RECONNAISSANCE OBSERVATIONS</span>
                 <span className="text-cyber-cyan">NASA PUBLIC DOMAIN</span>

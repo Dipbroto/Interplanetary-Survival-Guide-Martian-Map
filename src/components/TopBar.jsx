@@ -9,19 +9,17 @@ import useMapStore from '../store/useMapStore';
 import { marsAudio } from '../utils/audioSynthesizer';
 
 export default function TopBar({ isMapActive = false, activeSection = 'home' }) {
-  const { 
-    viewMode, 
-    setViewMode,
-    isEVASimulating,
-    setEVASimulating,
-    activeContingency,
-    setContingencyModalOpen,
-    rightSidebarOpen,
-    setRightSidebarOpen,
-    isAudioActive,
-    toggleAudio,
-    setFlightPlanOpen
-  } = useMapStore();
+  const viewMode = useMapStore(s => s.viewMode);
+  const setViewMode = useMapStore(s => s.setViewMode);
+  const isEVASimulating = useMapStore(s => s.isEVASimulating);
+  const setEVASimulating = useMapStore(s => s.setEVASimulating);
+  const activeContingency = useMapStore(s => s.activeContingency);
+  const setContingencyModalOpen = useMapStore(s => s.setContingencyModalOpen);
+  const rightSidebarOpen = useMapStore(s => s.rightSidebarOpen);
+  const setRightSidebarOpen = useMapStore(s => s.setRightSidebarOpen);
+  const isAudioActive = useMapStore(s => s.isAudioActive);
+  const toggleAudio = useMapStore(s => s.toggleAudio);
+  const setFlightPlanOpen = useMapStore(s => s.setFlightPlanOpen);
 
   const [isFullscreen, setIsFullscreen] = React.useState(false);
 

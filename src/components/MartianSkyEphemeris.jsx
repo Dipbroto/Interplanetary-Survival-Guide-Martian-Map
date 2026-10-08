@@ -59,7 +59,7 @@ const CAMERA_FILTERS = [
 ];
 
 export default function MartianSkyEphemeris() {
-  const { currentSol } = useMapStore();
+  const currentSol = useMapStore(s => s.currentSol);
 
   // Local Solar Time (00:00 to 24:39 in fractional hours: 0 to 24.65)
   const [solTime, setSolTime] = useState(13.4); // Default 13:24 (afternoon transit window)

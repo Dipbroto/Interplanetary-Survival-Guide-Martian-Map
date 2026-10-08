@@ -12,7 +12,10 @@ import ResourceCalculator from './ResourceCalculator';
 import MissionReport from './MissionReport';
 
 export default function Sidebar() {
-  const { sidebarOpen, setSidebarOpen, sidebarTab, setSidebarTab } = useMapStore();
+  const sidebarOpen = useMapStore(s => s.sidebarOpen);
+  const setSidebarOpen = useMapStore(s => s.setSidebarOpen);
+  const sidebarTab = useMapStore(s => s.sidebarTab);
+  const setSidebarTab = useMapStore(s => s.setSidebarTab);
 
   // Auto-scroll to top (map portion) when the sidebar is opened
   useEffect(() => {
@@ -60,7 +63,7 @@ export default function Sidebar() {
   return (
     <motion.div
       initial={false}
-      animate={{ width: sidebarOpen ? 396 : 54 }}
+      animate={{ width: sidebarOpen ? 'min(396px, calc(100vw - 32px))' : 54 }}
       transition={{ duration: 0.25, ease: 'easeInOut' }}
       className="relative z-30 flex flex-col h-max max-h-[85vh] rounded-2xl border border-white/[0.08] bg-[#0B0C10]/70 backdrop-blur-3xl shrink-0 shadow-hud-glass transition-all hover:bg-[#0B0C10]/80"
     >

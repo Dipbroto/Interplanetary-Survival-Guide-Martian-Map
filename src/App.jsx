@@ -21,7 +21,12 @@ import HomeHero from './components/HomeHero';
 import { Radar, ChevronLeft, Camera, FlaskConical, Sparkles, Image } from 'lucide-react';
 
 function App() {
-  const { viewMode, showLoadingScreen, rightSidebarOpen, setRightSidebarOpen, setScienceLabOpen, setImageryModalOpen } = useMapStore();
+  const viewMode = useMapStore(s => s.viewMode);
+  const showLoadingScreen = useMapStore(s => s.showLoadingScreen);
+  const rightSidebarOpen = useMapStore(s => s.rightSidebarOpen);
+  const setRightSidebarOpen = useMapStore(s => s.setRightSidebarOpen);
+  const setScienceLabOpen = useMapStore(s => s.setScienceLabOpen);
+  const setImageryModalOpen = useMapStore(s => s.setImageryModalOpen);
   const [activeSection, setActiveSection] = useState('home');
   const [isMapSectionActive, setIsMapSectionActive] = useState(false);
   const mapSectionRef = useRef(null);

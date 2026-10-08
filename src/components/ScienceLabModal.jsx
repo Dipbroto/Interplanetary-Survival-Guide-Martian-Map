@@ -12,7 +12,11 @@ import { marsAudio, playLaserZap, playSampleSeal, playUiClick, playUiHover } fro
 import { fetchScienceTargets } from '../services/nasaApiService';
 
 export default function ScienceLabModal() {
-  const { isScienceLabOpen, setScienceLabOpen, collectedSamples = [], addSample, currentSol } = useMapStore();
+  const isScienceLabOpen = useMapStore(s => s.isScienceLabOpen);
+  const setScienceLabOpen = useMapStore(s => s.setScienceLabOpen);
+  const collectedSamples = useMapStore(s => s.collectedSamples || []);
+  const addSample = useMapStore(s => s.addSample);
+  const currentSol = useMapStore(s => s.currentSol);
   const [rockTargets, setRockTargets] = useState([]);
   const [selectedTarget, setSelectedTarget] = useState(null);
   const [isLoadingTargets, setIsLoadingTargets] = useState(true);
@@ -270,9 +274,9 @@ export default function ScienceLabModal() {
             </div>
 
         {/* BODY CONTAINER */}
-        <div className="flex flex-col lg:flex-row overflow-hidden min-h-[580px]">
+        <div className="flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden min-h-0 lg:min-h-[580px] flex-1 custom-scrollbar">
           {isLoadingTargets || !target ? (
-            <div className="w-full flex flex-col items-center justify-center min-h-[580px] bg-space-950/40 text-stone-400">
+            <div className="w-full flex flex-col items-center justify-center min-h-[400px] lg:min-h-[580px] bg-space-950/40 text-stone-400">
               <Loader2 className="w-8 h-8 animate-spin text-mars-400 mb-4" />
               <p className="font-mono text-sm tracking-wider uppercase animate-pulse">Syncing PDS Target Database...</p>
             </div>
@@ -288,7 +292,7 @@ export default function ScienceLabModal() {
               <span className="text-[10px] text-stone-500 font-mono tracking-wider">6 Cataloged</span>
             </div>
 
-            <div className="space-y-2 overflow-y-auto max-h-[380px] lg:max-h-none custom-scrollbar pr-1">
+            <div className="space-y-2 overflow-y-auto max-h-[240px] lg:max-h-none custom-scrollbar pr-1">
               {rockTargets.map((t) => (
                 <button
                   key={t.id}
@@ -331,7 +335,7 @@ export default function ScienceLabModal() {
           </div>
 
           {/* CENTER & RIGHT: Interactive Instruments Workspace */}
-          <div className="flex-1 p-5 lg:p-6 flex flex-col gap-5 overflow-y-auto custom-scrollbar">
+          <div className="flex-1 p-5 lg:p-6 flex flex-col gap-5 lg:overflow-y-auto overflow-visible custom-scrollbar">
 
             {/* TARGET HEADER & TACTICAL DESCRIPTION */}
             <div className="bg-[#070A10]/70 border border-white/[0.08] rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 backdrop-blur-xl">

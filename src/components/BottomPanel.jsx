@@ -8,14 +8,12 @@ import RadiationPanel from './RadiationPanel';
 import DustStormTracker from './DustStormTracker';
 
 export default function BottomPanel() {
-  const { 
-    bottomPanelOpen, 
-    setBottomPanelOpen, 
-    bottomPanelTab, 
-    setBottomPanelTab,
-    weather,
-    waypoints
-  } = useMapStore();
+  const bottomPanelOpen = useMapStore(s => s.bottomPanelOpen);
+  const setBottomPanelOpen = useMapStore(s => s.setBottomPanelOpen);
+  const bottomPanelTab = useMapStore(s => s.bottomPanelTab);
+  const setBottomPanelTab = useMapStore(s => s.setBottomPanelTab);
+  const weather = useMapStore(s => s.weather);
+  const waypoints = useMapStore(s => s.waypoints);
 
   const tabs = [
     { 
