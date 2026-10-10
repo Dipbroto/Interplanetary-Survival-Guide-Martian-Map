@@ -495,6 +495,18 @@ const useMapStore = create((set, get) => ({
     isRulerActive: false,
     rulerPoints: []
   }),
+  // ========================
+  // AUTHENTICATION & USER
+  // ========================
+  user: null,
+  profile: null,
+  isAuthModalOpen: false,
+  isProfileModalOpen: false,
+  
+  setUser: (user) => set({ user }),
+  setProfile: (profile) => set({ profile }),
+  setAuthModalOpen: (val) => set({ isAuthModalOpen: val }),
+  setProfileModalOpen: (val) => set({ isProfileModalOpen: val }),
 }));
 
 export default useMapStore;

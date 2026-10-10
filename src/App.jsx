@@ -17,6 +17,9 @@ import SpaceAtmosphere from './components/SpaceAtmosphere';
 import RightSidebar from './components/RightSidebar';
 import MarsImageryModal from './components/MarsImageryModal';
 import HomeHero from './components/HomeHero';
+import AuthModal from './components/AuthModal';
+import UserProfileDashboard from './components/UserProfileDashboard';
+import { supabase } from './lib/supabase';
 
 import { Radar, ChevronLeft, Camera, FlaskConical, Sparkles, Image } from 'lucide-react';
 
@@ -27,9 +30,35 @@ function App() {
   const setRightSidebarOpen = useMapStore(s => s.setRightSidebarOpen);
   const setScienceLabOpen = useMapStore(s => s.setScienceLabOpen);
   const setImageryModalOpen = useMapStore(s => s.setImageryModalOpen);
+  const setUser = useMapStore(s => s.setUser);
+  const setProfile = useMapStore(s => s.setProfile);
   const [activeSection, setActiveSection] = useState('home');
   const [isMapSectionActive, setIsMapSectionActive] = useState(false);
   const mapSectionRef = useRef(null);
+
+  // Initialize Supabase Auth
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) fetchProfile(session.user.id);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setProfile(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchProfile = async (userId) => {
+    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    if (data) setProfile(data);
+  };
 
   // Update weather data periodically
   useEffect(() => {
@@ -80,6 +109,8 @@ function App() {
       {/* GLOBAL ATMOSPHERE & LOADING SCREEN */}
       <SpaceAtmosphere />
       {showLoadingScreen && <LoadingScreen />}
+      <AuthModal />
+      <UserProfileDashboard />
 
       {/* TOP NAVIGATION BAR (Fixed globally across all sections) */}
       <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">

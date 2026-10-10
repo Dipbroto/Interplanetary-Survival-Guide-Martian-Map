@@ -12,10 +12,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AUTONOMOUS_TARGET_PAIRS, generateAutonomousTraverse } from '../utils/autonomousRouter';
 import ProvenanceBadge from './ProvenanceBadge';
 import { marsAudio } from '../utils/audioSynthesizer';
+import { supabase } from '../lib/supabase';
+import { Loader2, CloudFog, CloudLightning, Cloud, UploadCloud } from 'lucide-react';
 
 export default function RoutePlanner() {
+  const user = useMapStore(s => s.user);
+  const setAuthModalOpen = useMapStore(s => s.setAuthModalOpen);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState(null);
+
   const { 
-    waypoints, 
+    waypoints,  
     isPlacingWaypoint, 
     setPlacingWaypoint, 
     removeWaypoint, 
@@ -185,6 +192,49 @@ export default function RoutePlanner() {
       }
       marsAudio.playQuindarTone(true);
     document.getElementById('section-map')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleSyncMission = async () => {
+    if (!user) {
+      setAuthModalOpen(true);
+      return;
+    }
+    if (!waypoints || waypoints.length < 2) return;
+    
+    setIsSyncing(true);
+    setSyncStatus('syncing');
+    try {
+      const distance = routeDistance(waypoints);
+      const title = `Expedition: ${waypoints[0].name} to ${waypoints[waypoints.length-1].name}`;
+      
+      const { error } = await supabase.from('missions').insert({
+        user_id: user.id,
+        title,
+        waypoints,
+        total_distance: distance,
+        is_public: true
+      });
+      
+      if (error) throw error;
+
+      // Update Profile Stats
+      const currentProfile = useMapStore.getState().profile;
+      if (currentProfile) {
+        const newTotal = (currentProfile.total_distance_km || 0) + distance;
+        await supabase.from('profiles').update({ total_distance_km: Math.round(newTotal) }).eq('id', user.id);
+        useMapStore.getState().setProfile({ ...currentProfile, total_distance_km: Math.round(newTotal) });
+      }
+
+      setSyncStatus('success');
+      marsAudio.playQuindarTone?.(true);
+      setTimeout(() => setSyncStatus(null), 3000);
+    } catch (err) {
+      console.error('Mission sync failed:', err);
+      setSyncStatus('error');
+      setTimeout(() => setSyncStatus(null), 3000);
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -888,6 +938,24 @@ export default function RoutePlanner() {
             <span>{activeContingency ? 'CONTINGENCY!' : 'What-If Sim'}</span>
           </button>
         </div>
+
+        {/* Global Sync Mission Button */}
+        {waypoints && waypoints.length > 1 && (
+          <button
+            onClick={handleSyncMission}
+            disabled={isSyncing}
+            className={`w-full py-2 px-3 rounded-xl text-[11px] font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 border transition-all cursor-pointer backdrop-blur-md ${
+              syncStatus === 'success' 
+                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50' 
+                : syncStatus === 'error'
+                ? 'bg-rose-500/20 text-rose-400 border-rose-500/50'
+                : 'bg-space-900/80 hover:bg-space-800 text-cyan-300 border-cyan-500/40 hover:border-cyan-400'
+            }`}
+          >
+            {isSyncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UploadCloud className="w-3.5 h-3.5" />}
+            <span>{syncStatus === 'success' ? 'Mission Published!' : syncStatus === 'error' ? 'Sync Failed' : 'Publish to Global Network'}</span>
+          </button>
+        )}
 
         {/* Marswalk Simulator Launch Button */}
         {waypoints && waypoints.length > 1 && (

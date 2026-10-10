@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   Menu, Hexagon, Maximize, Minimize, ShieldAlert,
   Play, X, Radar, Map as MapIcon, Image as ImageIcon, Sparkles,
-  Volume2, VolumeX, FileText, Compass, ArrowRight
+  Volume2, VolumeX, FileText, Compass, ArrowRight, User
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useMapStore from '../store/useMapStore';
@@ -20,6 +20,10 @@ export default function TopBar({ isMapActive = false, activeSection = 'home' }) 
   const isAudioActive = useMapStore(s => s.isAudioActive);
   const toggleAudio = useMapStore(s => s.toggleAudio);
   const setFlightPlanOpen = useMapStore(s => s.setFlightPlanOpen);
+  const user = useMapStore(s => s.user);
+  const profile = useMapStore(s => s.profile);
+  const setAuthModalOpen = useMapStore(s => s.setAuthModalOpen);
+  const setProfileModalOpen = useMapStore(s => s.setProfileModalOpen);
 
   const [isFullscreen, setIsFullscreen] = React.useState(false);
 
@@ -219,6 +223,20 @@ export default function TopBar({ isMapActive = false, activeSection = 'home' }) 
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* User Profile / Auth Button */}
+          <button
+            onClick={() => user ? setProfileModalOpen(true) : setAuthModalOpen(true)}
+            className={`px-2.5 py-1.5 border rounded-xl text-xs font-mono font-medium uppercase tracking-wider flex items-center gap-1.5 transition-all backdrop-blur-md cursor-pointer whitespace-nowrap ${
+              user 
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20' 
+                : 'bg-white/[0.02] hover:bg-[#101522]/85 border-white/[0.06] hover:border-mars-500/40 text-stone-300 hover:text-white'
+            }`}
+            title={user ? 'Astronaut Profile Active' : 'Authenticate Commander'}
+          >
+            <User className="w-3.5 h-3.5" />
+            <span className="hidden lg:inline">{profile?.username || (user ? 'Authenticated' : 'Login')}</span>
+          </button>
 
           {/* Universal Fullscreen Toggle */}
           <button

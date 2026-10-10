@@ -8,6 +8,8 @@ import useMapStore from '../store/useMapStore';
 import { routeDistance, estimateEVATime, estimateO2Consumption, estimateWaterConsumption, estimatePowerConsumption } from '../utils/marsUtils';
 import { getElevationProfile, getProfileStats } from '../utils/elevationService';
 import ProvenanceBadge from './ProvenanceBadge';
+import { generateFlightBrief } from '../services/aiService';
+import { Loader2, Sparkles } from 'lucide-react';
 
 export default function FlightPlanModal() {
   const { 
@@ -23,6 +25,8 @@ export default function FlightPlanModal() {
   } = useMapStore();
 
   const [copied, setCopied] = useState(false);
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [aiBrief, setAiBrief] = useState(null);
 
   // Escape key to close (called unconditionally at top level)
   React.useEffect(() => {
@@ -47,6 +51,17 @@ export default function FlightPlanModal() {
   const o2 = estimateO2Consumption(evaHours);
   const h2o = estimateWaterConsumption(evaHours);
   const pwr = estimatePowerConsumption(evaHours, -60);
+
+  const handleGenerateAiBrief = async () => {
+    if (!waypoints || waypoints.length === 0) return;
+    setIsAiGenerating(true);
+    const weatherString = `Temp: ${weather?.temperature?.avg}°C, Pressure: ${weather?.pressure?.value} Pa, Wind: ${weather?.wind?.speed} m/s, Dust: ${weather?.dustOpacity}`;
+    const brief = await generateFlightBrief(waypoints, totalDist, weatherString);
+    if (brief) {
+      setAiBrief(brief);
+    }
+    setIsAiGenerating(false);
+  };
 
   const handleDownloadJSON = () => {
     const flightPackage = {
@@ -218,6 +233,16 @@ export default function FlightPlanModal() {
             </button>
 
             <button
+              onClick={handleGenerateAiBrief}
+              disabled={isAiGenerating}
+              className="px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/40 text-purple-200 border border-purple-500/50 font-bold rounded-lg flex items-center gap-1.5 shadow-md shadow-purple-600/30 transition-all shrink-0 whitespace-nowrap disabled:opacity-50"
+              title="Generate AI Hazard Assessment"
+            >
+              {isAiGenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+              <span>{isAiGenerating ? 'AI Generating...' : 'AI Mission Analyst'}</span>
+            </button>
+
+            <button
               onClick={handleDownloadJSON}
               className="px-3 py-1.5 bg-mars-600 hover:bg-mars-500 text-white font-bold rounded-lg flex items-center gap-1.5 shadow-md shadow-mars-600/30 transition-all shrink-0 whitespace-nowrap"
               title="Download JSON for Rover Navigation Computer"
@@ -252,6 +277,18 @@ export default function FlightPlanModal() {
               </div>
             </div>
           </div>
+
+          {aiBrief && (
+            <div className="bg-purple-900/20 border-2 border-purple-500/40 rounded-xl p-5 print:hidden">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-5 h-5 text-purple-400" />
+                <h3 className="text-sm font-bold text-white uppercase tracking-widest">A.I. Mission Commander Assessment</h3>
+              </div>
+              <div className="text-xs font-mono text-purple-100 whitespace-pre-wrap leading-relaxed">
+                {aiBrief}
+              </div>
+            </div>
+          )}
 
           {/* Mission Executive Summary */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-space-900/50 p-4 rounded-xl border border-space-800 print:bg-gray-100 print:border-gray-400 print:text-black">

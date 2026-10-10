@@ -10,6 +10,8 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, 
 import useMapStore from '../store/useMapStore';
 import { marsAudio, playLaserZap, playSampleSeal, playUiClick, playUiHover } from '../utils/audioSynthesizer';
 import { fetchScienceTargets } from '../services/nasaApiService';
+import { generateScienceReport } from '../services/aiService';
+import { supabase } from '../lib/supabase';
 
 export default function ScienceLabModal() {
   const isScienceLabOpen = useMapStore(s => s.isScienceLabOpen);
@@ -20,6 +22,10 @@ export default function ScienceLabModal() {
   const [rockTargets, setRockTargets] = useState([]);
   const [selectedTarget, setSelectedTarget] = useState(null);
   const [isLoadingTargets, setIsLoadingTargets] = useState(true);
+  
+  // AI State
+  const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
+  const [aiReport, setAiReport] = useState(null);
 
   // Fetch targets from API
   useEffect(() => {
@@ -105,23 +111,69 @@ export default function ScienceLabModal() {
     }, 450);
   };
 
-  const handleCacheSample = () => {
+  const runAiAnalysis = async () => {
+    if (!target) return;
+    setIsAiAnalyzing(true);
+    setAiReport(null);
+    marsAudio.playQuindarTone?.();
+    
+    const coords = { lat: target.lat || 18.4, lon: target.lon || 77.4 };
+    const report = await generateScienceReport(target.name, target.formation, coords);
+    
+    if (report) {
+      setAiReport(report);
+      playUiClick?.();
+    }
+    setIsAiAnalyzing(false);
+  };
+
+  const handleCacheSample = async () => {
     if (isSealingTube) return;
     setIsSealingTube(true);
     playSampleSeal();
 
+    const newSample = {
+      id: `sample-${Date.now()}`,
+      name: target.name,
+      location: target.location,
+      sol: currentSol || 423,
+      rockType: target.formation,
+      keyMinerals: target.mineralogy,
+      biosignatureScore: target.bpi,
+      notes: customTubeNotes || 'Verified hermetic seal under 1.2 bar N2 purge.',
+      status: `Cached in MSR Tube #${safeSamples.length + 1}`
+    };
+
+    // Push to Supabase if authenticated
+    const user = useMapStore.getState().user;
+    if (user) {
+      try {
+        const { error } = await supabase.from('science_logs').insert({
+          user_id: user.id,
+          target_id: target.id || `target-${Date.now()}`,
+          target_name: target.name,
+          mineralogy: `${target.formation || 'Unknown'} | ${target.mineralogy || 'Unclassified'}`,
+          notes: newSample.notes
+        });
+
+        if (error) {
+          console.error('Supabase Insert Error:', error);
+          throw error;
+        }
+
+        // Update profile stats ONLY if insert was successful
+        const currentProfile = useMapStore.getState().profile;
+        if (currentProfile) {
+          const newTotal = (currentProfile.samples_collected || 0) + 1;
+          await supabase.from('profiles').update({ samples_collected: newTotal }).eq('id', user.id);
+          useMapStore.getState().setProfile({ ...currentProfile, samples_collected: newTotal });
+        }
+      } catch (err) {
+        console.error('Error saving sample to DB:', err);
+      }
+    }
+
     setTimeout(() => {
-      const newSample = {
-        id: `sample-${Date.now()}`,
-        name: target.name,
-        location: target.location,
-        sol: currentSol || 423,
-        rockType: target.formation,
-        keyMinerals: target.mineralogy,
-        biosignatureScore: target.bpi,
-        notes: customTubeNotes || 'Verified hermetic seal under 1.2 bar N2 purge.',
-        status: `Cached in MSR Tube #${safeSamples.length + 1}`
-      };
       if (addSample) addSample(newSample);
       setIsSealingTube(false);
       setCachedSuccess(true);
@@ -350,13 +402,37 @@ export default function ScienceLabModal() {
                   </span>
                 </div>
                 <p className="text-xs text-stone-300 leading-relaxed max-w-3xl font-sans">{target.description}</p>
-                <div className="text-xs text-stone-400 font-mono mt-2">
-                  Mineral Matrix: <span className="text-amber-400 font-medium">{target.mineralogy}</span>
-                </div>
+                
+                {aiReport ? (
+                  <div className="bg-purple-900/30 border border-purple-500/30 rounded-xl p-3 mt-2 flex flex-col gap-2 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 bg-purple-500/20 text-purple-300 text-[9px] px-2 py-0.5 rounded-bl-lg border-b border-l border-purple-500/30 font-bold tracking-wider">AI ANALYSIS</div>
+                    <div className="text-[10px] text-stone-300 font-mono">
+                      <span className="text-purple-400 font-bold">MINERALOGY:</span> {aiReport.mineralogy}
+                    </div>
+                    <div className="text-[10px] text-stone-300 font-mono flex items-center justify-between">
+                      <span><span className="text-cyan-400 font-bold">EST. pH:</span> {aiReport.phLevel}</span>
+                      <span><span className="text-emerald-400 font-bold">BIOSIGNATURE PROB:</span> {aiReport.biosignatureProbability}%</span>
+                    </div>
+                    <p className="text-[10px] text-stone-400 italic">"{aiReport.analysisNotes}"</p>
+                  </div>
+                ) : (
+                  <div className="text-xs text-stone-400 font-mono mt-2">
+                    Mineral Matrix: <span className="text-amber-400 font-medium">{target.mineralogy}</span>
+                  </div>
+                )}
               </div>
 
               {/* Firing & Sealing Action Buttons */}
               <div className="flex md:flex-col gap-2 shrink-0">
+                <button
+                  onClick={runAiAnalysis}
+                  disabled={isAiAnalyzing}
+                  className="px-4 py-2.5 bg-purple-500/20 hover:bg-purple-500/35 disabled:opacity-50 text-purple-100 rounded-xl text-xs font-bold font-mono uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_16px_rgba(168,85,247,0.2)] transition-all cursor-pointer border border-purple-500/60 hover:border-purple-500 backdrop-blur-md active:scale-95"
+                >
+                  {isAiAnalyzing ? <Loader2 className="w-4 h-4 animate-spin text-purple-400" /> : <Sparkles className="w-4 h-4 text-purple-400" />}
+                  <span>{isAiAnalyzing ? 'AI Analyzing...' : 'Run AI Spectrometry'}</span>
+                </button>
+
                 <button
                   onClick={() => triggerLaserAblation(laserTargetPos.x, laserTargetPos.y)}
                   disabled={isFiringLaser}

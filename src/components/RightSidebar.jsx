@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import useMapStore from '../store/useMapStore';
 import { marsAudio } from '../utils/audioSynthesizer';
+import MissionControlChat from './MissionControlChat';
 
 // Mini Atmospheric Area Graph (SVG)
 const AreaGraph = ({ data, color = '#00FFCC', height = 36, unit = '', label = '' }) => {
@@ -291,6 +292,7 @@ export default function RightSidebar() {
             </div>
           </div>
 
+          <MissionControlChat />
         </div>
       </div>
     </motion.div>
